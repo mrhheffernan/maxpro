@@ -167,7 +167,7 @@ fn plot_x_vs_y(data: Vec<Vec<f64>>) -> Result<(), Box<dyn std::error::Error>> {
 
 fn build_maxpro_lhd(n_samples: i32, n_iterations: i32, n_dim: usize, plot: bool) -> Vec<Vec<f64>> {
     let mut best_metric = f64::INFINITY;
-    let mut best_lhd = vec![vec![0.0; n_dim]; n_samples];
+    let mut best_lhd = vec![vec![0.0; n_dim]; n_samples as usize];
     for _i in 0..n_iterations {
         let lhd = generate_lhd(n_samples as usize, n_dim);
         let lhd_array = convert_design_to_array2(lhd.clone()).unwrap();
