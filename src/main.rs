@@ -2,19 +2,10 @@ use ndarray::ArrayBase; // Used for the generic array type in the function signa
 use ndarray::{Array, Array2, Data, Ix2, ShapeError, s}; // Import 's!' for slicing.
 use rand::Rng;
 use rand::prelude::SliceRandom;
-use rayon::prelude::*;
-
-fn generate_coords(n_samples: i32) -> Vec<(f64, f64)> {
-    (0..n_samples)
-        .into_par_iter()
-        .map_init(rand::rng, |rng, _| {
-            (rng.random_range(0.0..1.0), rng.random_range(0.0..1.0))
-        })
-        .collect()
-}
 
 fn generate_lhd(n_samples: usize, n_dim: usize) -> Vec<Vec<f64>> {
     // initialize empty lhd
+    // TODO: Make this seedable
     let mut rng = rand::rng();
     let mut lhd = vec![vec![0.0; n_dim]; n_samples];
 
@@ -25,7 +16,6 @@ fn generate_lhd(n_samples: usize, n_dim: usize) -> Vec<Vec<f64>> {
         permutation.shuffle(&mut rng);
 
         for i in 0..n_samples {
-            // okay, now for the tricky bit.
             // Get the range of the interval for this sample
             let interval_start = permutation[i] as f64 / n_samples as f64;
             let interval_end = (permutation[i] + 1) as f64 / n_samples as f64;
@@ -110,24 +100,18 @@ fn convert_design_to_array2(design: Vec<Vec<f64>>) -> Result<Array2<f64>, ShapeE
 
 fn main() {
     let n_samples: i32 = 64;
-    let coords = generate_coords(n_samples);
+    const N_ITERATIONS: i32 = 1000;
+    let mut best_metric = 10e12;
 
-    let n = coords.len(); // Number of rows (3)
-    let d = 2; // Number of columns (2)
-
-    // 2. Convert to a flat vector using iteration methods
-    let flat_data: Vec<f64> = coords
-        .into_iter()
-        // map each tuple (x, y) into a temporary array [x, y]
-        .flat_map(|(x, y)| [x, y].into_iter())
-        // collect the results into a single flat Vec<f64>
-        .collect();
-    let arr = Array::from_shape_vec((n, d), flat_data).unwrap();
-    let maxpro = maxpro_criterion(&arr);
-    println!("Maxpro: {maxpro}");
-
-    let lhd = generate_lhd(n_samples as usize, 2);
-    let lhd_array = convert_design_to_array2(lhd).unwrap();
-    let maxpro2 = maxpro_criterion(&lhd_array);
-    println!("Maxpro 2: {maxpro2}");
+    for _i in 0..N_ITERATIONS {
+        let lhd = generate_lhd(n_samples as usize, 2);
+        let lhd_array = convert_design_to_array2(lhd).unwrap();
+        let maxpro2 = maxpro_criterion(&lhd_array);
+        // println!("Maxpro 2: {maxpro2}");
+        if maxpro2 < best_metric {
+            let best_lhd = lhd_array;
+            best_metric = maxpro2;
+            println!("Best metric: {best_metric}")
+        }
+    }
 }
