@@ -1,5 +1,6 @@
 use ndarray::ArrayBase; // Used for the generic array type in the function signature.
 use ndarray::{Array, Array2, Data, Ix2, ShapeError, s}; // Import 's!' for slicing.
+use plotters::prelude::*;
 use rand::Rng;
 use rand::prelude::SliceRandom;
 
@@ -98,19 +99,92 @@ fn convert_design_to_array2(design: Vec<Vec<f64>>) -> Result<Array2<f64>, ShapeE
     Array2::from_shape_vec((n, d), flat_data)
 }
 
+fn plot_x_vs_y(data: Vec<Vec<f64>>) -> Result<(), Box<dyn std::error::Error>> {
+    let root = BitMapBackend::new("xy_scatter_plot.png", (640, 480)).into_drawing_area();
+    root.fill(&WHITE)?;
+
+    // 1. Prepare data and determine axis bounds
+    // We transform the Vec<Vec<f64>> into a Vec<(f64, f64)> of (x, y) pairs.
+    let points: Vec<(f64, f64)> = data
+        .into_iter()
+        .filter_map(|p| {
+            // Ensure the point has at least 2 dimensions [x, y]
+            if p.len() >= 2 {
+                // Return (x, y) tuple
+                Some((p[0], p[1]))
+            } else {
+                None
+            }
+        })
+        .collect();
+
+    // Find the min/max X and Y for axis scaling
+    let (min_x, max_x) = points
+        .iter()
+        .map(|(x, _)| *x)
+        .fold((f64::INFINITY, f64::NEG_INFINITY), |(min_x, max_x), x| {
+            (min_x.min(x), max_x.max(x))
+        });
+    let (min_y, max_y) = points
+        .iter()
+        .map(|(_, y)| *y)
+        .fold((f64::INFINITY, f64::NEG_INFINITY), |(min_y, max_y), y| {
+            (min_y.min(y), max_y.max(y))
+        });
+
+    // Add a small buffer and use the EXCLUSIVE range operator (..)
+    // The Ranged trait is implemented for std::ops::Range<f64>
+    let x_range = (min_x - 0.1)..(max_x + 0.1); // <-- Changed from ..= to ..
+    let y_range = (min_y - 0.1)..(max_y + 0.1); // <-- Changed from ..= to ..
+
+    // 2. Create the chart context
+    let mut chart = ChartBuilder::on(&root)
+        // ... other settings ...
+        // This call now satisfies the Ranged trait bound:
+        .build_cartesian_2d(x_range, y_range)?;
+
+    chart
+        .configure_mesh()
+        .x_desc("X Coordinate")
+        .y_desc("Y Coordinate")
+        .draw()?;
+
+    // 3. Draw the single series of points
+    chart
+        .draw_series(
+            // The PointSeries creation, without .mark_as_owned()
+            PointSeries::<_, _, Circle<_, _>, _>::new(
+                points,        // Data is Vec<(f64, f64)>
+                5,             // Radius
+                BLUE.filled(), // Color
+            ),
+        )?
+        // === FIX IS HERE ===
+        // Mark the drawn series as owned for the purpose of creating a label/legend.
+        // .mark_as_owned()
+        // Now you can safely apply .label() and .legend()
+        .label("Design Points")
+        .legend(move |(x, y)| Circle::new((x, y), 5, BLUE.filled()));
+
+    root.present()?;
+    Ok(())
+}
+
 fn main() {
     let n_samples: i32 = 64;
-    const N_ITERATIONS: i32 = 1000;
+    const N_ITERATIONS: i32 = 100000;
     let mut best_metric = 10e12;
 
     for _i in 0..N_ITERATIONS {
         let lhd = generate_lhd(n_samples as usize, 2);
-        let lhd_array = convert_design_to_array2(lhd).unwrap();
+        let lhd_array = convert_design_to_array2(lhd.clone()).unwrap();
         let maxpro2 = maxpro_criterion(&lhd_array);
         // println!("Maxpro 2: {maxpro2}");
+        let mut best_lhd = lhd.clone();
         if maxpro2 < best_metric {
-            let best_lhd = lhd_array;
+            best_lhd = lhd.clone();
             best_metric = maxpro2;
+            let _ = plot_x_vs_y(best_lhd);
             println!("Best metric: {best_metric}")
         }
     }
