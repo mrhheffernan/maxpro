@@ -1,6 +1,7 @@
 use ndarray::ArrayBase; // Used for the generic array type in the function signature.
 use ndarray::{Array, Data, Ix2, s}; // Import 's!' for slicing.
 use rand::Rng;
+use rand::prelude::SliceRandom;
 use rayon::prelude::*;
 
 fn generate_coords(n_samples: i32) -> Vec<(f64, f64)> {
@@ -10,6 +11,30 @@ fn generate_coords(n_samples: i32) -> Vec<(f64, f64)> {
             (rng.random_range(0.0..1.0), rng.random_range(0.0..1.0))
         })
         .collect()
+}
+
+fn generate_lhd(n_samples: usize, n_dim: usize) -> Vec<Vec<f64>> {
+    // initialize empty lhd
+    let mut rng = rand::rng();
+    let mut lhd = vec![vec![0.0; n_dim]; n_samples];
+
+    // For each dimension, start by generating a shuffle
+    for j in 0..n_dim {
+        let mut permutation: Vec<usize> = (0..n_samples).collect(); // might need a .collect()?
+        // Shuffle the 0..n_samples iterator
+        permutation.shuffle(&mut rng);
+
+        for i in 0..n_samples {
+            // okay, now for the tricky bit.
+            // Get the range of the interval for this sample
+            let interval_start = permutation[i] as f64 / n_samples as f64;
+            let interval_end = (permutation[i] + 1) as f64 / n_samples as f64;
+            // Generate a random sample in the box
+            let sample = rng.random_range(interval_start..interval_end);
+            lhd[i][j] = sample;
+        }
+    }
+    lhd
 }
 
 // Accepts any array (S) where S can be borrowed to view (&) f64.
@@ -78,5 +103,10 @@ fn main() {
         .collect();
     let arr = Array::from_shape_vec((n, d), flat_data).unwrap();
     let maxpro = maxpro_criterion(&arr);
-    println!("Maxpro: {maxpro}")
+    println!("Maxpro: {maxpro}");
+
+    let lhd = generate_lhd(n_samples as usize, 2);
+    let lhd_array = Array::from(lhd);
+    let maxpro2 = maxpro_criterion(lhd_array);
+    println!("Maxpro 2: {maxpro2}");
 }
