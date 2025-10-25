@@ -133,9 +133,8 @@ fn plot_x_vs_y(data: Vec<Vec<f64>>) -> Result<(), Box<dyn std::error::Error>> {
         });
 
     // Add a small buffer and use the EXCLUSIVE range operator (..)
-    // The Ranged trait is implemented for std::ops::Range<f64>
-    let x_range = (min_x - 0.1)..(max_x + 0.1); // <-- Changed from ..= to ..
-    let y_range = (min_y - 0.1)..(max_y + 0.1); // <-- Changed from ..= to ..
+    let x_range = (min_x - 0.1)..(max_x + 0.1); 
+    let y_range = (min_y - 0.1)..(max_y + 0.1); 
 
     // 2. Create the chart context
     let mut chart = ChartBuilder::on(&root)
@@ -159,10 +158,6 @@ fn plot_x_vs_y(data: Vec<Vec<f64>>) -> Result<(), Box<dyn std::error::Error>> {
                 BLUE.filled(), // Color
             ),
         )?
-        // === FIX IS HERE ===
-        // Mark the drawn series as owned for the purpose of creating a label/legend.
-        // .mark_as_owned()
-        // Now you can safely apply .label() and .legend()
         .label("Design Points")
         .legend(move |(x, y)| Circle::new((x, y), 5, BLUE.filled()));
 
@@ -170,22 +165,28 @@ fn plot_x_vs_y(data: Vec<Vec<f64>>) -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
-fn main() {
-    let n_samples: i32 = 64;
-    const N_ITERATIONS: i32 = 100000;
-    let mut best_metric = 10e12;
-
-    for _i in 0..N_ITERATIONS {
-        let lhd = generate_lhd(n_samples as usize, 2);
+fn build_maxpro_lhd(n_samples: i32, n_iterations: i32, n_dim: usize, plot: bool) -> Vec<Vec<f64>> {
+    let mut best_metric = f64::INFINITY;
+    let mut best_lhd = vec![vec![0.0, 0.0]];
+    for _i in 0..n_iterations {
+        let lhd = generate_lhd(n_samples as usize, n_dim);
         let lhd_array = convert_design_to_array2(lhd.clone()).unwrap();
-        let maxpro2 = maxpro_criterion(&lhd_array);
-        // println!("Maxpro 2: {maxpro2}");
-        let mut best_lhd = lhd.clone();
-        if maxpro2 < best_metric {
+        let maxpro_metric = maxpro_criterion(&lhd_array);
+        if maxpro_metric < best_metric {
             best_lhd = lhd.clone();
-            best_metric = maxpro2;
-            let _ = plot_x_vs_y(best_lhd);
+            best_metric = maxpro_metric;
+            if plot {
+                let _ = plot_x_vs_y(best_lhd.clone());
+            }
             println!("Best metric: {best_metric}")
         }
     }
+    best_lhd
+}
+
+fn main() {
+    let n_samples: i32 = 100;
+    const N_ITERATIONS: i32 = 10000;
+    let plot: bool = false;
+    let maxpro_lhd = build_maxpro_lhd(n_samples, N_ITERATIONS, 2, plot);
 }
