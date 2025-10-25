@@ -1,5 +1,5 @@
 use ndarray::ArrayBase; // Used for the generic array type in the function signature.
-use ndarray::{Array, Data, Ix2, s}; // Import 's!' for slicing.
+use ndarray::{Array, Array2, Data, Ix2, ShapeError, s}; // Import 's!' for slicing.
 use rand::Rng;
 use rand::prelude::SliceRandom;
 use rayon::prelude::*;
@@ -87,6 +87,27 @@ where
     inverse_product_sum
 }
 
+fn convert_design_to_array2(design: Vec<Vec<f64>>) -> Result<Array2<f64>, ShapeError> {
+    // Function to flatten the vector of vectors, slight tweaks from vec of tuples.
+    let n = design.len();
+
+    if n == 0 {
+        return Array2::from_shape_vec((0, 0), Vec::new());
+    }
+
+    // Use the length of the first row for the column count (d)
+    let d = design[0].len();
+
+    // Flatten the Vec<Vec<f64>> into a single contiguous Vec<f64>
+    let flat_data: Vec<f64> = design
+        .into_iter()
+        .flat_map(|inner_vec| inner_vec.into_iter())
+        .collect();
+
+    // Construct the Array2<f64> from the flat data and the shape (n, d)
+    Array2::from_shape_vec((n, d), flat_data)
+}
+
 fn main() {
     let n_samples: i32 = 64;
     let coords = generate_coords(n_samples);
@@ -106,7 +127,7 @@ fn main() {
     println!("Maxpro: {maxpro}");
 
     let lhd = generate_lhd(n_samples as usize, 2);
-    let lhd_array = Array::from(lhd);
-    let maxpro2 = maxpro_criterion(lhd_array);
+    let lhd_array = convert_design_to_array2(lhd).unwrap();
+    let maxpro2 = maxpro_criterion(&lhd_array);
     println!("Maxpro 2: {maxpro2}");
 }
