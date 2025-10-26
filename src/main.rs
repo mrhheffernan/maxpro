@@ -109,7 +109,7 @@ fn plot_x_vs_y(data: Vec<Vec<f64>>) -> Result<(), Box<dyn std::error::Error>> {
     let points: Vec<(f64, f64)> = data
         .into_iter()
         .filter_map(|p| {
-            // Ensure the point has at least 2 dimensions [x, y]
+            // Ensure the point has at least 2 dimensions [x, y , ...]
             if p.len() >= 2 {
                 // Return (x, y) tuple
                 Some((p[0], p[1]))
@@ -194,13 +194,16 @@ struct Args {
     iterations: i32,
     #[arg(short, long)]
     plot: bool,
+    #[arg(short, long)]
+    ndims: usize,
 }
 
 fn main() {
     let args = Args::parse();
     let n_samples: i32 = args.samples;
     let n_iterations = args.iterations;
+    let n_dims = args.ndims;
     let plot = args.plot;
-    let maxpro_lhd = build_maxpro_lhd(n_samples, n_iterations, 2, plot);
+    let maxpro_lhd = build_maxpro_lhd(n_samples, n_iterations, n_dims, plot);
     println!("{:?}", maxpro_lhd)
 }
