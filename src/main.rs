@@ -202,4 +202,5 @@ fn main() {
     let n_iterations = args.iterations;
     let plot = args.plot;
     let maxpro_lhd = build_maxpro_lhd(n_samples, n_iterations, 2, plot);
+    println!("{:?}", maxpro_lhd)
 }
