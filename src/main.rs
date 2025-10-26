@@ -1,3 +1,4 @@
+use clap::Parser;
 use ndarray::ArrayBase; // Used for the generic array type in the function signature.
 use ndarray::{Array, Array2, Data, Ix2, ShapeError, s}; // Import 's!' for slicing.
 use plotters::prelude::*;
@@ -133,8 +134,8 @@ fn plot_x_vs_y(data: Vec<Vec<f64>>) -> Result<(), Box<dyn std::error::Error>> {
         });
 
     // Add a small buffer and use the EXCLUSIVE range operator (..)
-    let x_range = (min_x - 0.1)..(max_x + 0.1); 
-    let y_range = (min_y - 0.1)..(max_y + 0.1); 
+    let x_range = (min_x - 0.1)..(max_x + 0.1);
+    let y_range = (min_y - 0.1)..(max_y + 0.1);
 
     // 2. Create the chart context
     let mut chart = ChartBuilder::on(&root)
@@ -184,9 +185,22 @@ fn build_maxpro_lhd(n_samples: i32, n_iterations: i32, n_dim: usize, plot: bool)
     best_lhd
 }
 
+#[derive(Parser)]
+struct Args {
+    // The pattern to look for
+    #[arg(short, long)]
+    samples: i32,
+    #[arg(short, long)]
+    iterations: i32,
+    #[arg(short, long)]
+    plot: bool,
+}
+
 fn main() {
-    let n_samples: i32 = 100;
-    const N_ITERATIONS: i32 = 10000;
-    let plot: bool = false;
-    let maxpro_lhd = build_maxpro_lhd(n_samples, N_ITERATIONS, 2, plot);
+    let args = Args::parse();
+    let n_samples: i32 = args.samples;
+    let n_iterations = args.iterations;
+    let plot = args.plot;
+    let maxpro_lhd = build_maxpro_lhd(n_samples, n_iterations, 2, plot);
+    println!("{:?}", maxpro_lhd)
 }
