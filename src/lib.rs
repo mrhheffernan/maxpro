@@ -1,6 +1,6 @@
 pub mod utils {
     use ndarray::ArrayBase; // Used for the generic array type in the function signature.
-    use ndarray::{Array, Array2, Data, Ix2, ShapeError, s}; // Import 's!' for slicing.
+    use ndarray::{Array2, Data, Ix2, ShapeError, s}; // Import 's!' for slicing.
     use plotters::prelude::*;
     use rand::Rng;
     use rand::prelude::SliceRandom;
