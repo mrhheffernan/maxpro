@@ -5,11 +5,11 @@ pub mod utils {
     use rand::Rng;
     use rand::prelude::SliceRandom;
 
-    pub fn generate_lhd(n_samples: usize, n_dim: usize) -> Vec<Vec<f64>> {
+    pub fn generate_lhd(n_samples: usize, n_dim: usize) -> Array2<f64> {
         // initialize empty lhd
         // TODO: Make this seedable
         let mut rng = rand::rng();
-        let mut lhd = vec![vec![0.0; n_dim]; n_samples];
+        let mut lhd = Array2::from_elem((n_samples, n_dim), 0.0);
 
         // For each dimension, start by generating a shuffle
         for j in 0..n_dim {
@@ -23,7 +23,7 @@ pub mod utils {
                 let interval_end = (permutation[i] + 1) as f64 / n_samples as f64;
                 // Generate a random sample in the box
                 let sample = rng.random_range(interval_start..interval_end);
-                lhd[i][j] = sample;
+                lhd[[i, j]] = sample;
             }
         }
         lhd
@@ -79,44 +79,18 @@ pub mod utils {
         inverse_product_sum
     }
 
-    fn convert_design_to_array2(design: Vec<Vec<f64>>) -> Result<Array2<f64>, ShapeError> {
-        // Function to flatten the vector of vectors, slight tweaks from vec of tuples.
-        let n = design.len();
-
-        if n == 0 {
-            return Array2::from_shape_vec((0, 0), Vec::new());
-        }
-
-        // Use the length of the first row for the column count (d)
-        let d = design[0].len();
-
-        // Flatten the Vec<Vec<f64>> into a single contiguous Vec<f64>
-        let flat_data: Vec<f64> = design
-            .into_iter()
-            .flat_map(|inner_vec| inner_vec.into_iter())
-            .collect();
-
-        // Construct the Array2<f64> from the flat data and the shape (n, d)
-        Array2::from_shape_vec((n, d), flat_data)
-    }
-
-    fn plot_x_vs_y(data: Vec<Vec<f64>>) -> Result<(), Box<dyn std::error::Error>> {
+    fn plot_x_vs_y(data: Array2<f64>) -> Result<(), Box<dyn std::error::Error>> {
         let root = BitMapBackend::new("xy_scatter_plot.png", (640, 480)).into_drawing_area();
         root.fill(&WHITE)?;
 
         // 1. Prepare data and determine axis bounds
         // We transform the Vec<Vec<f64>> into a Vec<(f64, f64)> of (x, y) pairs.
-        let points: Vec<(f64, f64)> = data
+        let x = data.slice(s![.., 0]);
+        let y = data.slice(s![.., 1]);
+        let point_pointers: Vec<(&f64, &f64)> = x.iter().zip(y.iter()).collect();
+        let points: Vec<(f64, f64)> = point_pointers
             .into_iter()
-            .filter_map(|p| {
-                // Ensure the point has at least 2 dimensions [x, y , ...]
-                if p.len() >= 2 {
-                    // Return (x, y) tuple
-                    Some((p[0], p[1]))
-                } else {
-                    None
-                }
-            })
+            .map(|(x_ref, y_ref)| (*x_ref, *y_ref))
             .collect();
 
         // Find the min/max X and Y for axis scaling
@@ -166,13 +140,18 @@ pub mod utils {
         Ok(())
     }
 
-    pub fn build_maxpro_lhd(n_samples: i32, n_iterations: i32, n_dim: usize, plot: bool) -> Vec<Vec<f64>> {
+    pub fn build_maxpro_lhd(
+        n_samples: i32,
+        n_iterations: i32,
+        n_dim: usize,
+        plot: bool,
+    ) -> Array2<f64> {
         let mut best_metric = f64::INFINITY;
-        let mut best_lhd = vec![vec![0.0; n_dim]; n_samples as usize];
+        let mut best_lhd = Array2::from_elem((n_samples as usize, n_dim), 0.0);
         for _i in 0..n_iterations {
             let lhd = generate_lhd(n_samples as usize, n_dim);
-            let lhd_array = convert_design_to_array2(lhd.clone()).unwrap();
-            let maxpro_metric = maxpro_criterion(&lhd_array);
+            // let lhd_array = convert_design_to_array2(lhd).unwrap();
+            let maxpro_metric = maxpro_criterion(&lhd);
             if maxpro_metric < best_metric {
                 best_lhd = lhd.clone();
                 best_metric = maxpro_metric;
