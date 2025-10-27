@@ -80,17 +80,22 @@ pub mod utils {
     }
 
     fn plot_x_vs_y(data: Array2<f64>) -> Result<(), Box<dyn std::error::Error>> {
+        if data.ncols() < 2 {
+            return Err(From::from(
+                "Data for plot_x_vs_y must have at least 2 columns.",
+            ));
+        }
+
         let root = BitMapBackend::new("xy_scatter_plot.png", (640, 480)).into_drawing_area();
         root.fill(&WHITE)?;
 
         // 1. Prepare data and determine axis bounds
-        // We transform the Vec<Vec<f64>> into a Vec<(f64, f64)> of (x, y) pairs.
-        let x = data.slice(s![.., 0]);
-        let y = data.slice(s![.., 1]);
-        let point_pointers: Vec<(&f64, &f64)> = x.iter().zip(y.iter()).collect();
-        let points: Vec<(f64, f64)> = point_pointers
-            .into_iter()
-            .map(|(x_ref, y_ref)| (*x_ref, *y_ref))
+        // We transform the Array2 into a Vec<(f64, f64)> of (x, y) pairs.
+        let points: Vec<(f64, f64)> = data
+            .column(0)
+            .iter()
+            .zip(data.column(1))
+            .map(|(&x, &y)| (x, y))
             .collect();
 
         // Find the min/max X and Y for axis scaling
