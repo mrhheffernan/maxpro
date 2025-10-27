@@ -1,6 +1,6 @@
 pub mod utils {
     use ndarray::ArrayBase; // Used for the generic array type in the function signature.
-    use ndarray::{Array2, Data, Ix2, ShapeError, s}; // Import 's!' for slicing.
+    use ndarray::{Array2, Data, Ix2, s}; // Import 's!' for slicing.
     use plotters::prelude::*;
     use rand::Rng;
     use rand::prelude::SliceRandom;
@@ -146,16 +146,15 @@ pub mod utils {
     }
 
     pub fn build_maxpro_lhd(
-        n_samples: i32,
-        n_iterations: i32,
+        n_samples: usize,
+        n_iterations: usize,
         n_dim: usize,
         plot: bool,
     ) -> Array2<f64> {
         let mut best_metric = f64::INFINITY;
-        let mut best_lhd = Array2::from_elem((n_samples as usize, n_dim), 0.0);
+        let mut best_lhd = Array2::from_elem((n_samples, n_dim), 0.0);
         for _i in 0..n_iterations {
-            let lhd = generate_lhd(n_samples as usize, n_dim);
-            // let lhd_array = convert_design_to_array2(lhd).unwrap();
+            let lhd = generate_lhd(n_samples, n_dim);
             let maxpro_metric = maxpro_criterion(&lhd);
             if maxpro_metric < best_metric {
                 best_lhd = lhd.clone();
