@@ -79,7 +79,7 @@ pub mod utils {
         inverse_product_sum
     }
 
-    fn plot_x_vs_y(data: Array2<f64>) -> Result<(), Box<dyn std::error::Error>> {
+    fn plot_x_vs_y(data: &Array2<f64>) -> Result<(), Box<dyn std::error::Error>> {
         if data.ncols() < 2 {
             return Err(From::from(
                 "Data for plot_x_vs_y must have at least 2 columns.",
@@ -161,7 +161,7 @@ pub mod utils {
                 best_lhd = lhd.clone();
                 best_metric = maxpro_metric;
                 if plot {
-                    let _ = plot_x_vs_y(best_lhd.clone());
+                    let _ = plot_x_vs_y(&best_lhd);
                 }
                 println!("Best metric: {best_metric}")
             }
