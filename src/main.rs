@@ -12,6 +12,8 @@ struct Args {
     plot: bool,
     #[arg(short, long)]
     ndims: usize,
+    #[arg(short, long)]
+    output_path: String,
 }
 
 fn main() {
@@ -20,6 +22,11 @@ fn main() {
     let n_iterations = args.iterations;
     let n_dims = args.ndims;
     let plot = args.plot;
-    let maxpro_lhd = build_maxpro_lhd(n_samples, n_iterations, n_dims, plot);
+    let mut output_path = std::path::Path::new("./");
+    if args.plot {
+        // Assign the variable iff args.plot is used
+        output_path = std::path::Path::new(&args.output_path);
+    }
+    let maxpro_lhd = build_maxpro_lhd(n_samples, n_iterations, n_dims, plot, &output_path);
     println!("{:?}", maxpro_lhd)
 }

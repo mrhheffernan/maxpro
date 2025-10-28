@@ -5,14 +5,17 @@ pub mod utils {
     use rand::Rng;
     use rand::prelude::SliceRandom;
 
-    fn plot_x_vs_y(data: &Array2<f64>) -> Result<(), Box<dyn std::error::Error>> {
+    fn plot_x_vs_y(
+        data: &Array2<f64>,
+        output_path: &std::path::Path,
+    ) -> Result<(), Box<dyn std::error::Error>> {
         if data.ncols() < 2 {
             return Err(From::from(
                 "Data for plot_x_vs_y must have at least 2 columns.",
             ));
         }
 
-        let root = BitMapBackend::new("xy_scatter_plot.png", (640, 480)).into_drawing_area();
+        let root = BitMapBackend::new(output_path, (640, 480)).into_drawing_area();
         root.fill(&WHITE)?;
 
         // 1. Prepare data and determine axis bounds
@@ -147,6 +150,7 @@ pub mod utils {
         n_iterations: usize,
         n_dim: usize,
         plot: bool,
+        output_path: &std::path::Path,
     ) -> Array2<f64> {
         let mut best_metric = f64::INFINITY;
         let mut best_lhd = Array2::from_elem((n_samples, n_dim), 0.0);
@@ -157,7 +161,7 @@ pub mod utils {
                 best_lhd = lhd.clone();
                 best_metric = maxpro_metric;
                 if plot {
-                    let _ = plot_x_vs_y(&best_lhd);
+                    let _ = plot_x_vs_y(&best_lhd, &output_path);
                 }
                 println!("Best metric: {best_metric}")
             }
