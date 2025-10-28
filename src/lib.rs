@@ -1,9 +1,75 @@
 pub mod utils {
     use ndarray::ArrayBase; // Used for the generic array type in the function signature.
-    use ndarray::{Array2, Data, Ix2, ShapeError, s}; // Import 's!' for slicing.
+    use ndarray::{Array2, Data, Ix2, s}; // Import 's!' for slicing.
     use plotters::prelude::*;
     use rand::Rng;
     use rand::prelude::SliceRandom;
+
+    fn plot_x_vs_y(
+        data: &Array2<f64>,
+        output_path: &std::path::Path,
+    ) -> Result<(), Box<dyn std::error::Error>> {
+        if data.ncols() < 2 {
+            return Err(From::from(
+                "Data for plot_x_vs_y must have at least 2 columns.",
+            ));
+        }
+
+        let root = BitMapBackend::new(output_path, (640, 480)).into_drawing_area();
+        root.fill(&WHITE)?;
+
+        // 1. Prepare data and determine axis bounds
+        // We transform the Array2 into a Vec<(f64, f64)> of (x, y) pairs.
+        let points: Vec<(f64, f64)> = data
+            .column(0)
+            .iter()
+            .zip(data.column(1))
+            .map(|(&x, &y)| (x, y))
+            .collect();
+
+        // Find the min/max X and Y for axis scaling
+        let (min_x, max_x) = points
+            .iter()
+            .map(|(x, _)| *x)
+            .fold((f64::INFINITY, f64::NEG_INFINITY), |(min_x, max_x), x| {
+                (min_x.min(x), max_x.max(x))
+            });
+        let (min_y, max_y) = points
+            .iter()
+            .map(|(_, y)| *y)
+            .fold((f64::INFINITY, f64::NEG_INFINITY), |(min_y, max_y), y| {
+                (min_y.min(y), max_y.max(y))
+            });
+
+        // Add a small buffer and use the EXCLUSIVE range operator (..)
+        let x_range = (min_x - 0.1)..(max_x + 0.1);
+        let y_range = (min_y - 0.1)..(max_y + 0.1);
+
+        // 2. Create the chart context
+        let mut chart = ChartBuilder::on(&root)
+            // ... other settings ...
+            // This call now satisfies the Ranged trait bound:
+            .build_cartesian_2d(x_range, y_range)?;
+
+        chart
+            .configure_mesh()
+            .x_desc("X Coordinate")
+            .y_desc("Y Coordinate")
+            .draw()?;
+
+        // 3. Draw the single series of points
+        chart
+            .draw_series(PointSeries::<_, _, Circle<_, _>, _>::new(
+                points,        // Data is Vec<(f64, f64)>
+                5,             // Radius
+                BLUE.filled(), // Color
+            ))?
+            .label("Design Points")
+            .legend(move |(x, y)| Circle::new((x, y), 5, BLUE.filled()));
+
+        root.present()?;
+        Ok(())
+    }
 
     pub fn generate_lhd(n_samples: usize, n_dim: usize) -> Array2<f64> {
         // initialize empty lhd
@@ -79,89 +145,23 @@ pub mod utils {
         inverse_product_sum
     }
 
-    fn plot_x_vs_y(data: &Array2<f64>) -> Result<(), Box<dyn std::error::Error>> {
-        if data.ncols() < 2 {
-            return Err(From::from(
-                "Data for plot_x_vs_y must have at least 2 columns.",
-            ));
-        }
-
-        let root = BitMapBackend::new("xy_scatter_plot.png", (640, 480)).into_drawing_area();
-        root.fill(&WHITE)?;
-
-        // 1. Prepare data and determine axis bounds
-        // We transform the Array2 into a Vec<(f64, f64)> of (x, y) pairs.
-        let points: Vec<(f64, f64)> = data
-            .column(0)
-            .iter()
-            .zip(data.column(1))
-            .map(|(&x, &y)| (x, y))
-            .collect();
-
-        // Find the min/max X and Y for axis scaling
-        let (min_x, max_x) = points
-            .iter()
-            .map(|(x, _)| *x)
-            .fold((f64::INFINITY, f64::NEG_INFINITY), |(min_x, max_x), x| {
-                (min_x.min(x), max_x.max(x))
-            });
-        let (min_y, max_y) = points
-            .iter()
-            .map(|(_, y)| *y)
-            .fold((f64::INFINITY, f64::NEG_INFINITY), |(min_y, max_y), y| {
-                (min_y.min(y), max_y.max(y))
-            });
-
-        // Add a small buffer and use the EXCLUSIVE range operator (..)
-        let x_range = (min_x - 0.1)..(max_x + 0.1);
-        let y_range = (min_y - 0.1)..(max_y + 0.1);
-
-        // 2. Create the chart context
-        let mut chart = ChartBuilder::on(&root)
-            // ... other settings ...
-            // This call now satisfies the Ranged trait bound:
-            .build_cartesian_2d(x_range, y_range)?;
-
-        chart
-            .configure_mesh()
-            .x_desc("X Coordinate")
-            .y_desc("Y Coordinate")
-            .draw()?;
-
-        // 3. Draw the single series of points
-        chart
-            .draw_series(
-                // The PointSeries creation, without .mark_as_owned()
-                PointSeries::<_, _, Circle<_, _>, _>::new(
-                    points,        // Data is Vec<(f64, f64)>
-                    5,             // Radius
-                    BLUE.filled(), // Color
-                ),
-            )?
-            .label("Design Points")
-            .legend(move |(x, y)| Circle::new((x, y), 5, BLUE.filled()));
-
-        root.present()?;
-        Ok(())
-    }
-
     pub fn build_maxpro_lhd(
-        n_samples: i32,
-        n_iterations: i32,
+        n_samples: usize,
+        n_iterations: usize,
         n_dim: usize,
         plot: bool,
+        output_path: &std::path::Path,
     ) -> Array2<f64> {
         let mut best_metric = f64::INFINITY;
-        let mut best_lhd = Array2::from_elem((n_samples as usize, n_dim), 0.0);
+        let mut best_lhd = Array2::from_elem((n_samples, n_dim), 0.0);
         for _i in 0..n_iterations {
-            let lhd = generate_lhd(n_samples as usize, n_dim);
-            // let lhd_array = convert_design_to_array2(lhd).unwrap();
+            let lhd = generate_lhd(n_samples, n_dim);
             let maxpro_metric = maxpro_criterion(&lhd);
             if maxpro_metric < best_metric {
                 best_lhd = lhd.clone();
                 best_metric = maxpro_metric;
                 if plot {
-                    let _ = plot_x_vs_y(&best_lhd);
+                    let _ = plot_x_vs_y(&best_lhd, &output_path);
                 }
                 println!("Best metric: {best_metric}")
             }
