@@ -151,26 +151,16 @@ pub mod utils {
     }
 
     #[pyfunction]
-    pub fn pymaxpro_criterion<'py>(
-        _py: Python<'py>,
-        design: PyReadonlyArray2<f64>,
-    ) -> PyResult<f64> {
-        // Here you can convert the PyReadonlyArray2<f64> to a Rust ndarray
-        let design_array = design.as_array();
-        let criterion = maxpro_criterion(design_array);
-        Ok(criterion)
-    }
-
-    #[pyfunction]
     pub fn build_maxpro_lhd(
         n_samples: usize,
         n_iterations: usize,
         n_dim: usize,
         plot: bool,
-        output_path: &std::path::Path,
+        output_path: String,
     ) -> Array2<f64> {
         let mut best_metric = f64::INFINITY;
         let mut best_lhd = Array2::from_elem((n_samples, n_dim), 0.0);
+        let output_path =  std::path::Path::new(&output_path);
         for _i in 0..n_iterations {
             let lhd = generate_lhd(n_samples, n_dim);
             let maxpro_metric = maxpro_criterion(&lhd);
@@ -192,7 +182,6 @@ pub mod utils {
 fn maxpro(_py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     // Add the inline module's functions to the Python module
     m.add_function(wrap_pyfunction!(utils::build_maxpro_lhd, m)?)?;
-    m.add_function(wrap_pyfunction!(utils::pymaxpro_criterion, m)?)?;
     m.add_function(wrap_pyfunction!(utils::generate_lhd, m)?)?;
     Ok(())
 }
