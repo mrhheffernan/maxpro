@@ -1,7 +1,10 @@
+use pyo3::prelude::*;
+
 pub mod utils {
     use ndarray::ArrayBase; // Used for the generic array type in the function signature.
     use ndarray::{Array2, Data, Ix2, s}; // Import 's!' for slicing.
     use plotters::prelude::*;
+    use pyo3::prelude::*;
     use rand::Rng;
     use rand::prelude::SliceRandom;
 
@@ -71,6 +74,7 @@ pub mod utils {
         Ok(())
     }
 
+    #[pyfunction]
     pub fn generate_lhd(n_samples: usize, n_dim: usize) -> Array2<f64> {
         // initialize empty lhd
         // TODO: Make this seedable
@@ -96,6 +100,7 @@ pub mod utils {
     }
 
     // Accepts any array (S) where S can be borrowed to view (&) f64.
+    #[pyfunction]
     pub fn maxpro_criterion<S>(design: &ArrayBase<S, Ix2>) -> f64
     where
         S: Data<Elem = f64>,
@@ -145,6 +150,7 @@ pub mod utils {
         inverse_product_sum
     }
 
+    #[pyfunction]
     pub fn build_maxpro_lhd(
         n_samples: usize,
         n_iterations: usize,
