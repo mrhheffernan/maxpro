@@ -175,3 +175,13 @@ pub mod utils {
         best_lhd
     }
 }
+
+// Python module definition
+#[pymodule]
+fn maxpro(_py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
+    // Add the inline module's functions to the Python module
+    m.add_function(wrap_pyfunction!(utils::build_maxpro_lhd, m)?)?;
+    m.add_function(wrap_pyfunction!(utils::maxpro_criterion, m)?)?;
+    m.add_function(wrap_pyfunction!(utils::generate_lhd, m)?)?;
+    Ok(())
+}
