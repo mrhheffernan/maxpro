@@ -3,6 +3,7 @@ use pyo3::prelude::*;
 pub mod utils {
     use ndarray::ArrayBase; // Used for the generic array type in the function signature.
     use ndarray::{Array2, Data, Ix2, s}; // Import 's!' for slicing.
+    use numpy::{PyReadonlyArray2, ToPyArray}; // For python binding
     use plotters::prelude::*;
     use pyo3::prelude::*;
     use rand::Rng;
@@ -100,7 +101,6 @@ pub mod utils {
     }
 
     // Accepts any array (S) where S can be borrowed to view (&) f64.
-    #[pyfunction]
     pub fn maxpro_criterion<S>(design: &ArrayBase<S, Ix2>) -> f64
     where
         S: Data<Elem = f64>,
@@ -151,6 +151,17 @@ pub mod utils {
     }
 
     #[pyfunction]
+    pub fn pymaxpro_criterion<'py>(
+        _py: Python<'py>,
+        design: PyReadonlyArray2<f64>,
+    ) -> PyResult<f64> {
+        // Here you can convert the PyReadonlyArray2<f64> to a Rust ndarray
+        let design_array = design.as_array();
+        let criterion = maxpro_criterion(design_array);
+        Ok(criterion)
+    }
+
+    #[pyfunction]
     pub fn build_maxpro_lhd(
         n_samples: usize,
         n_iterations: usize,
@@ -181,7 +192,7 @@ pub mod utils {
 fn maxpro(_py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     // Add the inline module's functions to the Python module
     m.add_function(wrap_pyfunction!(utils::build_maxpro_lhd, m)?)?;
-    m.add_function(wrap_pyfunction!(utils::maxpro_criterion, m)?)?;
+    m.add_function(wrap_pyfunction!(utils::pymaxpro_criterion, m)?)?;
     m.add_function(wrap_pyfunction!(utils::generate_lhd, m)?)?;
     Ok(())
 }
