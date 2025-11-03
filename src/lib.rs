@@ -1,17 +1,20 @@
+#[cfg(feature = "pyo3-bindings")]
+use pyo3::prelude::*;
+
 pub mod utils {
-    use ndarray::ArrayBase; // Used for the generic array type in the function signature.
-    use ndarray::{Array2, Data, Ix2, s}; // Import 's!' for slicing.
     use plotters::prelude::*;
+    #[cfg(feature = "pyo3-bindings")]
+    use pyo3::prelude::*;
     use rand::Rng;
     use rand::prelude::SliceRandom;
 
     fn plot_x_vs_y(
-        data: &Array2<f64>,
+        data: &Vec<Vec<f64>>,
         output_path: &std::path::Path,
     ) -> Result<(), Box<dyn std::error::Error>> {
-        if data.ncols() < 2 {
+        if data.is_empty() || data[0].len() < 2 {
             return Err(From::from(
-                "Data for plot_x_vs_y must have at least 2 columns.",
+                "Data for plot_x_vs_y must have at least 2 columns and 1 sample.",
             ));
         }
 
@@ -19,13 +22,7 @@ pub mod utils {
         root.fill(&WHITE)?;
 
         // 1. Prepare data and determine axis bounds
-        // We transform the Array2 into a Vec<(f64, f64)> of (x, y) pairs.
-        let points: Vec<(f64, f64)> = data
-            .column(0)
-            .iter()
-            .zip(data.column(1))
-            .map(|(&x, &y)| (x, y))
-            .collect();
+        let points: Vec<(f64, f64)> = data.iter().map(|row| (row[0], row[1])).collect();
 
         // Find the min/max X and Y for axis scaling
         let (min_x, max_x) = points
@@ -71,15 +68,15 @@ pub mod utils {
         Ok(())
     }
 
-    pub fn generate_lhd(n_samples: usize, n_dim: usize) -> Array2<f64> {
+    pub fn generate_lhd(n_samples: usize, n_dim: usize) -> Vec<Vec<f64>> {
         // initialize empty lhd
         // TODO: Make this seedable
         let mut rng = rand::rng();
-        let mut lhd = Array2::from_elem((n_samples, n_dim), 0.0);
+        let mut lhd: Vec<Vec<f64>> = vec![vec![0.0; n_dim]; n_samples];
 
         // For each dimension, start by generating a shuffle
         for j in 0..n_dim {
-            let mut permutation: Vec<usize> = (0..n_samples).collect(); // might need a .collect()?
+            let mut permutation: Vec<usize> = (0..n_samples).collect();
             // Shuffle the 0..n_samples iterator
             permutation.shuffle(&mut rng);
 
@@ -88,19 +85,15 @@ pub mod utils {
                 let interval_start = permutation[i] as f64 / n_samples as f64;
                 let interval_end = (permutation[i] + 1) as f64 / n_samples as f64;
                 // Generate a random sample in the box
-                let sample = rng.random_range(interval_start..interval_end);
-                lhd[[i, j]] = sample;
+                let sample: f64 = rng.random_range(interval_start..interval_end);
+                // lhd[[i, j]] = sample;
+                lhd[i][j] = sample;
             }
         }
         lhd
     }
 
-    // Accepts any array (S) where S can be borrowed to view (&) f64.
-    pub fn maxpro_criterion<S>(design: &ArrayBase<S, Ix2>) -> f64
-    where
-        S: Data<Elem = f64>,
-    {
-        // The storage type S must contain f64 elements
+    pub fn maxpro_criterion(design: &Vec<Vec<f64>>) -> f64 {
         /*
         Calculates the internal sum term of the MaxPro criterion (psi(D)).
         This sum is the term that is directly minimized in the optimization
@@ -109,13 +102,14 @@ pub mod utils {
         The minimized term is: sum_{i<j} [ 1 / product_{l=1}^{d} (x_il - x_jl)^2 ]
 
         Args:
-            design: An ndarray (n x d) representing the design points,
+            design: An Vec<Vec<f64>> (n x d) representing the design points,
                     normalized to the unit hypercube [0, 1]^d.
 
         Returns:
             The value of the internal sum (the MaxPro Sum Metric).
         */
-        let (n, _d) = design.dim();
+
+        let n: usize = design.len();
 
         if n < 2 {
             return 0.0;
@@ -127,15 +121,19 @@ pub mod utils {
         for i in 0..n {
             for j in (i + 1)..n {
                 // Calculate the product term: product_{l=1}^{d} (x_il - x_jl)^2
-                let row_i_slice = design.slice(s![i, ..]);
-                let row_j_slice = design.slice(s![j, ..]);
+                let row_i: &Vec<f64> = &design[i];
+                let row_j: &Vec<f64> = &design[j];
+                let mut product_of_squared_diffs: f64 = 1.0;
 
-                // // 2. Subtract: .to_owned() converts the second slice to an owned array (Array1)
-                // //    to allow the subtraction operation.
-                let diffs = row_i_slice.to_owned() - row_j_slice;
+                // Use zip to iterate over both rows simultaneously
+                for (x_i_l, x_j_l) in row_i.iter().zip(row_j.iter()) {
+                    let diff: f64 = x_i_l - x_j_l;
+                    let diff_sq: f64 = diff * diff;
+                    product_of_squared_diffs *= diff_sq;
+                }
 
-                let diffs_sq = diffs.map(|x| x * x);
-                let product_of_squared_diffs: f64 = diffs_sq.product() + epsilon;
+                // Add epsilon to prevent division by zero
+                product_of_squared_diffs += epsilon;
 
                 // // Sum the inverse products
                 inverse_product_sum += 1.0 / product_of_squared_diffs;
@@ -150,13 +148,14 @@ pub mod utils {
         n_iterations: usize,
         n_dim: usize,
         plot: bool,
-        output_path: &std::path::Path,
-    ) -> Array2<f64> {
+        output_path: String,
+    ) -> Vec<Vec<f64>> {
         let mut best_metric = f64::INFINITY;
-        let mut best_lhd = Array2::from_elem((n_samples, n_dim), 0.0);
+        let mut best_lhd: Vec<Vec<f64>> = vec![vec![0.0; n_dim]; n_samples as usize];
+        let output_path = std::path::Path::new(&output_path);
         for _i in 0..n_iterations {
-            let lhd = generate_lhd(n_samples, n_dim);
-            let maxpro_metric = maxpro_criterion(&lhd);
+            let lhd: Vec<Vec<f64>> = generate_lhd(n_samples, n_dim);
+            let maxpro_metric: f64 = maxpro_criterion(&lhd);
             if maxpro_metric < best_metric {
                 best_lhd = lhd.clone();
                 best_metric = maxpro_metric;
@@ -168,4 +167,38 @@ pub mod utils {
         }
         best_lhd
     }
+
+    #[cfg(feature = "pyo3-bindings")]
+    #[pyfunction(name = "generate_lhd")]
+    pub fn py_generate_lhd(n_samples: usize, n_dim: usize) -> Vec<Vec<f64>> {
+        generate_lhd(n_samples, n_dim)
+    }
+
+    #[cfg(feature = "pyo3-bindings")]
+    #[pyfunction(name = "maxpro_criterion")]
+    pub fn py_maxpro_criterion(design: Vec<Vec<f64>>) -> f64 {
+        maxpro_criterion(&design)
+    }
+
+    #[cfg(feature = "pyo3-bindings")]
+    #[pyfunction(name = "build_maxpro_lhd")]
+    pub fn py_build_maxpro_lhd(
+        n_samples: usize,
+        n_iterations: usize,
+        n_dim: usize,
+        plot: bool,
+        output_path: String,
+    ) -> Vec<Vec<f64>> {
+        build_maxpro_lhd(n_samples, n_iterations, n_dim, plot, output_path)
+    }
+}
+
+// Python module definition
+#[cfg(feature = "pyo3-bindings")]
+#[pymodule]
+fn maxpro(_py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
+    m.add_function(wrap_pyfunction!(utils::py_build_maxpro_lhd, m)?)?;
+    m.add_function(wrap_pyfunction!(utils::py_generate_lhd, m)?)?;
+    m.add_function(wrap_pyfunction!(utils::py_maxpro_criterion, m)?)?;
+    Ok(())
 }
