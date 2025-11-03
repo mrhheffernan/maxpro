@@ -66,7 +66,7 @@ pub mod utils {
         Ok(())
     }
 
-    // #[pyfunction]
+    #[pyfunction]
     pub fn generate_lhd(n_samples: usize, n_dim: usize) -> Vec<Vec<f64>> {
         // initialize empty lhd
         // TODO: Make this seedable
@@ -145,6 +145,7 @@ pub mod utils {
         inverse_product_sum
     }
 
+    #[pyfunction]
     pub fn build_maxpro_lhd(
         n_samples: usize,
         n_iterations: usize,
@@ -169,37 +170,13 @@ pub mod utils {
         }
         best_lhd
     }
-
-    //     #[pyfunction]
-    //     pub fn py_maxpro_lhd(
-    //     py: Python,
-    //     n_samples: usize,
-    //     n_iterations: usize,
-    //     n_dim: usize,
-    //     plot: bool,
-    //     output_path: String, // Takes Python String and converts to owned String
-    // ) -> PyResult<Py<PyArray2<f64>>> {
-
-    //     // 1. Call the pure Rust function
-    //     let best_lhd = build_maxpro_lhd(
-    //         n_samples,
-    //         n_iterations,
-    //         n_dim,
-    //         plot,
-    //         output_path
-    //     );
-
-    //     // 2. Convert the owned ndarray::Array2<f64> result into a Python NumPy array object
-    //     // PyO3 does the heavy lifting here.
-    //     Ok(best_lhd.into_pyarray(py).to_owned())
-    // }
 }
 
-// // Python module definition
-// #[pymodule]
-// fn maxpro(_py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
-//     // Add the inline module's functions to the Python module
-//     m.add_function(wrap_pyfunction!(utils::py_maxpro_lhd, m)?)?;
-//     m.add_function(wrap_pyfunction!(utils::generate_lhd, m)?)?;
-//     Ok(())
-// }
+// Python module definition
+#[pymodule]
+fn maxpro(_py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
+    // Add the inline module's functions to the Python module
+    m.add_function(wrap_pyfunction!(utils::build_maxpro_lhd, m)?)?;
+    m.add_function(wrap_pyfunction!(utils::generate_lhd, m)?)?;
+    Ok(())
+}
