@@ -148,7 +148,7 @@ pub mod utils {
         n_iterations: usize,
         n_dim: usize,
         plot: bool,
-        output_path: String,
+        output_path: &str,
     ) -> Vec<Vec<f64>> {
         let mut best_metric = f64::INFINITY;
         let mut best_lhd: Vec<Vec<f64>> = vec![vec![0.0; n_dim]; n_samples as usize];

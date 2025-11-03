@@ -28,6 +28,6 @@ fn main() {
         output_path = args.output_path;
     }
     let maxpro_lhd: Vec<Vec<f64>> =
-        build_maxpro_lhd(n_samples, n_iterations, n_dims, plot, output_path);
+        build_maxpro_lhd(n_samples, n_iterations, n_dims, plot, &output_path);
     println!("{:?}", maxpro_lhd)
 }
