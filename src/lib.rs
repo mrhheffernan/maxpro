@@ -169,19 +169,19 @@ pub mod utils {
     }
 
     #[cfg(feature = "pyo3-bindings")]
-    #[pyfunction]
+    #[pyfunction(name = "generate_lhd")]
     pub fn py_generate_lhd(n_samples: usize, n_dim: usize) -> Vec<Vec<f64>> {
         generate_lhd(n_samples, n_dim)
     }
 
     #[cfg(feature = "pyo3-bindings")]
-    #[pyfunction]
+    #[pyfunction(name = "maxpro_criterion")]
     pub fn py_maxpro_criterion(design: Vec<Vec<f64>>) -> f64 {
         maxpro_criterion(&design)
     }
 
     #[cfg(feature = "pyo3-bindings")]
-    #[pyfunction]
+    #[pyfunction(name = "build_maxpro_lhd")]
     pub fn py_build_maxpro_lhd(
         n_samples: usize,
         n_iterations: usize,
@@ -197,12 +197,8 @@ pub mod utils {
 #[cfg(feature = "pyo3-bindings")]
 #[pymodule]
 fn maxpro(_py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
-    // Add the inline module's functions to the Python module
-    let func_build_maxpro = wrap_pyfunction!(utils::py_build_maxpro_lhd, m)?;
-    m.add("build_maxpro_lhd", func_build_maxpro)?;
-    let func_generate_lhd = wrap_pyfunction!(utils::py_generate_lhd, m)?;
-    m.add("generate_lhd", func_generate_lhd)?;
-    let func_maxpro_criterion = wrap_pyfunction!(utils::py_maxpro_criterion, m)?;
-    m.add("maxpro_criterion", func_maxpro_criterion)?;
+    m.add_function(wrap_pyfunction!(utils::py_build_maxpro_lhd, m)?)?;
+    m.add_function(wrap_pyfunction!(utils::py_generate_lhd, m)?)?;
+    m.add_function(wrap_pyfunction!(utils::py_maxpro_criterion, m)?)?;
     Ok(())
 }
