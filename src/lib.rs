@@ -1,10 +1,13 @@
+#[cfg(feature = "pyo3-bindings")]
 use pyo3::prelude::*;
 
 pub mod utils {
     use plotters::prelude::*;
-    use pyo3::prelude::*;
     use rand::Rng;
     use rand::prelude::SliceRandom;
+    
+    #[cfg(feature = "pyo3-bindings")]
+    use pyo3::prelude::*;
 
     fn plot_x_vs_y(
         data: Vec<Vec<f64>>,
@@ -66,7 +69,6 @@ pub mod utils {
         Ok(())
     }
 
-    #[pyfunction]
     pub fn generate_lhd(n_samples: usize, n_dim: usize) -> Vec<Vec<f64>> {
         // initialize empty lhd
         // TODO: Make this seedable
@@ -89,13 +91,10 @@ pub mod utils {
                 lhd[i][j] = sample;
             }
         }
-        //ToPyArray(lhd).readonly()
         lhd
     }
 
-    // Accepts any array (S) where S can be borrowed to view (&) f64.
     pub fn maxpro_criterion(design: &Vec<Vec<f64>>) -> f64 {
-        // The storage type S must contain f64 elements
         /*
         Calculates the internal sum term of the MaxPro criterion (psi(D)).
         This sum is the term that is directly minimized in the optimization
@@ -104,7 +103,7 @@ pub mod utils {
         The minimized term is: sum_{i<j} [ 1 / product_{l=1}^{d} (x_il - x_jl)^2 ]
 
         Args:
-            design: An ndarray (n x d) representing the design points,
+            design: An Vec<Vec<f64>> (n x d) representing the design points,
                     normalized to the unit hypercube [0, 1]^d.
 
         Returns:
@@ -145,7 +144,6 @@ pub mod utils {
         inverse_product_sum
     }
 
-    #[pyfunction]
     pub fn build_maxpro_lhd(
         n_samples: usize,
         n_iterations: usize,
@@ -170,13 +168,42 @@ pub mod utils {
         }
         best_lhd
     }
+
+    #[cfg(feature = "pyo3-bindings")]
+    #[pyfunction]
+    pub fn py_generate_lhd(n_samples: usize, n_dim: usize) -> Vec<Vec<f64>> {
+        generate_lhd(n_samples, n_dim)
+    }
+
+    #[cfg(feature = "pyo3-bindings")]
+    #[pyfunction]
+    pub fn py_maxpro_criterion(design: Vec<Vec<f64>>) -> f64 {
+        maxpro_criterion(&design)
+    }
+
+    #[cfg(feature = "pyo3-bindings")]
+    #[pyfunction]
+    pub fn py_build_maxpro_lhd(
+        n_samples: usize,
+        n_iterations: usize,
+        n_dim: usize,
+        plot: bool,
+        output_path: String,
+    ) -> Vec<Vec<f64>> {
+        build_maxpro_lhd(n_samples, n_iterations, n_dim, plot, output_path)
+    }
 }
 
 // Python module definition
+#[cfg(feature = "pyo3-bindings")]
 #[pymodule]
 fn maxpro(_py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     // Add the inline module's functions to the Python module
-    m.add_function(wrap_pyfunction!(utils::build_maxpro_lhd, m)?)?;
-    m.add_function(wrap_pyfunction!(utils::generate_lhd, m)?)?;
+    let func_build_maxpro = wrap_pyfunction!(utils::py_build_maxpro_lhd, m)?;
+    m.add("build_maxpro_lhd", func_build_maxpro)?;
+    let func_generate_lhd = wrap_pyfunction!(utils::py_generate_lhd, m)?;
+    m.add("generate_lhd", func_generate_lhd)?;
+    let func_maxpro_criterion = wrap_pyfunction!(utils::py_maxpro_criterion, m)?;
+    m.add("maxpro_criterion", func_maxpro_criterion)?;
     Ok(())
 }
