@@ -17,16 +17,17 @@ struct Args {
 }
 
 fn main() {
-    let args = Args::parse();
-    let n_samples = args.samples;
-    let n_iterations = args.iterations;
-    let n_dims = args.ndims;
-    let plot = args.plot;
-    let mut output_path = "./";
+    let args: Args = Args::parse();
+    let n_samples: usize = args.samples;
+    let n_iterations: usize = args.iterations;
+    let n_dims: usize = args.ndims;
+    let plot: bool = args.plot;
+    let mut output_path = std::string::String::new();
     if args.plot {
         // Assign the variable iff args.plot is used
         output_path = args.output_path;
     }
-    let maxpro_lhd = build_maxpro_lhd(n_samples, n_iterations, n_dims, plot, output_path);
+    let maxpro_lhd: Vec<Vec<f64>> =
+        build_maxpro_lhd(n_samples, n_iterations, n_dims, plot, output_path);
     println!("{:?}", maxpro_lhd)
 }
