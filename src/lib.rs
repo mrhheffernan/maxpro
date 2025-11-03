@@ -3,14 +3,13 @@ use pyo3::prelude::*;
 
 pub mod utils {
     use plotters::prelude::*;
-    use rand::Rng;
-    use rand::prelude::SliceRandom;
-    
     #[cfg(feature = "pyo3-bindings")]
     use pyo3::prelude::*;
+    use rand::Rng;
+    use rand::prelude::SliceRandom;
 
     fn plot_x_vs_y(
-        data: Vec<Vec<f64>>,
+        data: &Vec<Vec<f64>>,
         output_path: &std::path::Path,
     ) -> Result<(), Box<dyn std::error::Error>> {
         if data[0].len() < 2 {
@@ -161,7 +160,7 @@ pub mod utils {
                 best_lhd = lhd.clone();
                 best_metric = maxpro_metric;
                 if plot {
-                    let _ = plot_x_vs_y(best_lhd.clone(), &output_path);
+                    let _ = plot_x_vs_y(&best_lhd, &output_path);
                 }
                 println!("Best metric: {best_metric}")
             }
