@@ -22,7 +22,7 @@ fn main() {
     let n_iterations: usize = args.iterations;
     let n_dims: usize = args.ndims;
     let plot: bool = args.plot;
-    let mut output_path = std::string::String::new();
+    let mut output_path = String::new();
     if args.plot {
         // Assign the variable iff args.plot is used
         output_path = args.output_path;

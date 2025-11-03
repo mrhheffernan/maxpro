@@ -12,9 +12,9 @@ pub mod utils {
         data: &Vec<Vec<f64>>,
         output_path: &std::path::Path,
     ) -> Result<(), Box<dyn std::error::Error>> {
-        if data[0].len() < 2 {
+        if data.is_empty() || data[0].len() < 2 {
             return Err(From::from(
-                "Data for plot_x_vs_y must have at least 2 columns.",
+                "Data for plot_x_vs_y must have at least 2 columns and 1 sample.",
             ));
         }
 
