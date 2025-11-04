@@ -12,9 +12,25 @@ def calculate_pymaxpro_criterion(maxpro_lhd):
     return true_maxpro
 
 
+def test_parity():
+    """
+    Test parity between Python and Rust MaxPro criterion calculations
+    """
+    n_dims = [2, 4, 10]
+    n_samples = [10, 100, 1000]
+    iterations = 1000
+    for nd in n_dims:
+        for ns in n_samples:
+            print(f"Checking {ns} samples in {nd} dimensions")
+            maxpro_lhd = maxpro.build_maxpro_lhd(ns, iterations, nd, False, ".")
+            rust_criterion = maxpro.maxpro_criterion(maxpro_lhd)
+            python_criterion = calculate_pymaxpro_criterion(maxpro_lhd)
+            assert rust_criterion == python_criterion
+
+
 def main():
-    n_samples = 50
-    n_iterations = 100000
+    n_samples = 5
+    n_iterations = 10000
     n_dim = 2
     plot = False
     output_path = "."
@@ -35,6 +51,9 @@ def main():
     print(f"Rust calculation: {maxpro_criterion} in {rust_timer} s")
     print(f"Python calculation: {pymaxpro_criterion} in {python_timer} s")
     print(f"Python / Rust ratio: {python_timer / rust_timer}")
+
+    print("Checking parity")
+    test_parity()
 
 
 if __name__ == "__main__":
