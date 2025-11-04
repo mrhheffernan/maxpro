@@ -21,4 +21,5 @@ generation in Python is possible.
 ## Planned work
 - Implement simulated annealing
 - Add testing
+- Comparisons to R implementation for further metric, performance benchmarking and validation.
 - Performance improvements
