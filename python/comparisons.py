@@ -4,7 +4,7 @@ import time
 import pymaxpro
 
 
-def calculate_pymaxpro_criterion(maxpro_lhd):
+def calculate_pymaxpro_criterion(maxpro_lhd: list[list[float]]) -> float:
     maxpro_inner = pymaxpro.maxpro_criterion(np.array(maxpro_lhd))
     n = len(maxpro_lhd)
     d = len(maxpro_lhd[0])
@@ -29,6 +29,9 @@ def test_parity():
 
 
 def benchmark_time():
+    """
+    Benchmark rust vs. python implementation for time.
+    """
     n_samples = 5
     n_iterations = 10000
     n_dim = 2
