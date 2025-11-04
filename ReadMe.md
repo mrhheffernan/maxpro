@@ -16,7 +16,7 @@ generation in Python is possible.
 ## Current capabilities
 - Generate a random latin hypercube
 - Generate many random latin hypercubes, calculate the maximum projection metric, and return the LHD that minimizes the MaxPro design.
-- Using `maturin develop --features pyo3-bindings`, can `import maxpro` and generate optimal MaxPro LHDs in Python directly.
+- Using `maturin develop --release --features pyo3-bindings`, can `import maxpro` and generate optimal MaxPro LHDs in Python directly.
 
 ## Planned work
 - Implement simulated annealing
