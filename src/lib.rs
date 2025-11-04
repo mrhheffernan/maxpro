@@ -6,9 +6,9 @@ pub mod utils {
     #[cfg(feature = "pyo3-bindings")]
     use pyo3::prelude::*;
     use rand::Rng;
-    use rand::prelude::SliceRandom;
+    use rand::prelude::{SliceRandom, ThreadRng};
 
-    fn plot_x_vs_y(
+    pub fn plot_x_vs_y(
         data: &Vec<Vec<f64>>,
         output_path: &std::path::Path,
     ) -> Result<(), Box<dyn std::error::Error>> {
@@ -71,7 +71,7 @@ pub mod utils {
     pub fn generate_lhd(n_samples: usize, n_dim: usize) -> Vec<Vec<f64>> {
         // initialize empty lhd
         // TODO: Make this seedable
-        let mut rng = rand::rng();
+        let mut rng: ThreadRng = rand::rng();
         let mut lhd: Vec<Vec<f64>> = vec![vec![0.0; n_dim]; n_samples];
 
         // For each dimension, start by generating a shuffle
@@ -82,8 +82,8 @@ pub mod utils {
 
             for i in 0..n_samples {
                 // Get the range of the interval for this sample
-                let interval_start = permutation[i] as f64 / n_samples as f64;
-                let interval_end = (permutation[i] + 1) as f64 / n_samples as f64;
+                let interval_start: f64 = permutation[i] as f64 / n_samples as f64;
+                let interval_end: f64 = (permutation[i] + 1) as f64 / n_samples as f64;
                 // Generate a random sample in the box
                 let sample: f64 = rng.random_range(interval_start..interval_end);
                 // lhd[[i, j]] = sample;
@@ -93,7 +93,7 @@ pub mod utils {
         lhd
     }
 
-    pub fn maxpro_criterion(design: &Vec<Vec<f64>>) -> f64 {
+    fn maxpro_sum(design: &Vec<Vec<f64>>) -> f64 {
         /*
         Calculates the internal sum term of the MaxPro criterion (psi(D)).
         This sum is the term that is directly minimized in the optimization
@@ -110,13 +110,12 @@ pub mod utils {
         */
 
         let n: usize = design.len();
-
         if n < 2 {
             return 0.0;
         }
 
-        let mut inverse_product_sum = 0.0;
-        let epsilon = 1e-12; // Small constant to prevent division by zero
+        let mut inverse_product_sum: f64 = 0.0;
+        let epsilon: f64 = 1e-12; // Small constant to prevent division by zero
 
         for i in 0..n {
             for j in (i + 1)..n {
@@ -143,26 +142,27 @@ pub mod utils {
         inverse_product_sum
     }
 
-    pub fn build_maxpro_lhd(
-        n_samples: usize,
-        n_iterations: usize,
-        n_dim: usize,
-        plot: bool,
-        output_path: String,
-    ) -> Vec<Vec<f64>> {
+    pub fn maxpro_criterion(design: &Vec<Vec<f64>>) -> f64 {
+        /* Calculates the full, complete MaxPro criterion */
+        let n: usize = design.len();
+        if n < 2 {
+            return 0.0;
+        }
+        let d: usize = design[0].len();
+        let inverse_product_sum: f64 = maxpro_sum(design);
+        let n_pairs: f64 = n as f64 * (n as f64 - 1.0) / 2.0;
+        (inverse_product_sum / n_pairs).powf(1.0 / d as f64)
+    }
+
+    pub fn build_maxpro_lhd(n_samples: usize, n_dim: usize, n_iterations: usize) -> Vec<Vec<f64>> {
         let mut best_metric = f64::INFINITY;
         let mut best_lhd: Vec<Vec<f64>> = vec![vec![0.0; n_dim]; n_samples as usize];
-        let output_path = std::path::Path::new(&output_path);
         for _i in 0..n_iterations {
             let lhd: Vec<Vec<f64>> = generate_lhd(n_samples, n_dim);
-            let maxpro_metric: f64 = maxpro_criterion(&lhd);
+            let maxpro_metric: f64 = maxpro_sum(&lhd);
             if maxpro_metric < best_metric {
                 best_lhd = lhd.clone();
                 best_metric = maxpro_metric;
-                if plot {
-                    let _ = plot_x_vs_y(&best_lhd, &output_path);
-                }
-                println!("Best metric: {best_metric}")
             }
         }
         best_lhd
@@ -186,10 +186,8 @@ pub mod utils {
         n_samples: usize,
         n_iterations: usize,
         n_dim: usize,
-        plot: bool,
-        output_path: String,
     ) -> Vec<Vec<f64>> {
-        build_maxpro_lhd(n_samples, n_iterations, n_dim, plot, output_path)
+        build_maxpro_lhd(n_samples, n_iterations, n_dim)
     }
 }
 
