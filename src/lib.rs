@@ -8,7 +8,7 @@ pub mod utils {
     use rand::Rng;
     use rand::prelude::SliceRandom;
 
-    fn plot_x_vs_y(
+    pub fn plot_x_vs_y(
         data: &Vec<Vec<f64>>,
         output_path: &std::path::Path,
     ) -> Result<(), Box<dyn std::error::Error>> {
@@ -118,7 +118,7 @@ pub mod utils {
 
         let mut inverse_product_sum = 0.0;
         let epsilon = 1e-12; // Small constant to prevent division by zero
-        let n_pairs: f64 = n as f64 * (n as f64 -1.0) / 2.0;
+        let n_pairs: f64 = n as f64 * (n as f64 - 1.0) / 2.0;
 
         for i in 0..n {
             for j in (i + 1)..n {
@@ -142,29 +142,18 @@ pub mod utils {
             }
         }
 
-        (inverse_product_sum / n_pairs).powf(1.0 /d as f64)
+        (inverse_product_sum / n_pairs).powf(1.0 / d as f64)
     }
 
-    pub fn build_maxpro_lhd(
-        n_samples: usize,
-        n_iterations: usize,
-        n_dim: usize,
-        plot: bool,
-        output_path: String,
-    ) -> Vec<Vec<f64>> {
+    pub fn build_maxpro_lhd(n_samples: usize, n_iterations: usize, n_dim: usize) -> Vec<Vec<f64>> {
         let mut best_metric = f64::INFINITY;
         let mut best_lhd: Vec<Vec<f64>> = vec![vec![0.0; n_dim]; n_samples as usize];
-        let output_path = std::path::Path::new(&output_path);
         for _i in 0..n_iterations {
             let lhd: Vec<Vec<f64>> = generate_lhd(n_samples, n_dim);
             let maxpro_metric: f64 = maxpro_criterion(&lhd);
             if maxpro_metric < best_metric {
                 best_lhd = lhd.clone();
                 best_metric = maxpro_metric;
-                if plot {
-                    let _ = plot_x_vs_y(&best_lhd, &output_path);
-                }
-                println!("Best metric: {best_metric}")
             }
         }
         best_lhd
@@ -188,10 +177,8 @@ pub mod utils {
         n_samples: usize,
         n_iterations: usize,
         n_dim: usize,
-        plot: bool,
-        output_path: String,
     ) -> Vec<Vec<f64>> {
-        build_maxpro_lhd(n_samples, n_iterations, n_dim, plot, output_path)
+        build_maxpro_lhd(n_samples, n_iterations, n_dim)
     }
 }
 

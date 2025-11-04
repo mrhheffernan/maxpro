@@ -1,5 +1,5 @@
 use clap::Parser;
-use maxpro::utils::build_maxpro_lhd;
+use maxpro::utils::{build_maxpro_lhd, plot_x_vs_y};
 
 #[derive(Parser)]
 struct Args {
@@ -27,7 +27,7 @@ fn main() {
         // Assign the variable iff args.plot is used
         output_path = args.output_path;
     }
-    let maxpro_lhd: Vec<Vec<f64>> =
-        build_maxpro_lhd(n_samples, n_iterations, n_dims, plot, output_path);
+    let maxpro_lhd: Vec<Vec<f64>> = build_maxpro_lhd(n_samples, n_iterations, n_dims);
+    let _ = plot_x_vs_y(&maxpro_lhd, std::path::Path::new(&output_path));
     println!("{:?}", maxpro_lhd)
 }
