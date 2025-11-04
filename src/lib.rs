@@ -110,6 +110,7 @@ pub mod utils {
         */
 
         let n: usize = design.len();
+        let d: usize = design[0].len();
 
         if n < 2 {
             return 0.0;
@@ -117,6 +118,7 @@ pub mod utils {
 
         let mut inverse_product_sum = 0.0;
         let epsilon = 1e-12; // Small constant to prevent division by zero
+        let n_pairs: f64 = n as f64 * (n as f64 -1.0) / 2.0;
 
         for i in 0..n {
             for j in (i + 1)..n {
@@ -140,7 +142,7 @@ pub mod utils {
             }
         }
 
-        inverse_product_sum
+        (inverse_product_sum / n_pairs).powf(1.0 /d as f64)
     }
 
     pub fn build_maxpro_lhd(
