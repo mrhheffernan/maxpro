@@ -96,18 +96,8 @@ def generate_maxpro_lhd_greedy(
     # 2. Optimization Loop
     for iteration in range(max_iterations):
 
-        # Create a candidate design by swapping two values in one dimension
-        candidate_design = current_design.copy()
-
-        # Choose a dimension (column) and two different points (rows) to swap
-        dim_to_swap = random.randrange(n_dims)
-        i, j = random.sample(range(n_points), 2)
-
-        # Perform the swap (preserving the LHD property)
-        candidate_design[i, dim_to_swap], candidate_design[j, dim_to_swap] = (
-            candidate_design[j, dim_to_swap],
-            candidate_design[i, dim_to_swap],
-        )
+        # Generate a new candidate
+        candidate_design = sampler.random(n=n_points)
 
         # Evaluate the candidate design
         candidate_metric = maxpro_criterion(candidate_design)

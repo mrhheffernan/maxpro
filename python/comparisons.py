@@ -22,7 +22,7 @@ def test_parity():
     for nd in n_dims:
         for ns in n_samples:
             print(f"Checking {ns} samples in {nd} dimensions")
-            maxpro_lhd = maxpro.build_maxpro_lhd(ns, iterations, nd)
+            maxpro_lhd = maxpro.build_maxpro_lhd(ns, nd, iterations)
             rust_criterion = maxpro.maxpro_criterion(maxpro_lhd)
             python_criterion = calculate_pymaxpro_criterion(maxpro_lhd)
             assert rust_criterion == python_criterion
@@ -34,7 +34,7 @@ def benchmark_time():
     n_dim = 2
 
     time_rust_start = time.time()
-    maxpro_lhd = maxpro.build_maxpro_lhd(n_samples, n_iterations, n_dim)
+    maxpro_lhd = maxpro.build_maxpro_lhd(n_samples, n_dim, n_iterations)
     maxpro_criterion = maxpro.maxpro_criterion(maxpro_lhd)
     time_rust_end = time.time()
     pymaxpro_lhd = pymaxpro.generate_maxpro_lhd_greedy(n_samples, n_dim, n_iterations)

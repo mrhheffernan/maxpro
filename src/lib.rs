@@ -145,7 +145,7 @@ pub mod utils {
         (inverse_product_sum / n_pairs).powf(1.0 / d as f64)
     }
 
-    pub fn build_maxpro_lhd(n_samples: usize, n_iterations: usize, n_dim: usize) -> Vec<Vec<f64>> {
+    pub fn build_maxpro_lhd(n_samples: usize, n_dim: usize, n_iterations: usize) -> Vec<Vec<f64>> {
         let mut best_metric = f64::INFINITY;
         let mut best_lhd: Vec<Vec<f64>> = vec![vec![0.0; n_dim]; n_samples as usize];
         for _i in 0..n_iterations {
