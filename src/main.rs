@@ -22,13 +22,10 @@ fn main() {
     let n_iterations: usize = args.iterations;
     let n_dims: usize = args.ndims;
     let plot: bool = args.plot;
-    let mut output_path: String = String::new();
 
     let maxpro_lhd: Vec<Vec<f64>> = build_maxpro_lhd(n_samples, n_dims, n_iterations);
     if plot {
-        // Assign the variable iff args.plot is used
-        output_path = args.output_path;
-        let _ = plot_x_vs_y(&maxpro_lhd, std::path::Path::new(&output_path));
+        let _ = plot_x_vs_y(&maxpro_lhd, std::path::Path::new(&args.output_path));
     }
     println!("{:?}", maxpro_lhd)
 }

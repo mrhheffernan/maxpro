@@ -110,11 +110,10 @@ pub mod utils {
         */
 
         let n: usize = design.len();
-        let d: usize = design[0].len();
-
         if n < 2 {
             return 0.0;
         }
+        let d: usize = design[0].len();
 
         let mut inverse_product_sum: f64 = 0.0;
         let epsilon: f64 = 1e-12; // Small constant to prevent division by zero

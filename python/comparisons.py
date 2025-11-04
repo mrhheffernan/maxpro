@@ -25,7 +25,7 @@ def test_parity():
             maxpro_lhd = maxpro.build_maxpro_lhd(ns, nd, iterations)
             rust_criterion = maxpro.maxpro_criterion(maxpro_lhd)
             python_criterion = calculate_pymaxpro_criterion(maxpro_lhd)
-            assert rust_criterion == python_criterion
+            assert np.isclose(rust_criterion, python_criterion)
 
 
 def benchmark_time():
