@@ -28,7 +28,7 @@ def test_parity():
             assert rust_criterion == python_criterion
 
 
-def main():
+def benchmark_time():
     n_samples = 5
     n_iterations = 10000
     n_dim = 2
@@ -52,8 +52,13 @@ def main():
     print(f"Python calculation: {pymaxpro_criterion} in {python_timer} s")
     print(f"Python / Rust ratio: {python_timer / rust_timer}")
 
+
+def main():
     print("Checking parity")
     test_parity()
+
+    print("Benchmarking time between Python and Rust")
+    benchmark_time()
 
 
 if __name__ == "__main__":
