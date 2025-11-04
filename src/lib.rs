@@ -6,7 +6,7 @@ pub mod utils {
     #[cfg(feature = "pyo3-bindings")]
     use pyo3::prelude::*;
     use rand::Rng;
-    use rand::prelude::SliceRandom;
+    use rand::prelude::{SliceRandom, ThreadRng};
 
     pub fn plot_x_vs_y(
         data: &Vec<Vec<f64>>,
@@ -71,7 +71,7 @@ pub mod utils {
     pub fn generate_lhd(n_samples: usize, n_dim: usize) -> Vec<Vec<f64>> {
         // initialize empty lhd
         // TODO: Make this seedable
-        let mut rng = rand::rng();
+        let mut rng: ThreadRng = rand::rng();
         let mut lhd: Vec<Vec<f64>> = vec![vec![0.0; n_dim]; n_samples];
 
         // For each dimension, start by generating a shuffle
@@ -116,8 +116,8 @@ pub mod utils {
             return 0.0;
         }
 
-        let mut inverse_product_sum = 0.0;
-        let epsilon = 1e-12; // Small constant to prevent division by zero
+        let mut inverse_product_sum: f64 = 0.0;
+        let epsilon: f64 = 1e-12; // Small constant to prevent division by zero
         let n_pairs: f64 = n as f64 * (n as f64 - 1.0) / 2.0;
 
         for i in 0..n {

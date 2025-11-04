@@ -15,5 +15,4 @@ Joseph, V. R., Gul, E., & Ba, S. (2015). Maximum projection designs for computer
 ## Planned work
 - Implement simulated annealing
 - Add testing
-- Compare calculations between this work and the MaxPro R implementation to ensure metrics match between designs
 - Performance improvements
