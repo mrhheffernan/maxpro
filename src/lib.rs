@@ -82,8 +82,8 @@ pub mod utils {
 
             for i in 0..n_samples {
                 // Get the range of the interval for this sample
-                let interval_start = permutation[i] as f64 / n_samples as f64;
-                let interval_end = (permutation[i] + 1) as f64 / n_samples as f64;
+                let interval_start: f64 = permutation[i] as f64 / n_samples as f64;
+                let interval_end: f64 = (permutation[i] + 1) as f64 / n_samples as f64;
                 // Generate a random sample in the box
                 let sample: f64 = rng.random_range(interval_start..interval_end);
                 // lhd[[i, j]] = sample;
