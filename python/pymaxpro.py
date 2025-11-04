@@ -83,11 +83,8 @@ def generate_maxpro_lhd_greedy(
 
     # 1. Generate an initial, standard Latin Hypercube Design (LHD)
     sampler = qmc.LatinHypercube(d=n_dims)
-    current_design = sampler.random(n=n_points)
-
-    current_metric = maxpro_criterion(current_design)
-    best_design = current_design.copy()
-    best_metric = current_metric
+    best_design = sampler.random(n=n_points)
+    best_metric = maxpro_criterion(current_design)
 
     print(f"Initial MaxPro Sum Metric: {best_metric:,.4f}")
 
@@ -98,18 +95,11 @@ def generate_maxpro_lhd_greedy(
 
         # Generate a new candidate
         candidate_design = sampler.random(n=n_points)
-
-        # Evaluate the candidate design
         candidate_metric = maxpro_criterion(candidate_design)
 
-        # Accept or reject the change (Greedy: only accept if better)
-        if candidate_metric < current_metric:
-            current_design = candidate_design
-            current_metric = candidate_metric
-
-            if current_metric < best_metric:
-                best_metric = current_metric
-                best_design = current_design.copy()
+        if candidate_metric < best_metric:
+            best_design = candidate_design
+            best_metric = candidate_metric
 
         if (iteration + 1) % (max_iterations // 10) == 0:
             print(

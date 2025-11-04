@@ -93,7 +93,7 @@ pub mod utils {
         lhd
     }
 
-    pub fn maxpro_criterion(design: &Vec<Vec<f64>>) -> f64 {
+    fn maxpro_sum(design: &Vec<Vec<f64>>) -> f64 {
         /*
         Calculates the internal sum term of the MaxPro criterion (psi(D)).
         This sum is the term that is directly minimized in the optimization
@@ -113,11 +113,9 @@ pub mod utils {
         if n < 2 {
             return 0.0;
         }
-        let d: usize = design[0].len();
 
         let mut inverse_product_sum: f64 = 0.0;
         let epsilon: f64 = 1e-12; // Small constant to prevent division by zero
-        let n_pairs: f64 = n as f64 * (n as f64 - 1.0) / 2.0;
 
         for i in 0..n {
             for j in (i + 1)..n {
@@ -141,6 +139,18 @@ pub mod utils {
             }
         }
 
+        inverse_product_sum
+    }
+
+    pub fn maxpro_criterion(design: &Vec<Vec<f64>>) -> f64 {
+        /* Calculates the full, complete MaxPro criterion */
+        let n: usize = design.len();
+        if n < 2 {
+            return 0.0;
+        }
+        let d: usize = design[0].len();
+        let inverse_product_sum: f64 = maxpro_sum(design);
+        let n_pairs: f64 = n as f64 * (n as f64 - 1.0) / 2.0;
         (inverse_product_sum / n_pairs).powf(1.0 / d as f64)
     }
 
@@ -149,7 +159,7 @@ pub mod utils {
         let mut best_lhd: Vec<Vec<f64>> = vec![vec![0.0; n_dim]; n_samples as usize];
         for _i in 0..n_iterations {
             let lhd: Vec<Vec<f64>> = generate_lhd(n_samples, n_dim);
-            let maxpro_metric: f64 = maxpro_criterion(&lhd);
+            let maxpro_metric: f64 = maxpro_sum(&lhd);
             if maxpro_metric < best_metric {
                 best_lhd = lhd.clone();
                 best_metric = maxpro_metric;
