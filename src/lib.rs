@@ -156,7 +156,7 @@ pub mod utils {
 
     pub fn build_maxpro_lhd(n_samples: usize, n_dim: usize, n_iterations: usize) -> Vec<Vec<f64>> {
         let mut best_metric = f64::INFINITY;
-        let mut best_lhd: Vec<Vec<f64>> = vec![vec![0.0; n_dim]; n_samples as usize];
+        let mut best_lhd: Vec<Vec<f64>> = vec![vec![0.0; n_dim]; n_samples];
         for _i in 0..n_iterations {
             let lhd: Vec<Vec<f64>> = generate_lhd(n_samples, n_dim);
             let maxpro_metric: f64 = maxpro_sum(&lhd);
@@ -166,6 +166,42 @@ pub mod utils {
             }
         }
         best_lhd
+    }
+
+    #[test]
+    fn test_generate_lhd() {
+        /*
+        Makes a simple test of a latin hypercube checking that,
+        for any interval in any dimension, there should be only one sample.
+        */
+        let n_samples: usize = 100;
+        let n_dim: usize = 4;
+        let design = generate_lhd(n_samples, n_dim);
+
+        for dimension in 0..n_dim {
+            // n_samples in an LHD is the same as the number of intervals to fill
+            let mut counts = vec![0; n_samples];
+            for interval in 0..n_samples {
+                // back-engineer the interval
+                let sample = design[interval][dimension];
+                let sample_interval_idx = (sample * n_samples as f64).floor() as usize;
+                counts[sample_interval_idx] += 1;
+            }
+            assert!(counts.iter().all(|&c| c == 1))
+        }
+    }
+
+    #[test]
+    fn test_maxpro_criterion() {
+        let n_iterations: usize = 10;
+        let n_samples: usize = 100;
+        let n_dim: usize = 5;
+        for _i in 0..n_iterations {
+            let lhd = generate_lhd(n_samples, n_dim);
+            let maxpro_metric: f64 = maxpro_criterion(&lhd);
+            assert!(maxpro_metric >= 0.0);
+            assert!(maxpro_metric < f64::INFINITY)
+        }
     }
 
     #[cfg(feature = "pyo3-bindings")]
