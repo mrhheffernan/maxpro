@@ -173,7 +173,6 @@ pub mod utils {
         /* Naive test of a latin hypercube:
         For any interval in any dimension, there should be only one sample.
         */
-
         let n_samples: usize = 100;
         let n_dims: usize = 4;
         let design = generate_lhd(n_samples, n_dims);
@@ -196,6 +195,19 @@ pub mod utils {
                 }
                 assert_eq!(count, 1)
             }
+        }
+    }
+
+    #[test]
+    fn test_maxpro_criterion() {
+        let n_iterations: usize = 10;
+        let n_samples: usize = 100;
+        let n_dim: usize = 5;
+        for _i in 0..n_iterations {
+            let lhd = generate_lhd(n_samples, n_dim);
+            let maxpro_metric: f64 = maxpro_criterion(&lhd);
+            assert!(maxpro_metric >= 0.0);
+            assert!(maxpro_metric < f64::INFINITY)
         }
     }
 
