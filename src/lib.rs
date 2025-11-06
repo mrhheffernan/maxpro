@@ -170,15 +170,17 @@ pub mod utils {
 
     #[test]
     fn test_generate_lhd() {
-        /* Naive test of a latin hypercube:
-        For any interval in any dimension, there should be only one sample.
+        /* 
+        Makes a simple test of a latin hypercube checking that,
+        for any interval in any dimension, there should be only one sample.
         */
         let n_samples: usize = 100;
-        let n_dims: usize = 4;
-        let design = generate_lhd(n_samples, n_dims);
+        let n_dim: usize = 4;
+        let design = generate_lhd(n_samples, n_dim);
 
-        for dimension in 0..n_dims {
+        for dimension in 0..n_dim {
             // n_samples in an LHD is the same as the number of intervals to fill
+            let mut counts = vec![0; n_samples];
             for interval in 0..n_samples {
                 // specify the interval
                 let interval_start: f64 = interval as f64 / n_samples as f64;
@@ -186,15 +188,14 @@ pub mod utils {
 
                 // check each interval and ensure that it only has one member
                 // along any dimension
-                let mut count: usize = 0;
                 for sample_idx in 0..n_samples {
                     let sample = design[sample_idx][dimension];
                     if (sample >= interval_start) && (sample < interval_end) {
-                        count += 1;
+                        counts[interval] += 1;
                     }
                 }
-                assert_eq!(count, 1)
             }
+            assert!(counts.iter().all(|&c| c == 1))
         }
     }
 
