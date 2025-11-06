@@ -168,6 +168,26 @@ pub mod utils {
         best_lhd
     }
 
+    #[test]
+    fn test_maxpro_lhd_2_samples() {
+        /* Naive test of a latin hypercube:
+        For any interval in any dimension, there should be only one sample.
+        Start off with a simple 2-sample example in 2D.
+        */
+        let design = build_maxpro_lhd(2, 2, 1);
+        if design[0][0] <= 0.5 {
+            assert!(design[1][0] > 0.5);
+        } else if design[0][0] > 0.5 {
+            assert!((design[1][0]) < 0.5)
+        }
+
+        if design[0][1] <= 0.5 {
+            assert!(design[1][1] > 0.5);
+        } else if design[0][1] > 0.5 {
+            assert!((design[1][1]) < 0.5)
+        }
+    }
+
     #[cfg(feature = "pyo3-bindings")]
     #[pyfunction(name = "generate_lhd")]
     pub fn py_generate_lhd(n_samples: usize, n_dim: usize) -> Vec<Vec<f64>> {
