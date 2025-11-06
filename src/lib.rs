@@ -169,14 +169,14 @@ pub mod utils {
     }
 
     #[test]
-    fn test_maxpro_lhd_partitioning() {
+    fn test_generate_lhd() {
         /* Naive test of a latin hypercube:
         For any interval in any dimension, there should be only one sample.
         */
 
         let n_samples: usize = 100;
         let n_dims: usize = 4;
-        let design = build_maxpro_lhd(n_samples, n_dims, 3);
+        let design = generate_lhd(n_samples, n_dims);
 
         for dimension in 0..n_dims {
             // n_samples in an LHD is the same as the number of intervals to fill
