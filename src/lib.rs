@@ -169,22 +169,33 @@ pub mod utils {
     }
 
     #[test]
-    fn test_maxpro_lhd_2_samples() {
+    fn test_maxpro_lhd_partitioning() {
         /* Naive test of a latin hypercube:
         For any interval in any dimension, there should be only one sample.
-        Start off with a simple 2-sample example in 2D.
         */
-        let design = build_maxpro_lhd(2, 2, 1);
-        if design[0][0] <= 0.5 {
-            assert!(design[1][0] > 0.5);
-        } else if design[0][0] > 0.5 {
-            assert!((design[1][0]) < 0.5)
-        }
 
-        if design[0][1] <= 0.5 {
-            assert!(design[1][1] > 0.5);
-        } else if design[0][1] > 0.5 {
-            assert!((design[1][1]) < 0.5)
+        let n_samples: usize = 100;
+        let n_dims: usize = 4;
+        let design = build_maxpro_lhd(n_samples, n_dims, 3);
+
+        for dimension in 0..n_dims {
+            // n_samples in an LHD is the same as the number of intervals to fill
+            for interval in 0..n_samples {
+                // specify the interval
+                let interval_start: f64 = interval as f64 / n_samples as f64;
+                let interval_end: f64 = (interval + 1) as f64 / n_samples as f64;
+
+                // check each interval and ensure that it only has one member
+                // along any dimension
+                let mut count: usize = 0;
+                for sample_idx in 0..n_samples {
+                    let sample = design[sample_idx][dimension];
+                    if (sample >= interval_start) & (sample <= interval_end) {
+                        count += 1;
+                    }
+                }
+                assert_eq!(count, 1)
+            }
         }
     }
 
