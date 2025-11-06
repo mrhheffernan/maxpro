@@ -189,7 +189,7 @@ pub mod utils {
                 let mut count: usize = 0;
                 for sample_idx in 0..n_samples {
                     let sample = design[sample_idx][dimension];
-                    if (sample >= interval_start) & (sample <= interval_end) {
+                    if (sample >= interval_start) && (sample < interval_end) {
                         count += 1;
                     }
                 }
