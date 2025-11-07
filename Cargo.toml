@@ -14,7 +14,7 @@ rayon = "1.11.0"
 plotters = "0.3"
 
 [dependencies.pyo3]
-version = "0.21" # Use your version
+version = "0.24.1" # Use your version
 optional = true   # PyO3 is now an optional dependency
 features = ["extension-module"]
 
