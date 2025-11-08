@@ -1,5 +1,6 @@
 use clap::Parser;
-use maxpro::utils::{build_maxpro_lhd, plot_x_vs_y};
+use maxpro::lhd::plot_x_vs_y;
+use maxpro::maxpro_utils::build_maxpro_lhd;
 
 #[derive(Parser)]
 struct Args {

@@ -1,7 +1,7 @@
 #[cfg(feature = "pyo3-bindings")]
 use pyo3::prelude::*;
 
-pub mod utils {
+pub mod lhd {
     use plotters::prelude::*;
     #[cfg(feature = "pyo3-bindings")]
     use pyo3::prelude::*;
@@ -93,6 +93,40 @@ pub mod utils {
         lhd
     }
 
+    #[test]
+    fn test_generate_lhd() {
+        /*
+        Makes a simple test of a latin hypercube checking that,
+        for any interval in any dimension, there should be only one sample.
+        */
+        let n_samples: usize = 100;
+        let n_dim: usize = 4;
+        let design = generate_lhd(n_samples, n_dim);
+
+        for dimension in 0..n_dim {
+            // n_samples in an LHD is the same as the number of intervals to fill
+            let mut counts = vec![0; n_samples];
+            for interval in 0..n_samples {
+                // back-engineer the interval
+                let sample = design[interval][dimension];
+                let sample_interval_idx = (sample * n_samples as f64).floor() as usize;
+                counts[sample_interval_idx] += 1;
+            }
+            assert!(counts.iter().all(|&c| c == 1))
+        }
+    }
+
+    #[cfg(feature = "pyo3-bindings")]
+    #[pyfunction(name = "generate_lhd")]
+    pub fn py_generate_lhd(n_samples: usize, n_dim: usize) -> Vec<Vec<f64>> {
+        generate_lhd(n_samples, n_dim)
+    }
+}
+
+pub mod maxpro_utils {
+    use crate::lhd::generate_lhd;
+    #[cfg(feature = "pyo3-bindings")]
+    use pyo3::prelude::*;
     fn maxpro_sum(design: &Vec<Vec<f64>>) -> f64 {
         /*
         Calculates the internal sum term of the MaxPro criterion (psi(D)).
@@ -168,48 +202,6 @@ pub mod utils {
         best_lhd
     }
 
-    #[test]
-    fn test_generate_lhd() {
-        /*
-        Makes a simple test of a latin hypercube checking that,
-        for any interval in any dimension, there should be only one sample.
-        */
-        let n_samples: usize = 100;
-        let n_dim: usize = 4;
-        let design = generate_lhd(n_samples, n_dim);
-
-        for dimension in 0..n_dim {
-            // n_samples in an LHD is the same as the number of intervals to fill
-            let mut counts = vec![0; n_samples];
-            for interval in 0..n_samples {
-                // back-engineer the interval
-                let sample = design[interval][dimension];
-                let sample_interval_idx = (sample * n_samples as f64).floor() as usize;
-                counts[sample_interval_idx] += 1;
-            }
-            assert!(counts.iter().all(|&c| c == 1))
-        }
-    }
-
-    #[test]
-    fn test_maxpro_criterion() {
-        let n_iterations: usize = 10;
-        let n_samples: usize = 100;
-        let n_dim: usize = 5;
-        for _i in 0..n_iterations {
-            let lhd = generate_lhd(n_samples, n_dim);
-            let maxpro_metric: f64 = maxpro_criterion(&lhd);
-            assert!(maxpro_metric >= 0.0);
-            assert!(maxpro_metric < f64::INFINITY)
-        }
-    }
-
-    #[cfg(feature = "pyo3-bindings")]
-    #[pyfunction(name = "generate_lhd")]
-    pub fn py_generate_lhd(n_samples: usize, n_dim: usize) -> Vec<Vec<f64>> {
-        generate_lhd(n_samples, n_dim)
-    }
-
     #[cfg(feature = "pyo3-bindings")]
     #[pyfunction(name = "maxpro_criterion")]
     pub fn py_maxpro_criterion(design: Vec<Vec<f64>>) -> f64 {
@@ -225,14 +217,27 @@ pub mod utils {
     ) -> Vec<Vec<f64>> {
         build_maxpro_lhd(n_samples, n_iterations, n_dim)
     }
+
+    #[test]
+    fn test_maxpro_criterion() {
+        let n_iterations: usize = 10;
+        let n_samples: usize = 100;
+        let n_dim: usize = 5;
+        for _i in 0..n_iterations {
+            let lhd = generate_lhd(n_samples, n_dim);
+            let maxpro_metric: f64 = maxpro_criterion(&lhd);
+            assert!(maxpro_metric >= 0.0);
+            assert!(maxpro_metric < f64::INFINITY)
+        }
+    }
 }
 
 // Python module definition
 #[cfg(feature = "pyo3-bindings")]
 #[pymodule]
 fn maxpro(_py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
-    m.add_function(wrap_pyfunction!(utils::py_build_maxpro_lhd, m)?)?;
-    m.add_function(wrap_pyfunction!(utils::py_generate_lhd, m)?)?;
-    m.add_function(wrap_pyfunction!(utils::py_maxpro_criterion, m)?)?;
+    m.add_function(wrap_pyfunction!(maxpro_utils::py_build_maxpro_lhd, m)?)?;
+    m.add_function(wrap_pyfunction!(lhd::py_generate_lhd, m)?)?;
+    m.add_function(wrap_pyfunction!(maxpro_utils::py_maxpro_criterion, m)?)?;
     Ok(())
 }
