@@ -237,12 +237,19 @@ pub mod maximin_utils {
     #[cfg(feature = "pyo3-bindings")]
     use pyo3::prelude::*;
     fn calculate_l2_distance(point_a: &Vec<f64>, point_b: &Vec<f64>) -> f64 {
-        assert!(point_a.len() == point_b.len());
-        let mut distance: f64 = 0.0;
-        for i in 0..point_a.len() {
-            distance += (point_a[i] - point_b[i]).powf(2.0)
-        }
-        distance.sqrt()
+        assert_eq!(point_a.len(), point_b.len());
+        // Iterator below is equivalent to this less idiomatic approach.
+        // let mut distance: f64 = 0.0;
+        // for i in 0..point_a.len() {
+        //     distance += (point_a[i] - point_b[i]).powf(2.0)
+        // }
+        // distance.sqrt()
+        point_a
+            .iter()
+            .zip(point_b)
+            .map(|(a, b)| (a - b).powi(2))
+            .sum::<f64>()
+            .sqrt()
     }
 
     fn maximin_criterion(design: &Vec<Vec<f64>>) -> f64 {
@@ -274,7 +281,7 @@ pub mod maximin_utils {
     }
 
     #[cfg(feature = "pyo3-bindings")]
-    #[pyfunction(name = "maximincriterion")]
+    #[pyfunction(name = "maximin_criterion")]
     pub fn py_maximin_criterion(design: Vec<Vec<f64>>) -> f64 {
         maximin_criterion(&design)
     }

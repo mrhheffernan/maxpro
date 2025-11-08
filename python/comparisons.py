@@ -60,11 +60,12 @@ def benchmark_time_maximin():
     time_rust_start = time.time()
     maxpro.build_maximin_lhd(n_samples, n_dim, n_iterations)
     time_rust_end = time.time()
+    time_python_start = time.time()
     pyDOE3.lhs(n_dim, n_samples, "maximin", n_iterations)
     time_python_end = time.time()
 
     print(f"Rust calculation time: {time_rust_end-time_rust_start}")
-    print(f"Python calculation time: {time_python_end - time_rust_end}")
+    print(f"Python calculation time: {time_python_end - time_python_start}")
 
 
 def main():
