@@ -13,9 +13,12 @@ This implementation was inspired by the comparative lack of lightweight LHD opti
 implementations of MaxPro. By implementing the backend in Rust, a performant and scalable approach for MaxPro design
 generation in Python is possible.
 
+This implementation also includes the often-less-optimal, but more standard, Maximin metric for additional functionality and benchmarking against reference implementations in Python.
+
 ## Current capabilities
 - Generate a random latin hypercube
-- Generate many random latin hypercubes, calculate the maximum projection metric, and return the LHD that minimizes the MaxPro design.
+- Generate many random latin hypercubes, calculate the maximum projection metric, and return the LHD that minimizes the MaxPro criterion: `cargo run --release -- --iterations 100000 --samples 50 --ndims 2 --metric max-pro`
+- Generate many random latin hypercubes, calculate the maximinn metric, and return the LHD that maximizes the minimum distance between points: `cargo run --release -- --iterations 100000 --samples 50 --ndims 2 --metric maxi-min`
 - Using `maturin develop --release --features pyo3-bindings`, can `import maxpro` and generate optimal MaxPro LHDs in Python directly.
 
 ## Planned work
