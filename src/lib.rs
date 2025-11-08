@@ -232,6 +232,46 @@ pub mod maxpro_utils {
     }
 }
 
+pub mod maximin_utils {
+    use crate::lhd::generate_lhd;
+    fn calculate_l2_distance(point_a: &Vec<f64>, point_b: &Vec<f64>) -> f64 {
+        assert!(point_a.len() == point_b.len());
+        let mut distance: f64 = 0.0;
+        for i in 0..point_a.len() {
+            distance += (point_a[i] - point_b[i]).powf(2.0)
+        }
+        distance.sqrt()
+    }
+
+    fn maximin_criterion(design: &Vec<Vec<f64>>) -> f64 {
+        let n: usize = design.len();
+        let mut min_distance: f64 = f64::INFINITY;
+        for i in 0..n {
+            for j in (i+1)..n {
+                let distance: f64 = calculate_l2_distance(&design[i], &design[j]);
+                if distance < min_distance {
+                    min_distance = distance
+                }
+            }
+        }
+        min_distance
+    }
+
+    pub fn build_maximin_lhd(n_samples: usize, n_dim: usize, n_iterations: usize) -> Vec<Vec<f64>> {
+        let mut best_metric = 0.0;
+        let mut best_lhd: Vec<Vec<f64>> = vec![vec![0.0; n_dim]; n_samples];
+        for _i in 0..n_iterations {
+            let lhd: Vec<Vec<f64>> = generate_lhd(n_samples, n_dim);
+            let metric: f64 = maximin_criterion(&lhd);
+            if metric > best_metric {
+                best_lhd = lhd.clone();
+                best_metric = metric;
+            }
+        }
+        best_lhd
+    }
+}
+
 // Python module definition
 #[cfg(feature = "pyo3-bindings")]
 #[pymodule]
