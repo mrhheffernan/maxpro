@@ -234,6 +234,8 @@ pub mod maxpro_utils {
 
 pub mod maximin_utils {
     use crate::lhd::generate_lhd;
+    #[cfg(feature = "pyo3-bindings")]
+    use pyo3::prelude::*;
     fn calculate_l2_distance(point_a: &Vec<f64>, point_b: &Vec<f64>) -> f64 {
         assert!(point_a.len() == point_b.len());
         let mut distance: f64 = 0.0;
@@ -270,14 +272,32 @@ pub mod maximin_utils {
         }
         best_lhd
     }
+
+    #[cfg(feature = "pyo3-bindings")]
+    #[pyfunction(name = "maximincriterion")]
+    pub fn py_maximin_criterion(design: Vec<Vec<f64>>) -> f64 {
+        maximin_criterion(&design)
+    }
+
+    #[cfg(feature = "pyo3-bindings")]
+    #[pyfunction(name = "build_maximin_lhd")]
+    pub fn py_build_maximin_lhd(
+        n_samples: usize,
+        n_iterations: usize,
+        n_dim: usize,
+    ) -> Vec<Vec<f64>> {
+        build_maximin_lhd(n_samples, n_iterations, n_dim)
+    }
 }
 
 // Python module definition
 #[cfg(feature = "pyo3-bindings")]
 #[pymodule]
 fn maxpro(_py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
-    m.add_function(wrap_pyfunction!(maxpro_utils::py_build_maxpro_lhd, m)?)?;
     m.add_function(wrap_pyfunction!(lhd::py_generate_lhd, m)?)?;
+    m.add_function(wrap_pyfunction!(maxpro_utils::py_build_maxpro_lhd, m)?)?;
     m.add_function(wrap_pyfunction!(maxpro_utils::py_maxpro_criterion, m)?)?;
+    m.add_function(wrap_pyfunction!(maximin_utils::py_build_maximin_lhd, m)?)?;
+    m.add_function(wrap_pyfunction!(maximin_utils::py_maximin_criterion, m)?)?;
     Ok(())
 }
