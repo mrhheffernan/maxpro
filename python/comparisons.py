@@ -52,6 +52,7 @@ def benchmark_time_maxpro():
     print(f"Python calculation: {pymaxpro_criterion} in {python_timer} s")
     print(f"Python / Rust ratio: {python_timer / rust_timer}")
 
+
 def benchmark_time_maximin():
     n_dim = 5
     n_samples = 100
