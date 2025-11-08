@@ -78,7 +78,7 @@ def generate_maxpro_lhd_greedy(
     Returns:
         The optimized design matrix (n x d) on the unit hypercube [0, 1]^d.
     """
-    print(f"--- Starting Greedy LHD Optimization ---")
+    print("--- Starting Greedy LHD Optimization ---")
     print(f"N (Points): {n_points}, D (Dimensions): {n_dims}, ITERS: {max_iterations}")
 
     # 1. Generate an initial, standard Latin Hypercube Design (LHD)
@@ -109,7 +109,7 @@ def generate_maxpro_lhd_greedy(
     end_time = time.time()
     true_maxpro_value = calculate_true_maxpro(best_metric, n_points, n_dims)
 
-    print(f"--- Greedy Optimization Complete ---")
+    print("--- Greedy Optimization Complete ---")
     print(f"Time elapsed: {end_time - start_time:.2f} seconds")
     print(f"Final MaxPro Sum Metric: {best_metric:,.4f}")
     print(f"True MaxPro Criterion (psi(D)): {true_maxpro_value:.6f}")
@@ -137,7 +137,7 @@ def optimize_maxpro_sa(
         The optimized design matrix (n x d) on the unit hypercube [0, 1]^d.
     """
     n_points, n_dims = initial_design.shape
-    print(f"\n--- Starting Simulated Annealing Optimization ---")
+    print("\n--- Starting Simulated Annealing Optimization ---")
     print(f"N (Points): {n_points}, D (Dimensions): {n_dims}, ITERS: {max_iterations}")
     print(f"Initial Temp: {initial_temp}, Cooling Rate: {cooling_rate}")
 
@@ -201,7 +201,7 @@ def optimize_maxpro_sa(
     end_time = time.time()
     true_maxpro_value = calculate_true_maxpro(best_metric, n_points, n_dims)
 
-    print(f"--- SA Optimization Complete ---")
+    print("--- SA Optimization Complete ---")
     print(f"Time elapsed: {end_time - start_time:.2f} seconds")
     print(f"Final MaxPro Sum Metric: {best_metric:,.4f}")
     print(f"True MaxPro Criterion (psi(D)): {true_maxpro_value:.6f}")
