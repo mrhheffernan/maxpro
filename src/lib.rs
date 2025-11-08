@@ -247,7 +247,7 @@ pub mod maximin_utils {
         let n: usize = design.len();
         let mut min_distance: f64 = f64::INFINITY;
         for i in 0..n {
-            for j in (i+1)..n {
+            for j in (i + 1)..n {
                 let distance: f64 = calculate_l2_distance(&design[i], &design[j]);
                 if distance < min_distance {
                     min_distance = distance
