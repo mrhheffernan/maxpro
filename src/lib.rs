@@ -212,10 +212,10 @@ pub mod maxpro_utils {
     #[pyfunction(name = "build_maxpro_lhd")]
     pub fn py_build_maxpro_lhd(
         n_samples: usize,
-        n_iterations: usize,
         n_dim: usize,
+        n_iterations: usize,
     ) -> Vec<Vec<f64>> {
-        build_maxpro_lhd(n_samples, n_iterations, n_dim)
+        build_maxpro_lhd(n_samples, n_dim, n_iterations)
     }
 
     #[test]
@@ -290,10 +290,10 @@ pub mod maximin_utils {
     #[pyfunction(name = "build_maximin_lhd")]
     pub fn py_build_maximin_lhd(
         n_samples: usize,
-        n_iterations: usize,
         n_dim: usize,
+        n_iterations: usize,
     ) -> Vec<Vec<f64>> {
-        build_maximin_lhd(n_samples, n_iterations, n_dim)
+        build_maximin_lhd(n_samples, n_dim, n_iterations)
     }
 }
 
