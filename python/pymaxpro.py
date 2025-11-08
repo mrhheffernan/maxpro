@@ -1,8 +1,9 @@
-import numpy as np
-from scipy.stats import qmc
+import math
 import random
 import time
-import math
+
+import numpy as np
+from scipy.stats import qmc
 
 
 def maxpro_criterion(design: np.ndarray) -> float:
