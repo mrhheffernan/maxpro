@@ -306,6 +306,19 @@ pub mod maximin_utils {
         best_lhd_metric_pair.0 // only return the lhd, not the metric
     }
 
+    #[test]
+    fn test_maximin_criterion() {
+        let n_iterations: usize = 10;
+        let n_samples: usize = 100;
+        let n_dim: usize = 5;
+        for _i in 0..n_iterations {
+            let lhd = generate_lhd(n_samples, n_dim);
+            let maximin_metric: f64 = maximin_criterion(&lhd);
+            assert!(maximin_metric >= 0.0);
+            assert!(maximin_metric < f64::INFINITY)
+        }
+    }
+
     #[cfg(feature = "pyo3-bindings")]
     #[pyfunction(name = "maximin_criterion")]
     pub fn py_maximin_criterion(design: Vec<Vec<f64>>) -> f64 {
