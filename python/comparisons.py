@@ -1,7 +1,10 @@
-import maxpro
-import numpy as np
 import time
+
+import numpy as np
+import pyDOE3
 import pymaxpro
+
+import maxpro
 
 
 def calculate_pymaxpro_criterion(maxpro_lhd: list[list[float]]) -> float:
@@ -28,7 +31,7 @@ def test_parity():
             assert np.isclose(rust_criterion, python_criterion)
 
 
-def benchmark_time():
+def benchmark_time_maxpro():
     """
     Benchmark rust vs. python implementation for time.
     """
@@ -52,12 +55,39 @@ def benchmark_time():
     print(f"Python / Rust ratio: {python_timer / rust_timer}")
 
 
+def benchmark_time_maximin():
+    n_dim = 5
+    n_samples = 100
+    n_iterations = 1000
+
+    time_rust_start = time.time()
+    maxpro_lhd = maxpro.build_maximin_lhd(n_samples, n_dim, n_iterations)
+    time_rust_end = time.time()
+
+    time_python_start = time.time()
+    pyDOE3_lhd = pyDOE3.lhs(n_dim, n_samples, "maximin", n_iterations)
+    time_python_end = time.time()
+
+    maxpro_maximin = maxpro.maximin_criterion(maxpro_lhd)
+    pyDOE3_maximin = maxpro.maximin_criterion(pyDOE3_lhd.tolist())
+
+    rust_timer = time_rust_end - time_rust_start
+    python_timer = time_python_end - time_python_start
+
+    print(f"Rust criterion {maxpro_maximin} in {rust_timer} s")
+    print(f"Python criterion {pyDOE3_maximin} in {python_timer} s")
+    print(f"Python/Rust ratio: {python_timer/rust_timer}")
+
+
 def main():
     print("Checking parity")
     test_parity()
 
     print("Benchmarking time between Python and Rust")
-    benchmark_time()
+    benchmark_time_maxpro()
+
+    print("Benchmarking Maximin time against reference implementation")
+    benchmark_time_maximin()
 
 
 if __name__ == "__main__":
