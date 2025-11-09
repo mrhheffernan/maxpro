@@ -189,13 +189,16 @@ pub mod maxpro_utils {
     }
 
     pub fn build_maxpro_lhd(n_samples: usize, n_dim: usize, n_iterations: usize) -> Vec<Vec<f64>> {
-        let mut best_metric = f64::INFINITY;
-        let mut best_lhd: Vec<Vec<f64>> = vec![vec![0.0; n_dim]; n_samples];
-        for _i in 0..n_iterations {
+        let mut best_lhd: Vec<Vec<f64>> = generate_lhd(n_samples, n_dim);
+        if n_iterations < 2 {
+            return best_lhd;
+        }
+        let mut best_metric = maxpro_sum(&best_lhd);
+        for _i in 1..n_iterations {
             let lhd: Vec<Vec<f64>> = generate_lhd(n_samples, n_dim);
             let maxpro_metric: f64 = maxpro_sum(&lhd);
             if maxpro_metric < best_metric {
-                best_lhd = lhd.clone();
+                best_lhd = lhd;
                 best_metric = maxpro_metric;
             }
         }
@@ -267,13 +270,16 @@ pub mod maximin_utils {
     }
 
     pub fn build_maximin_lhd(n_samples: usize, n_dim: usize, n_iterations: usize) -> Vec<Vec<f64>> {
-        let mut best_metric = 0.0;
-        let mut best_lhd: Vec<Vec<f64>> = vec![vec![0.0; n_dim]; n_samples];
-        for _i in 0..n_iterations {
+        let mut best_lhd: Vec<Vec<f64>> = generate_lhd(n_samples, n_dim);
+        if n_iterations < 2 {
+            return best_lhd;
+        }
+        let mut best_metric: f64 = maximin_criterion(&best_lhd);
+        for _i in 1..n_iterations {
             let lhd: Vec<Vec<f64>> = generate_lhd(n_samples, n_dim);
             let metric: f64 = maximin_criterion(&lhd);
             if metric > best_metric {
-                best_lhd = lhd.clone();
+                best_lhd = lhd;
                 best_metric = metric;
             }
         }
