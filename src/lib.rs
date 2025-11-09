@@ -69,6 +69,10 @@ pub mod lhd {
     }
 
     pub fn generate_lhd(n_samples: usize, n_dim: usize) -> Vec<Vec<f64>> {
+        /*
+        Generates an LHD by taking in a number of samples and a number of dimensions
+        (parameters). This then creates a non-centered latin hypercube design.
+         */
         // initialize empty lhd
         // TODO: Make this seedable
         let mut rng: ThreadRng = rand::rng();
@@ -190,6 +194,7 @@ pub mod maxpro_utils {
     }
 
     pub fn build_maxpro_lhd(n_samples: usize, n_dim: usize, n_iterations: usize) -> Vec<Vec<f64>> {
+        /* Using many iterations, choose the best LHD according to the MaxPro metric */
         if n_iterations < 2 {
             return generate_lhd(n_samples, n_dim);
         }
@@ -251,6 +256,7 @@ pub mod maximin_utils {
     use pyo3::prelude::*;
     use rayon::prelude::*;
     fn calculate_l2_distance(point_a: &Vec<f64>, point_b: &Vec<f64>) -> f64 {
+        /* Calculate the L2 distance between two points */
         assert_eq!(point_a.len(), point_b.len());
         // Iterator below is equivalent to this less idiomatic approach.
         // let mut distance: f64 = 0.0;
@@ -267,6 +273,7 @@ pub mod maximin_utils {
     }
 
     fn maximin_criterion(design: &Vec<Vec<f64>>) -> f64 {
+        /* Calculate the minimum pairwise distance between points, to be maximized. */
         let n: usize = design.len();
         let mut min_distance: f64 = f64::INFINITY;
         for i in 0..n {
@@ -281,6 +288,7 @@ pub mod maximin_utils {
     }
 
     pub fn build_maximin_lhd(n_samples: usize, n_dim: usize, n_iterations: usize) -> Vec<Vec<f64>> {
+        /* Using many iterations, select a LHD that maximizes the minimum pairwise distance between points. */
         if n_iterations < 2 {
             return generate_lhd(n_samples, n_dim);
         }
