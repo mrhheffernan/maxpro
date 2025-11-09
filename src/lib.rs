@@ -258,7 +258,7 @@ pub mod maximin_utils {
     }
 
     /// Calculate the minimum pairwise distance between points, to be maximized
-    fn maximin_criterion(design: &Vec<Vec<f64>>) -> f64 {
+    pub fn maximin_criterion(design: &Vec<Vec<f64>>) -> f64 {
         let n: usize = design.len();
         let mut min_distance: f64 = f64::INFINITY;
         for i in 0..n {

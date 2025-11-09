@@ -59,18 +59,23 @@ def benchmark_time_maximin():
     n_dim = 5
     n_samples = 100
     n_iterations = 1000
+
     time_rust_start = time.time()
-    maxpro.build_maximin_lhd(n_samples, n_dim, n_iterations)
+    maxpro_lhd = maxpro.build_maximin_lhd(n_samples, n_dim, n_iterations)
     time_rust_end = time.time()
+
     time_python_start = time.time()
-    pyDOE3.lhs(n_dim, n_samples, "maximin", n_iterations)
+    pyDOE3_lhd = pyDOE3.lhs(n_dim, n_samples, "maximin", n_iterations)
     time_python_end = time.time()
+
+    maxpro_maximin = maxpro.maximin_criterion(maxpro_lhd)
+    pyDOE3_maximin = maxpro.maximin_criterion(pyDOE3_lhd.tolist())
 
     rust_timer = time_rust_end - time_rust_start
     python_timer = time_python_end - time_python_start
 
-    print(f"Rust calculation time: {rust_timer}")
-    print(f"Python calculation time: {python_timer}")
+    print(f"Rust criterion {maxpro_maximin} in {rust_timer} s")
+    print(f"Python criterion {pyDOE3_maximin} in {python_timer} s")
     print(f"Python/Rust ratio: {python_timer/rust_timer}")
 
 
