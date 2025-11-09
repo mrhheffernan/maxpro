@@ -127,6 +127,7 @@ pub mod maxpro_utils {
     use crate::lhd::generate_lhd;
     #[cfg(feature = "pyo3-bindings")]
     use pyo3::prelude::*;
+    use rayon::prelude::*;
     fn maxpro_sum(design: &Vec<Vec<f64>>) -> f64 {
         /*
         Calculates the internal sum term of the MaxPro criterion (psi(D)).
@@ -189,20 +190,29 @@ pub mod maxpro_utils {
     }
 
     pub fn build_maxpro_lhd(n_samples: usize, n_dim: usize, n_iterations: usize) -> Vec<Vec<f64>> {
-        let mut best_lhd: Vec<Vec<f64>> = generate_lhd(n_samples, n_dim);
         if n_iterations < 2 {
-            return best_lhd;
+            return generate_lhd(n_samples, n_dim);
         }
-        let mut best_metric = maxpro_sum(&best_lhd);
-        for _i in 1..n_iterations {
-            let lhd: Vec<Vec<f64>> = generate_lhd(n_samples, n_dim);
-            let maxpro_metric: f64 = maxpro_sum(&lhd);
-            if maxpro_metric < best_metric {
-                best_lhd = lhd;
-                best_metric = maxpro_metric;
-            }
-        }
-        best_lhd
+        let best_lhd_metric_pair: (Vec<Vec<f64>>, f64) = (0..n_iterations)
+            .into_par_iter()
+            .map(|_| {
+                // Generate lhd, metric pairs in parallel via rayon's into_par_iter
+                let lhd: Vec<Vec<f64>> = generate_lhd(n_samples, n_dim);
+                let metric = maxpro_sum(&lhd);
+                (lhd, metric)
+            })
+            .reduce(
+                || (Vec::new(), f64::INFINITY), // Starting value
+                // Iterate through at the op stage to find the lowest of any two pairs of comparison
+                |(lhd1, metric1), (lhd2, metric2)| {
+                    if metric1 < metric2 {
+                        (lhd1, metric1)
+                    } else {
+                        (lhd2, metric2)
+                    }
+                },
+            );
+        best_lhd_metric_pair.0 // only return the lhd, not the metric
     }
 
     #[cfg(feature = "pyo3-bindings")]
@@ -239,6 +249,7 @@ pub mod maximin_utils {
     use crate::lhd::generate_lhd;
     #[cfg(feature = "pyo3-bindings")]
     use pyo3::prelude::*;
+    use rayon::prelude::*;
     fn calculate_l2_distance(point_a: &Vec<f64>, point_b: &Vec<f64>) -> f64 {
         assert_eq!(point_a.len(), point_b.len());
         // Iterator below is equivalent to this less idiomatic approach.
@@ -270,20 +281,29 @@ pub mod maximin_utils {
     }
 
     pub fn build_maximin_lhd(n_samples: usize, n_dim: usize, n_iterations: usize) -> Vec<Vec<f64>> {
-        let mut best_lhd: Vec<Vec<f64>> = generate_lhd(n_samples, n_dim);
         if n_iterations < 2 {
-            return best_lhd;
+            return generate_lhd(n_samples, n_dim);
         }
-        let mut best_metric: f64 = maximin_criterion(&best_lhd);
-        for _i in 1..n_iterations {
-            let lhd: Vec<Vec<f64>> = generate_lhd(n_samples, n_dim);
-            let metric: f64 = maximin_criterion(&lhd);
-            if metric > best_metric {
-                best_lhd = lhd;
-                best_metric = metric;
-            }
-        }
-        best_lhd
+        let best_lhd_metric_pair: (Vec<Vec<f64>>, f64) = (0..n_iterations)
+            .into_par_iter()
+            .map(|_| {
+                // Generate lhd, metric pairs in parallel via rayon's into_par_iter
+                let lhd: Vec<Vec<f64>> = generate_lhd(n_samples, n_dim);
+                let metric = maximin_criterion(&lhd);
+                (lhd, metric)
+            })
+            .reduce(
+                || (Vec::new(), f64::NEG_INFINITY), // Starting value
+                // Iterate through at the op stage to find the highest of any two pairs of comparison
+                |(lhd1, metric1), (lhd2, metric2)| {
+                    if metric1 > metric2 {
+                        (lhd1, metric1)
+                    } else {
+                        (lhd2, metric2)
+                    }
+                },
+            );
+        best_lhd_metric_pair.0 // only return the lhd, not the metric
     }
 
     #[cfg(feature = "pyo3-bindings")]
