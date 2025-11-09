@@ -68,11 +68,9 @@ pub mod lhd {
         Ok(())
     }
 
+    /// Generates an LHD by taking in a number of samples and a number of dimensions
+    /// (parameters). This then creates a non-centered latin hypercube design.
     pub fn generate_lhd(n_samples: usize, n_dim: usize) -> Vec<Vec<f64>> {
-        /*
-        Generates an LHD by taking in a number of samples and a number of dimensions
-        (parameters). This then creates a non-centered latin hypercube design.
-         */
         // initialize empty lhd
         // TODO: Make this seedable
         let mut rng: ThreadRng = rand::rng();
@@ -98,11 +96,10 @@ pub mod lhd {
     }
 
     #[test]
+    /// Makes a simple test of a latin hypercube checking that,
+    /// for any interval in any dimension, there should be only one sample.
     fn test_generate_lhd() {
-        /*
-        Makes a simple test of a latin hypercube checking that,
-        for any interval in any dimension, there should be only one sample.
-        */
+        
         let n_samples: usize = 100;
         let n_dim: usize = 4;
         let design = generate_lhd(n_samples, n_dim);
@@ -132,22 +129,12 @@ pub mod maxpro_utils {
     #[cfg(feature = "pyo3-bindings")]
     use pyo3::prelude::*;
     use rayon::prelude::*;
+
+    /// Calculates the internal sum term of the MaxPro criterion (psi(D)).
+    /// This sum is the term that is directly minimized in the optimization
+    /// process.
+    /// The minimized term is: sum_{i<j} [ 1 / product_{l=1}^{d} (x_il - x_jl)^2 ]
     fn maxpro_sum(design: &Vec<Vec<f64>>) -> f64 {
-        /*
-        Calculates the internal sum term of the MaxPro criterion (psi(D)).
-        This sum is the term that is directly minimized in the optimization
-        process.
-
-        The minimized term is: sum_{i<j} [ 1 / product_{l=1}^{d} (x_il - x_jl)^2 ]
-
-        Args:
-            design: An Vec<Vec<f64>> (n x d) representing the design points,
-                    normalized to the unit hypercube [0, 1]^d.
-
-        Returns:
-            The value of the internal sum (the MaxPro Sum Metric).
-        */
-
         let n: usize = design.len();
         if n < 2 {
             return 0.0;
@@ -181,8 +168,9 @@ pub mod maxpro_utils {
         inverse_product_sum
     }
 
+    /// Calculates the full, complete MaxPro criterion 
     pub fn maxpro_criterion(design: &Vec<Vec<f64>>) -> f64 {
-        /* Calculates the full, complete MaxPro criterion */
+        
         let n: usize = design.len();
         if n < 2 {
             return 0.0;
@@ -193,8 +181,9 @@ pub mod maxpro_utils {
         (inverse_product_sum / n_pairs).powf(1.0 / d as f64)
     }
 
+    /// Using many iterations, choose the best LHD according to the MaxPro metric
     pub fn build_maxpro_lhd(n_samples: usize, n_dim: usize, n_iterations: usize) -> Vec<Vec<f64>> {
-        /* Using many iterations, choose the best LHD according to the MaxPro metric */
+        
         if n_iterations < 2 {
             return generate_lhd(n_samples, n_dim);
         }
@@ -255,8 +244,8 @@ pub mod maximin_utils {
     #[cfg(feature = "pyo3-bindings")]
     use pyo3::prelude::*;
     use rayon::prelude::*;
+    /// Calculate the L2 distance between two points 
     fn calculate_l2_distance(point_a: &Vec<f64>, point_b: &Vec<f64>) -> f64 {
-        /* Calculate the L2 distance between two points */
         assert_eq!(point_a.len(), point_b.len());
         // Iterator below is equivalent to this less idiomatic approach.
         // let mut distance: f64 = 0.0;
@@ -272,8 +261,8 @@ pub mod maximin_utils {
             .sqrt()
     }
 
+    /// Calculate the minimum pairwise distance between points, to be maximized
     fn maximin_criterion(design: &Vec<Vec<f64>>) -> f64 {
-        /* Calculate the minimum pairwise distance between points, to be maximized. */
         let n: usize = design.len();
         let mut min_distance: f64 = f64::INFINITY;
         for i in 0..n {
@@ -287,8 +276,8 @@ pub mod maximin_utils {
         min_distance
     }
 
+    /// Using many iterations, select a LHD that maximizes the minimum pairwise distance between points.
     pub fn build_maximin_lhd(n_samples: usize, n_dim: usize, n_iterations: usize) -> Vec<Vec<f64>> {
-        /* Using many iterations, select a LHD that maximizes the minimum pairwise distance between points. */
         if n_iterations < 2 {
             return generate_lhd(n_samples, n_dim);
         }
