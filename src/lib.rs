@@ -183,10 +183,6 @@ pub mod maxpro_utils {
 
     /// Using many iterations, choose the best LHD according to the MaxPro metric
     pub fn build_maxpro_lhd(n_samples: usize, n_dim: usize, n_iterations: usize) -> Vec<Vec<f64>> {
-        
-        if n_iterations < 2 {
-            return generate_lhd(n_samples, n_dim);
-        }
         let best_lhd_metric_pair: (Vec<Vec<f64>>, f64) = (0..n_iterations)
             .into_par_iter()
             .map(|_| {
@@ -278,9 +274,6 @@ pub mod maximin_utils {
 
     /// Using many iterations, select a LHD that maximizes the minimum pairwise distance between points.
     pub fn build_maximin_lhd(n_samples: usize, n_dim: usize, n_iterations: usize) -> Vec<Vec<f64>> {
-        if n_iterations < 2 {
-            return generate_lhd(n_samples, n_dim);
-        }
         let best_lhd_metric_pair: (Vec<Vec<f64>>, f64) = (0..n_iterations)
             .into_par_iter()
             .map(|_| {
