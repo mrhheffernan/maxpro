@@ -358,6 +358,10 @@ pub mod anneal {
         let mut best_design = design.clone();
         let mut best_metric = metric(design);
 
+        // Retain global best so annealing can never make a result worse
+        let mut global_best_design = design.clone();
+        let mut global_best_metric = best_metric.clone();
+
         for _it in 0..n_iterations {
             // Modify the design
             let mut annealed_design = best_design.clone();
@@ -394,11 +398,24 @@ pub mod anneal {
                 }
             }
 
+            // Ensure the global best is returned
+            if minimize {
+                if best_metric < global_best_metric {
+                    global_best_design = best_design.clone();
+                    global_best_metric = best_metric.clone();
+                }
+            } else {
+                if best_metric > global_best_metric {
+                    global_best_design = best_design.clone();
+                    global_best_metric = best_metric.clone();
+                }
+            }
+
             // Cool for the next iteration
             temp *= cooling_rate;
         }
 
-        best_design
+        global_best_design
     }
 }
 
