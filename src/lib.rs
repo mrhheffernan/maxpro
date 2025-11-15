@@ -99,7 +99,6 @@ pub mod lhd {
     /// Makes a simple test of a latin hypercube checking that,
     /// for any interval in any dimension, there should be only one sample.
     fn test_generate_lhd() {
-        
         let n_samples: usize = 100;
         let n_dim: usize = 4;
         let design = generate_lhd(n_samples, n_dim);
@@ -168,9 +167,8 @@ pub mod maxpro_utils {
         inverse_product_sum
     }
 
-    /// Calculates the full, complete MaxPro criterion 
+    /// Calculates the full, complete MaxPro criterion
     pub fn maxpro_criterion(design: &Vec<Vec<f64>>) -> f64 {
-        
         let n: usize = design.len();
         if n < 2 {
             return 0.0;
@@ -240,7 +238,7 @@ pub mod maximin_utils {
     #[cfg(feature = "pyo3-bindings")]
     use pyo3::prelude::*;
     use rayon::prelude::*;
-    /// Calculate the L2 distance between two points 
+    /// Calculate the L2 distance between two points
     fn calculate_l2_distance(point_a: &Vec<f64>, point_b: &Vec<f64>) -> f64 {
         assert_eq!(point_a.len(), point_b.len());
         // Iterator below is equivalent to this less idiomatic approach.
@@ -326,6 +324,123 @@ pub mod maximin_utils {
     }
 }
 
+pub mod anneal {
+    #[cfg(feature = "pyo3-bindings")]
+    use crate::maximin_utils::maximin_criterion;
+    #[cfg(feature = "pyo3-bindings")]
+    use crate::maxpro_utils::maxpro_criterion;
+    #[cfg(feature = "pyo3-bindings")]
+    use pyo3::prelude::*;
+    use rand::Rng;
+    use rand::prelude::ThreadRng;
+
+    /// Simulated annealing for improving (maximizing or minimizing) a given metric.
+    pub fn anneal_lhd<F>(
+        design: &Vec<Vec<f64>>,
+        n_iterations: usize,
+        initial_temp: f64,
+        cooling_rate: f64,
+        metric: F,
+        minimize: bool,
+    ) -> Vec<Vec<f64>>
+    where
+        F: Fn(&Vec<Vec<f64>>) -> f64,
+    {
+        if design.is_empty() {
+            return design.to_vec();
+        }
+        // Set max step size as +/- 1% of the size of the design interval
+        let n_samples: usize = design.len();
+        let n_dim: usize = design[0].len();
+        let step_size: f64 = 0.01 / n_samples as f64;
+        let mut temp = initial_temp;
+        // TODO: Make this seedable
+        let mut rng: ThreadRng = rand::rng();
+
+        let mut best_design = design.clone();
+        let mut best_metric = metric(design);
+
+        // Retain global best so annealing can never make a result worse
+        let mut global_best_design = design.clone();
+        let mut global_best_metric = best_metric;
+
+        for _it in 0..n_iterations {
+            // Modify the design
+            let mut annealed_design = best_design.clone();
+            for i in 0..n_samples {
+                for j in 0..n_dim {
+                    // Perturb the point, ensuring the point remains on the unit interval.
+                    annealed_design[i][j] = (annealed_design[i][j]
+                        + rng.random_range(-step_size..step_size))
+                    .clamp(0.0, 1.0)
+                }
+            }
+
+            // Calculate new metric
+            let new_metric = metric(&annealed_design);
+            let mut metric_diff = new_metric - best_metric;
+            if !minimize {
+                // Invert for maximization
+                metric_diff *= -1.0
+            }
+
+            // Metropolis probability of acceptance
+            let p_acceptance: f64 = if metric_diff < 0.0 {
+                1.0
+            } else {
+                (-metric_diff / temp).exp()
+            };
+
+            // Metropolis acceptance
+            if rng.random_range(0.0..1.0) < p_acceptance {
+                best_design = annealed_design;
+                best_metric = new_metric;
+            } 
+
+            // Ensure the global best is returned
+            if (minimize && best_metric < global_best_metric)
+                || (!minimize && best_metric > global_best_metric)
+            {
+                global_best_design = best_design.clone();
+                global_best_metric = best_metric;
+            }
+
+            // Cool for the next iteration
+            temp *= cooling_rate;
+        }
+
+        global_best_design
+    }
+
+    #[cfg(feature = "pyo3-bindings")]
+    #[pyfunction(name = "anneal_lhd")]
+    pub fn py_anneal_lhd(
+        design: Vec<Vec<f64>>,
+        n_iterations: usize,
+        initial_temp: f64,
+        cooling_rate: f64,
+        metric_name: String,
+        minimize: bool,
+    ) -> Vec<Vec<f64>> {
+        let metric = match metric_name.to_lowercase().as_str() {
+            "maxpro" => maxpro_criterion,
+            "maximin" => maximin_criterion,
+            _ => panic!(
+                "Unknown metric: '{}'. Available metrics are 'maxpro' and 'maximin'.",
+                metric_name
+            ),
+        };
+        anneal_lhd(
+            &design,
+            n_iterations,
+            initial_temp,
+            cooling_rate,
+            metric,
+            minimize,
+        )
+    }
+}
+
 // Python module definition
 #[cfg(feature = "pyo3-bindings")]
 #[pymodule]
@@ -335,5 +450,6 @@ fn maxpro(_py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(maxpro_utils::py_maxpro_criterion, m)?)?;
     m.add_function(wrap_pyfunction!(maximin_utils::py_build_maximin_lhd, m)?)?;
     m.add_function(wrap_pyfunction!(maximin_utils::py_maximin_criterion, m)?)?;
+    m.add_function(wrap_pyfunction!(anneal::py_anneal_lhd, m)?)?;
     Ok(())
 }
