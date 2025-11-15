@@ -41,8 +41,10 @@ def benchmark_time_maxpro():
 
     time_rust_start = time.time()
     maxpro_lhd = maxpro.build_maxpro_lhd(n_samples, n_dim, n_iterations)
+    maxpro_lhd = maxpro.anneal_lhd(maxpro_lhd, 10000, 1.0, 0.99, "maxpro", True)
     maxpro_criterion = maxpro.maxpro_criterion(maxpro_lhd)
     time_rust_end = time.time()
+
     pymaxpro_lhd = pymaxpro.generate_maxpro_lhd_greedy(n_samples, n_dim, n_iterations)
     pymaxpro_criterion = calculate_pymaxpro_criterion(pymaxpro_lhd)
     time_py_end = time.time()
@@ -61,14 +63,15 @@ def benchmark_time_maximin():
     n_iterations = 1000
 
     time_rust_start = time.time()
-    maxpro_lhd = maxpro.build_maximin_lhd(n_samples, n_dim, n_iterations)
+    maximin_lhd = maxpro.build_maximin_lhd(n_samples, n_dim, n_iterations)
+    maximin_lhd = maxpro.anneal_lhd(maximin_lhd, 10000, 1.0, 0.99, "maximin", False)
     time_rust_end = time.time()
 
     time_python_start = time.time()
     pyDOE3_lhd = pyDOE3.lhs(n_dim, n_samples, "maximin", n_iterations)
     time_python_end = time.time()
 
-    maxpro_maximin = maxpro.maximin_criterion(maxpro_lhd)
+    maxpro_maximin = maxpro.maximin_criterion(maximin_lhd)
     pyDOE3_maximin = maxpro.maximin_criterion(pyDOE3_lhd.tolist())
 
     rust_timer = time_rust_end - time_rust_start

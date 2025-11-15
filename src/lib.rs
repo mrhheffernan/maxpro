@@ -326,6 +326,10 @@ pub mod maximin_utils {
 
 pub mod anneal {
     #[cfg(feature = "pyo3-bindings")]
+    use crate::maximin_utils::maximin_criterion;
+    #[cfg(feature = "pyo3-bindings")]
+    use crate::maxpro_utils::maxpro_criterion;
+    #[cfg(feature = "pyo3-bindings")]
     use pyo3::prelude::*;
     use rand::Rng;
     use rand::prelude::ThreadRng;
@@ -368,15 +372,14 @@ pub mod anneal {
                     // Perturb the point, ensuring the point remains on the unit interval.
                     annealed_design[i][j] = (annealed_design[i][j]
                         + rng.random_range(-step_size..step_size))
-                    .max(0.0)
-                    .min(1.0)
+                    .clamp(0.0, 1.0)
                 }
             }
 
             // Calculate new metric
             let new_metric = metric(&annealed_design);
             let mut metric_diff = new_metric - best_metric;
-            if minimize == false {
+            if !minimize {
                 // Invert for maximization
                 metric_diff *= -1.0
             }
@@ -419,6 +422,33 @@ pub mod anneal {
 
         global_best_design
     }
+
+    #[cfg(feature = "pyo3-bindings")]
+    #[pyfunction(name = "anneal_lhd")]
+    pub fn py_anneal_lhd(
+        design: Vec<Vec<f64>>,
+        n_iterations: usize,
+        initial_temp: f64,
+        cooling_rate: f64,
+        metric_name: String,
+        minimize: bool,
+    ) -> Vec<Vec<f64>> {
+        let metric = if metric_name == "maxpro" {
+            maxpro_criterion
+        } else if metric_name == "maximin" {
+            maximin_criterion
+        } else {
+            maxpro_criterion
+        };
+        anneal_lhd(
+            &design,
+            n_iterations,
+            initial_temp,
+            cooling_rate,
+            metric,
+            minimize,
+        )
+    }
 }
 
 // Python module definition
@@ -430,5 +460,6 @@ fn maxpro(_py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(maxpro_utils::py_maxpro_criterion, m)?)?;
     m.add_function(wrap_pyfunction!(maximin_utils::py_build_maximin_lhd, m)?)?;
     m.add_function(wrap_pyfunction!(maximin_utils::py_maximin_criterion, m)?)?;
+    m.add_function(wrap_pyfunction!(anneal::py_anneal_lhd, m)?)?;
     Ok(())
 }
