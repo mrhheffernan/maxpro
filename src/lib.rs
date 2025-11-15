@@ -347,10 +347,10 @@ pub mod anneal {
         if design.is_empty() {
             return design.to_vec();
         }
-        // Set max step size as +/- half of the size of the design interval
+        // Set max step size as +/- 10% of the size of the design interval
         let n_samples: usize = design.len();
         let n_dim: usize = design[0].len();
-        let step_size: f64 = 0.5 / n_samples as f64;
+        let step_size: f64 = 0.01 / n_samples as f64;
         let mut temp = initial_temp;
         // TODO: Make this seedable
         let mut rng: ThreadRng = rand::rng();

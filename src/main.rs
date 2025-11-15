@@ -39,14 +39,14 @@ fn main() {
         Metrics::MaxPro => build_maxpro_lhd(n_samples, n_dims, n_iterations),
         Metrics::MaxiMin => build_maximin_lhd(n_samples, n_dims, n_iterations),
     };
-    println!("{:?}", lhd);
+    
     let metric_value = match metric {
         Metrics::MaxPro => maxpro_criterion(&lhd),
         Metrics::MaxiMin => maximin_criterion(&lhd),
     };
     // all below are dummy values for now
     let n_iterations: usize = 100000;
-    let initial_temp: f64 = 2.0;
+    let initial_temp: f64 = 1.0;
     let cooling_rate: f64 = 0.999;
     let annealed_design = match metric {
         Metrics::MaxPro => anneal_lhd(
@@ -72,6 +72,7 @@ fn main() {
     };
 
     // Outputs
+    println!("{:?}", annealed_design);
     println!("Original metric: {metric_value}");
     println!("Annealed metric: {annealed_metric}");
     if plot {
