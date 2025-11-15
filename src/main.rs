@@ -25,11 +25,11 @@ struct Args {
     output_path: String,
     #[arg(short, long, value_enum, default_value_t = Metrics::MaxPro)]
     metric: Metrics,
-    #[arg(short, long, default_value_t = 100000)]
+    #[arg(long, default_value_t = 100000)]
     anneal_iterations: usize,
-    #[arg(short, long, default_value_t = 0.99)]
+    #[arg(long, default_value_t = 0.99)]
     anneal_cooling: f64,
-    #[arg(short, long, default_value_t = 1.0)]
+    #[arg(long, default_value_t = 1.0)]
     anneal_t: f64,
 }
 
