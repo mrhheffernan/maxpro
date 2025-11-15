@@ -1,7 +1,8 @@
 use clap::{Parser, ValueEnum};
+use maxpro::anneal::anneal_maxprolhd;
 use maxpro::lhd::plot_x_vs_y;
 use maxpro::maximin_utils::build_maximin_lhd;
-use maxpro::maxpro_utils::build_maxpro_lhd;
+use maxpro::maxpro_utils::{build_maxpro_lhd, maxpro_criterion};
 
 #[derive(ValueEnum, Clone, Debug)]
 enum Metrics {
@@ -38,9 +39,19 @@ fn main() {
         Metrics::MaxPro => build_maxpro_lhd(n_samples, n_dims, n_iterations),
         Metrics::MaxiMin => build_maximin_lhd(n_samples, n_dims, n_iterations),
     };
+    println!("{:?}", lhd);
+    let metric_value = maxpro_criterion(&lhd);
+    // all below are dummy values for now
+    let n_iterations: usize = 100000;
+    let initial_temp: f64 = 20.0;
+    let cooling_rate: f64 = 0.99;
+    let annealed_design = anneal_maxprolhd(&lhd, n_iterations, initial_temp, cooling_rate);
+    let annealed_metric = maxpro_criterion(&annealed_design);
 
+    // Outputs
+    println!("Original metric: {metric_value}");
+    println!("Annealed metric: {annealed_metric}");
     if plot {
-        let _ = plot_x_vs_y(&lhd, std::path::Path::new(&args.output_path));
+        let _ = plot_x_vs_y(&annealed_design, std::path::Path::new(&args.output_path));
     }
-    println!("{:?}", lhd)
 }

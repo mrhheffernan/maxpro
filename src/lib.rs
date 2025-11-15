@@ -99,7 +99,6 @@ pub mod lhd {
     /// Makes a simple test of a latin hypercube checking that,
     /// for any interval in any dimension, there should be only one sample.
     fn test_generate_lhd() {
-        
         let n_samples: usize = 100;
         let n_dim: usize = 4;
         let design = generate_lhd(n_samples, n_dim);
@@ -168,9 +167,8 @@ pub mod maxpro_utils {
         inverse_product_sum
     }
 
-    /// Calculates the full, complete MaxPro criterion 
+    /// Calculates the full, complete MaxPro criterion
     pub fn maxpro_criterion(design: &Vec<Vec<f64>>) -> f64 {
-        
         let n: usize = design.len();
         if n < 2 {
             return 0.0;
@@ -240,7 +238,7 @@ pub mod maximin_utils {
     #[cfg(feature = "pyo3-bindings")]
     use pyo3::prelude::*;
     use rayon::prelude::*;
-    /// Calculate the L2 distance between two points 
+    /// Calculate the L2 distance between two points
     fn calculate_l2_distance(point_a: &Vec<f64>, point_b: &Vec<f64>) -> f64 {
         assert_eq!(point_a.len(), point_b.len());
         // Iterator below is equivalent to this less idiomatic approach.
@@ -323,6 +321,71 @@ pub mod maximin_utils {
         n_iterations: usize,
     ) -> Vec<Vec<f64>> {
         build_maximin_lhd(n_samples, n_dim, n_iterations)
+    }
+}
+
+pub mod anneal {
+    use crate::maxpro_utils::maxpro_criterion;
+    #[cfg(feature = "pyo3-bindings")]
+    use pyo3::prelude::*;
+    use rand::Rng;
+    use rand::prelude::ThreadRng;
+    use rayon::prelude::*;
+
+    // TODO: Follow up by using a closure and making the metric an input with a minimize/maximize argument as well
+    /// Simulated annealing for improving the maximum projection criterion.
+    pub fn anneal_maxprolhd(
+        design: &Vec<Vec<f64>>,
+        n_iterations: usize,
+        initial_temp: f64,
+        cooling_rate: f64,
+    ) -> Vec<Vec<f64>> {
+        // TODO: come back and make the step size configurable
+        // Set max step size as +/- half of the size of the design interval
+        let n_samples: usize = design.len();
+        let n_dim: usize = design[0].len();
+        let step_size: f64 = 0.5 / n_samples as f64;
+        let mut temp = initial_temp;
+        // TODO: Make this seedable
+        let mut rng: ThreadRng = rand::rng();
+
+        let mut best_design = design.clone();
+        let best_metric = maxpro_criterion(design);
+
+        for _it in 0..n_iterations {
+            let mut annealed_design = best_design.clone();
+            // TODO: Come back and make this an iter/map construction
+            for i in 0..n_samples {
+                for j in 0..n_dim {
+                    annealed_design[i][j] += rng.random_range(-step_size..step_size);
+                }
+            }
+
+            let new_metric = maxpro_criterion(&annealed_design);
+            let metric_diff = new_metric - best_metric;
+
+            // Metropolis probability of acceptance
+            let p_acceptance: f64 = if metric_diff < 0.0 {
+                1.0
+            } else {
+                (-metric_diff / temp).exp()
+            };
+
+            if p_acceptance == 1.0 {
+                best_design = annealed_design;
+            } else {
+                // Metropolis step away from minima
+                let dice_roll = rng.random_range(0.0..1.0);
+                if dice_roll < p_acceptance {
+                    best_design = annealed_design;
+                }
+            }
+
+            // Cool for the next iteration
+            temp *= cooling_rate;
+        }
+
+        best_design
     }
 }
 
