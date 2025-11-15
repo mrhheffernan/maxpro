@@ -332,15 +332,21 @@ pub mod anneal {
     use rand::prelude::ThreadRng;
     use rayon::prelude::*;
 
-    // TODO: Follow up by using a closure and making the metric an input with a minimize/maximize argument as well
-    /// Simulated annealing for improving the maximum projection criterion.
-    pub fn anneal_maxprolhd(
+    /// Simulated annealing for improving (maximizing or minimizing) a given metric.
+    pub fn anneal_lhd<F>(
         design: &Vec<Vec<f64>>,
         n_iterations: usize,
         initial_temp: f64,
         cooling_rate: f64,
-    ) -> Vec<Vec<f64>> {
-        // TODO: come back and make the step size configurable
+        metric: F,
+        minimize: bool,
+    ) -> Vec<Vec<f64>>
+    where
+        F: Fn(&Vec<Vec<f64>>) -> f64,
+    {
+        if design.is_empty() {
+            return design.to_vec();
+        }
         // Set max step size as +/- half of the size of the design interval
         let n_samples: usize = design.len();
         let n_dim: usize = design[0].len();
@@ -350,19 +356,24 @@ pub mod anneal {
         let mut rng: ThreadRng = rand::rng();
 
         let mut best_design = design.clone();
-        let mut best_metric = maxpro_criterion(design);
+        let mut best_metric = metric(design);
 
         for _it in 0..n_iterations {
+            // Modify the design
             let mut annealed_design = best_design.clone();
-            // TODO: Come back and make this an iter/map construction
             for i in 0..n_samples {
                 for j in 0..n_dim {
                     annealed_design[i][j] += rng.random_range(-step_size..step_size);
                 }
             }
 
-            let new_metric = maxpro_criterion(&annealed_design);
-            let metric_diff = new_metric - best_metric;
+            // Calculate new metric
+            let new_metric = metric(&annealed_design);
+            let mut metric_diff = new_metric - best_metric;
+            if minimize == false {
+                // Invert for maximization
+                metric_diff *= -1.0
+            }
 
             // Metropolis probability of acceptance
             let p_acceptance: f64 = if metric_diff < 0.0 {
@@ -371,11 +382,11 @@ pub mod anneal {
                 (-metric_diff / temp).exp()
             };
 
+            // Metropolis acceptance
             if p_acceptance == 1.0 {
                 best_design = annealed_design;
                 best_metric = new_metric;
             } else {
-                // Metropolis step away from minima
                 let dice_roll = rng.random_range(0.0..1.0);
                 if dice_roll < p_acceptance {
                     best_design = annealed_design;
