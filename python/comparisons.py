@@ -41,7 +41,7 @@ def benchmark_time_maxpro():
 
     time_rust_start = time.time()
     maxpro_lhd = maxpro.build_maxpro_lhd(n_samples, n_dim, n_iterations)
-    maxpro_lhd = maxpro.anneal_lhd(maxpro_lhd, 10000, 1.0, 0.99, "maxpro", True)
+    maxpro_lhd = maxpro.anneal_lhd(maxpro_lhd, 1000, 1.0, 0.99, "maxpro", True)
     maxpro_criterion = maxpro.maxpro_criterion(maxpro_lhd)
     time_rust_end = time.time()
 
@@ -64,7 +64,7 @@ def benchmark_time_maximin():
 
     time_rust_start = time.time()
     maximin_lhd = maxpro.build_maximin_lhd(n_samples, n_dim, n_iterations)
-    maximin_lhd = maxpro.anneal_lhd(maximin_lhd, 10000, 1.0, 0.99, "maximin", False)
+    maximin_lhd = maxpro.anneal_lhd(maximin_lhd, 1000, 1.0, 0.99, "maximin", False)
     time_rust_end = time.time()
 
     time_python_start = time.time()
