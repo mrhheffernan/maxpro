@@ -49,33 +49,21 @@ fn main() {
         Metrics::MaxiMin => build_maximin_lhd(n_samples, n_dims, n_iterations),
     };
 
-    let metric_value = match metric {
-        Metrics::MaxPro => maxpro_criterion(&lhd),
-        Metrics::MaxiMin => maximin_criterion(&lhd),
+    let (metric_fn, minimize) = match metric {
+        Metrics::MaxPro => (maxpro_criterion as fn(&Vec<Vec<f64>>) -> f64, true),
+        Metrics::MaxiMin => (maximin_criterion as fn(&Vec<Vec<f64>>) -> f64, false),
     };
 
-    let annealed_design = match metric {
-        Metrics::MaxPro => anneal_lhd(
-            &lhd,
-            annealing_iterations,
-            annealing_t,
-            annealing_cooling,
-            |design: &Vec<Vec<f64>>| maxpro_criterion(design),
-            true,
-        ),
-        Metrics::MaxiMin => anneal_lhd(
-            &lhd,
-            annealing_iterations,
-            annealing_t,
-            annealing_cooling,
-            |design: &Vec<Vec<f64>>| maximin_criterion(design),
-            false,
-        ),
-    };
-    let annealed_metric = match metric {
-        Metrics::MaxPro => maxpro_criterion(&annealed_design),
-        Metrics::MaxiMin => maximin_criterion(&annealed_design),
-    };
+    let metric_value = metric_fn(&lhd);
+    let annealed_design = anneal_lhd(
+        &lhd,
+        annealing_iterations,
+        annealing_t,
+        annealing_cooling,
+        metric_fn,
+        minimize,
+    );
+    let annealed_metric = metric_fn(&annealed_design);
 
     // Outputs
     println!("{:?}", annealed_design);

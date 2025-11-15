@@ -362,7 +362,7 @@ pub mod anneal {
 
         // Retain global best so annealing can never make a result worse
         let mut global_best_design = design.clone();
-        let mut global_best_metric = best_metric.clone();
+        let mut global_best_metric = best_metric;
 
         for _it in 0..n_iterations {
             // Modify the design
@@ -404,16 +404,11 @@ pub mod anneal {
             }
 
             // Ensure the global best is returned
-            if minimize {
-                if best_metric < global_best_metric {
-                    global_best_design = best_design.clone();
-                    global_best_metric = best_metric.clone();
-                }
-            } else {
-                if best_metric > global_best_metric {
-                    global_best_design = best_design.clone();
-                    global_best_metric = best_metric.clone();
-                }
+            if (minimize && best_metric < global_best_metric)
+                || (!minimize && best_metric > global_best_metric)
+            {
+                global_best_design = best_design.clone();
+                global_best_metric = best_metric;
             }
 
             // Cool for the next iteration
@@ -433,12 +428,13 @@ pub mod anneal {
         metric_name: String,
         minimize: bool,
     ) -> Vec<Vec<f64>> {
-        let metric = if metric_name == "maxpro" {
-            maxpro_criterion
-        } else if metric_name == "maximin" {
-            maximin_criterion
-        } else {
-            maxpro_criterion
+        let metric = match metric_name.to_lowercase().as_str() {
+            "maxpro" => maxpro_criterion,
+            "maximin" => maximin_criterion,
+            _ => panic!(
+                "Unknown metric: '{}'. Available metrics are 'maxpro' and 'maximin'.",
+                metric_name
+            ),
         };
         anneal_lhd(
             &design,
