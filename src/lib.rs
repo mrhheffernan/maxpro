@@ -325,12 +325,10 @@ pub mod maximin_utils {
 }
 
 pub mod anneal {
-    use crate::maxpro_utils::maxpro_criterion;
     #[cfg(feature = "pyo3-bindings")]
     use pyo3::prelude::*;
     use rand::Rng;
     use rand::prelude::ThreadRng;
-    use rayon::prelude::*;
 
     /// Simulated annealing for improving (maximizing or minimizing) a given metric.
     pub fn anneal_lhd<F>(
@@ -367,7 +365,11 @@ pub mod anneal {
             let mut annealed_design = best_design.clone();
             for i in 0..n_samples {
                 for j in 0..n_dim {
-                    annealed_design[i][j] += rng.random_range(-step_size..step_size);
+                    // Perturb the point, ensuring the point remains on the unit interval.
+                    annealed_design[i][j] = (annealed_design[i][j]
+                        + rng.random_range(-step_size..step_size))
+                    .max(0.0)
+                    .min(1.0)
                 }
             }
 
