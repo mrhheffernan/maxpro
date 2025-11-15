@@ -43,8 +43,8 @@ fn main() {
     let metric_value = maxpro_criterion(&lhd);
     // all below are dummy values for now
     let n_iterations: usize = 100000;
-    let initial_temp: f64 = 20.0;
-    let cooling_rate: f64 = 0.99;
+    let initial_temp: f64 = 2.0;
+    let cooling_rate: f64 = 0.999;
     let annealed_design = anneal_maxprolhd(&lhd, n_iterations, initial_temp, cooling_rate);
     let annealed_metric = maxpro_criterion(&annealed_design);
 

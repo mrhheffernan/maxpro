@@ -350,7 +350,7 @@ pub mod anneal {
         let mut rng: ThreadRng = rand::rng();
 
         let mut best_design = design.clone();
-        let best_metric = maxpro_criterion(design);
+        let mut best_metric = maxpro_criterion(design);
 
         for _it in 0..n_iterations {
             let mut annealed_design = best_design.clone();
@@ -373,11 +373,13 @@ pub mod anneal {
 
             if p_acceptance == 1.0 {
                 best_design = annealed_design;
+                best_metric = new_metric;
             } else {
                 // Metropolis step away from minima
                 let dice_roll = rng.random_range(0.0..1.0);
                 if dice_roll < p_acceptance {
                     best_design = annealed_design;
+                    best_metric = new_metric;
                 }
             }
 
