@@ -93,7 +93,6 @@ def generate_maxpro_lhd_greedy(
 
     # 2. Optimization Loop
     for iteration in range(max_iterations):
-
         # Generate a new candidate
         candidate_design = sampler.random(n=n_points)
         candidate_metric = maxpro_criterion(candidate_design)
