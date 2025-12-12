@@ -395,7 +395,7 @@ pub mod anneal {
             if rng.random_range(0.0..1.0) < p_acceptance {
                 best_design = annealed_design;
                 best_metric = new_metric;
-            } 
+            }
 
             // Ensure the global best is returned
             if (minimize && best_metric < global_best_metric)

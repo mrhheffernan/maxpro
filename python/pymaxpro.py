@@ -1,5 +1,3 @@
-import math
-import random
 import time
 
 import numpy as np
@@ -21,7 +19,7 @@ def maxpro_criterion(design: np.ndarray) -> float:
     Returns:
         The value of the internal sum (the MaxPro Sum Metric).
     """
-    n, d = design.shape
+    n, _ = design.shape
 
     if n < 2:
         return 0.0
@@ -82,7 +80,6 @@ def generate_maxpro_lhd_greedy(
     print("--- Starting Greedy LHD Optimization ---")
     print(f"N (Points): {n_points}, D (Dimensions): {n_dims}, ITERS: {max_iterations}")
 
-    # 1. Generate an initial, standard Latin Hypercube Design (LHD)
     sampler = qmc.LatinHypercube(d=n_dims)
     best_design = sampler.random(n=n_points)
     best_metric = maxpro_criterion(best_design)
@@ -91,10 +88,8 @@ def generate_maxpro_lhd_greedy(
 
     start_time = time.time()
 
-    # 2. Optimization Loop
+    # Optimization Loop
     for iteration in range(max_iterations):
-
-        # Generate a new candidate
         candidate_design = sampler.random(n=n_points)
         candidate_metric = maxpro_criterion(candidate_design)
 
@@ -116,17 +111,3 @@ def generate_maxpro_lhd_greedy(
     print(f"True MaxPro Criterion (psi(D)): {true_maxpro_value:.6f}")
 
     return best_design
-
-
-# --- Example Usage ---
-
-if __name__ == "__main__":
-    # Define design parameters
-    N = 20  # Number of points
-    D = 4  # Number of dimensions
-    ITERS = 50000  # Optimization iterations
-
-    optimized_lhd_greedy = generate_maxpro_lhd_greedy(N, D, ITERS)
-
-    print("\n--- Results for Greedy Optimization ---")
-    print(f"Final MaxPro Sum Metric: {maxpro_criterion(optimized_lhd_greedy):,.4f}")

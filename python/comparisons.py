@@ -79,7 +79,7 @@ def benchmark_time_maximin():
 
     print(f"Rust criterion {maxpro_maximin} in {rust_timer} s")
     print(f"Python criterion {pyDOE3_maximin} in {python_timer} s")
-    print(f"Python/Rust ratio: {python_timer/rust_timer}")
+    print(f"Python/Rust ratio: {python_timer / rust_timer}")
 
 
 def main():
