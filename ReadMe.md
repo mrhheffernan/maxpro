@@ -34,5 +34,7 @@ This implementation also includes the often-less-optimal, but more standard, Max
 ## AI Policy
 This project's AI policy is that no AI-written code is included in the core Rust module or in the python bindings. AI-written code may be present in the `python/` directory but is restricted to analysis. AI code is not used for benchmarking either correctness or speed. 
 
+Gemini code review is used in development and any code suggestions must be human tested.
+
 ## Style
 Rust formatting by `cargo fmt`. Python formatting by `ruff`. `flake8` used for PEP, line length not enforced in docstrings within reason.
