@@ -32,4 +32,7 @@ This implementation also includes the often-less-optimal, but more standard, Max
 - Ordering the designs for optimal execution order
 
 ## AI Policy
-This project's AI policy is that no AI-written code is included in the core Rust module or in the python bindings. AI-written code may be present in the `python/` directory but is restricted to analysis.
+This project's AI policy is that no AI-written code is included in the core Rust module or in the python bindings. AI-written code may be present in the `python/` directory but is restricted to analysis. AI code is not used for benchmarking either correctness or speed. 
+
+## Style
+Rust formatting by `cargo fmt`. Python formatting by `ruff`. `flake8` used for PEP, line length not enforced in docstrings within reason.
