@@ -69,17 +69,16 @@ def generalized_maximin_measure(design, q):
         power_2q_distances = squared_distances**q
 
         # 2. Perform the double summation
-        # Sum only the upper triangle (i < j) to match the formula's i=1 to n-1, j=i+1 to n
-        summation = 0.0
+        # Sum only the upper triangle (i < j) to match the formula
+        triu_indices = np.triu_indices(n_points, k=1)
+        upper_triangle_distances = power_2q_distances[triu_indices]
 
-        for i in range(n_points):
-            for j in range(i + 1, n_points):
-                # Check for zero distance (degenerate case)
-                if power_2q_distances[i, j] == 0:
-                    return 0.0  # Mm_q would be 0 if points overlap
+        # Check for zero distance (degenerate case)
+        if np.any(upper_triangle_distances == 0):
+            return 0.0  # Mm_q would be 0 if points overlap
 
-                # Sum the inverse distances raised to the power 2q
-                summation += 1.0 / power_2q_distances[i, j]
+        # Sum the inverse distances raised to the power 2q
+        summation = np.sum(1.0 / upper_triangle_distances)
 
         # Apply the prefactor and store the result for this projection
         projection_sums.append(term_prefactor * summation)
