@@ -119,16 +119,16 @@ def calculate_maximin_projections(
         "maximin_metric": [],
         "generalized_maximin": [],
     }
-    for i in range(1, n_dimensions):
-        projected_design = lhd[:, : -(i + 1)].tolist()
+    for q in range(1, n_dimensions):
+        projected_design = lhd[:, : -q].tolist()
         projected_maxpro = maxpro.maxpro_criterion(projected_design)
-        projected_metrics["maxpro_metric"].append([i + 1, projected_maxpro])
+        projected_metrics["maxpro_metric"].append([q, projected_maxpro])
 
         projected_maximin = maxpro.maximin_criterion(projected_design)
-        projected_metrics["maximin_metric"].append([i + 1, projected_maximin])
+        projected_metrics["maximin_metric"].append([q, projected_maximin])
 
-        projected_genmaximin = generalized_maximin_measure(lhd, i)
-        projected_metrics["generalized_maximin"].append([i + 1, projected_genmaximin])
+        projected_genmaximin = generalized_maximin_measure(lhd, q)
+        projected_metrics["generalized_maximin"].append([q, projected_genmaximin])
 
     return projected_metrics
 
