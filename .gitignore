@@ -1,1 +1,5 @@
 /target
+.venv/
+*.png
+*.lock
+__pycache__/
