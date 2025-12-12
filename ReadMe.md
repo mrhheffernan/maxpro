@@ -22,10 +22,14 @@ This implementation also includes the often-less-optimal, but more standard, Max
 - Using `maturin develop --release --features pyo3-bindings`, can `import maxpro` and generate optimal MaxPro LHDs in Python directly.
 - Anneal a LHD to optimize its metric
 
-## Planned work for 0.1.0
+## Planned work 
+### 0.1.0
 - Add testing
 - Comparisons to R implementation for further metric, performance benchmarking and validation.
 - Crates.io and PyPI deployment
 
-## Planned work for 0.2.0
+### 0.2.0
 - Ordering the designs for optimal execution order
+
+## AI Policy
+This project's AI policy is that no AI-written code is included in the core Rust module or in the python bindings. AI-written code may be present in the `python/` directory but is restricted to analysis.

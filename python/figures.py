@@ -152,7 +152,7 @@ def main():
     for metric in projected_metrics:
         metrics = np.array(projected_metrics[metric])
         plt.figure()
-        plt.plot(metrics[:, 0], metrics[:, 1], marker = "^")
+        plt.plot(metrics[:, 0], metrics[:, 1], marker="^")
         plt.ylabel(metric)
         plt.xlabel("Projection dimension")
         plt.savefig(f"./projection_{metric}.png")
