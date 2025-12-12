@@ -106,7 +106,7 @@ def calculate_maximin_projections(
     """
     Calculate projection metric values
 
-    :param lhd: Description
+    :param lhd: Latin Hypercube design
     :type lhd: list[list[float]]
     :return: Projection metric values by projection dimension
     :rtype: dict[str, list[list[float]]]
