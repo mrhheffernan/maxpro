@@ -1,5 +1,7 @@
 # MaxPro
 
+[![Rust build](https://github.com/mrhheffernan/maxpro/actions/workflows/rust-build-test.yml/badge.svg)](https://github.com/mrhheffernan/maxpro/actions/workflows/rust-build-test.yml)
+
 This is a minimal rust implementation of Latin Hypercube design generation with the Maximum Projection metric. 
 It pursues an initial random search for a relatively-optimal candidate and (eventually) will allow for further 
 optimization of that candidate in search of a better solution.
