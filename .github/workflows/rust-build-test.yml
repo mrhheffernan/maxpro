@@ -15,8 +15,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Install system dependencies
-      run: sudo apt update | 
-          sudo apt install -y fontconfig
+      run: sudo apt update && sudo apt install -y fontconfig
     - name: Build
       run: cargo build --verbose
     - name: Run tests
