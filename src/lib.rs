@@ -125,6 +125,24 @@ pub mod lhd {
         }
     }
 
+    #[test]
+    #[should_panic]
+    /// Ensure for 0 samples, generate_lhd panics.
+    fn test_generate_lhd_0_samples() {
+        let n_samples: u64 = 0;
+        let n_dim: u64 = 4;
+        generate_lhd(n_samples, n_dim);
+        }
+
+    #[test]
+    #[should_panic]
+    /// Ensure for 0 samples, generate_lhd panics.
+    fn test_generate_lhd_0_dimension() {
+        let n_samples: u64 = 10;
+        let n_dim: u64 = 0;
+        generate_lhd(n_samples, n_dim);
+        }
+
     #[cfg(feature = "pyo3-bindings")]
     /// Generates an unoptimized latin hypercube design
     ///
