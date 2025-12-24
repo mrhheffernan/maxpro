@@ -114,10 +114,10 @@ pub mod lhd {
 
         for dimension in 0..n_dim {
             // n_samples in an LHD is the same as the number of intervals to fill
-            let mut counts = vec![0; n_samples];
+            let mut counts = vec![0; n_samples.try_into().unwrap()];
             for sample_idx in 0..n_samples {
                 // back-engineer the interval
-                let sample = design[sample_idx][dimension];
+                let sample: f64 = design[sample_idx as usize][dimension as usize];
                 let sample_interval_idx = (sample * n_samples as f64).floor() as usize;
                 counts[sample_interval_idx] += 1;
             }
