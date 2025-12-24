@@ -41,3 +41,6 @@ Gemini code review is used in development and any code suggestions must be human
 
 ## Style
 Rust formatting by `cargo fmt`. Python formatting by `ruff`. `flake8` used for PEP, line length not enforced in docstrings within reason.
+
+## Contributing and feature requests
+For both contributing and feature requests, please begin by filing an issue specifying either a bug or a feature request. The issues will then be prioritized for inclusion in the next release against other open issues or planned features. To resolve an issue, open a pull request and link it to the issue.
