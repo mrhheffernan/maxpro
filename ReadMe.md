@@ -29,10 +29,10 @@ This implementation also includes the often-less-optimal, but more standard, Max
 - Add testing
 - Documentation for PyO3 bindings
 - Crates.io and PyPI deployment
-- Comparisons to R implementation for further metric, performance benchmarking and validation.
 
 ### 0.2.0
 - Ordering the designs for optimal execution order
+- Performance benchmarking and validation against the R implementation of MaxPro
 
 ## AI Policy
 This project's AI policy is that no AI-written code is included in the core Rust module or in the python bindings. AI-written code may be present in the `python/` directory but is restricted to analysis. AI code is not used for benchmarking either correctness or speed. 
