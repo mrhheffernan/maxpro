@@ -117,6 +117,14 @@ pub mod lhd {
     }
 
     #[cfg(feature = "pyo3-bindings")]
+    /// Generates an unoptimized latin hypercube design
+    ///
+    /// Args:
+    ///     n_samples (int): Number of samples
+    ///     n_dim (int): Number of dimensions
+    ///
+    /// Returns:
+    ///     list[list[float]]: Latin hypercube design
     #[pyfunction(name = "generate_lhd")]
     pub fn py_generate_lhd(n_samples: usize, n_dim: usize) -> Vec<Vec<f64>> {
         generate_lhd(n_samples, n_dim)
@@ -204,12 +212,28 @@ pub mod maxpro_utils {
     }
 
     #[cfg(feature = "pyo3-bindings")]
+    /// Calculate the maximum projection (maxpro) criterion for an input design
+    ///
+    /// Args:
+    ///     design (list[list[float]]): Design of interest
+    ///
+    /// Returns:
+    ///     float: Maximum projection criterion value
     #[pyfunction(name = "maxpro_criterion")]
     pub fn py_maxpro_criterion(design: Vec<Vec<f64>>) -> f64 {
         maxpro_criterion(&design)
     }
 
     #[cfg(feature = "pyo3-bindings")]
+    /// Build a maxpro LHD
+    ///
+    /// Args:
+    ///     n_samples (int): Number of samples for the LHD
+    ///     n_dim (int): Number of dimensions in which to generate points
+    ///     n_iterations (int): Number of iterations to use to search for an optimal LHD
+    ///
+    /// Returns:
+    ///     list[list[float]]: A semi-optimal maxpro latin hypercube design
     #[pyfunction(name = "build_maxpro_lhd")]
     pub fn py_build_maxpro_lhd(
         n_samples: usize,
@@ -308,12 +332,28 @@ pub mod maximin_utils {
     }
 
     #[cfg(feature = "pyo3-bindings")]
+    /// Calculate the maximin criterion
+    ///
+    /// Args:
+    ///     design (list[list[float]]): Input design
+    ///
+    /// Returns:
+    ///     float: Maximin criterion for the input design
     #[pyfunction(name = "maximin_criterion")]
     pub fn py_maximin_criterion(design: Vec<Vec<f64>>) -> f64 {
         maximin_criterion(&design)
     }
 
     #[cfg(feature = "pyo3-bindings")]
+    /// Build a maximin LHD
+    ///
+    /// Args:
+    ///     n_samples (int): Number of samples for the LHD
+    ///     n_dim (int): Number of dimensions in which to generate points
+    ///     n_iterations (int): Number of iterations to use to search for an optimal LHD
+    ///
+    /// Returns:
+    ///     list[list[float]]: A semi-optimal maximin latin hypercube design
     #[pyfunction(name = "build_maximin_lhd")]
     pub fn py_build_maximin_lhd(
         n_samples: usize,
@@ -413,10 +453,23 @@ pub mod anneal {
     }
 
     #[cfg(feature = "pyo3-bindings")]
+    /// Anneal a latin hypercube to optimize its metric value.
+    /// Available metrics are "maxpro" and "maximin".
+    ///
+    /// Args:
+    ///     design (list[list[float]]): Input latin hypercube design
+    ///     n_iterations (int): Number of optimizations to search for a better candidate
+    ///     initial_temp (float): Initial temperature for annealing
+    ///     cooling_rate (float): Cooling rate for annealing
+    ///     metric_name (str): metric name; options are "maxpro" and "maximin"
+    ///     minimize (bool): Whether to minimize the metric
+    ///
+    /// Returns:
+    ///     list[list[float]]: Optimized latin hypercube design
     #[pyfunction(name = "anneal_lhd")]
     pub fn py_anneal_lhd(
         design: Vec<Vec<f64>>,
-        n_iterations: usize,
+        n_iterations: i64,
         initial_temp: f64,
         cooling_rate: f64,
         metric_name: String,
@@ -432,7 +485,7 @@ pub mod anneal {
         };
         anneal_lhd(
             &design,
-            n_iterations,
+            n_iterations as usize,
             initial_temp,
             cooling_rate,
             metric,

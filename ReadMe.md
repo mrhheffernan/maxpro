@@ -3,8 +3,8 @@
 [![Rust build](https://github.com/mrhheffernan/maxpro/actions/workflows/rust-build-test.yml/badge.svg)](https://github.com/mrhheffernan/maxpro/actions/workflows/rust-build-test.yml)
 
 This is a minimal rust implementation of Latin Hypercube design generation with the Maximum Projection metric. 
-It pursues an initial random search for a relatively-optimal candidate and (eventually) will allow for further 
-optimization of that candidate in search of a better solution.
+It pursues an initial random search for a relatively-optimal candidate and allows for further 
+optimization of that candidate (or any other supplied) in search of a better solution.
 
 Usage of this code should cite both this package as implementation and the MaxPro paper,
 ```
@@ -22,13 +22,14 @@ This implementation also includes the often-less-optimal, but more standard, Max
 - Generate many random latin hypercubes, calculate the maximum projection metric, and return the LHD that minimizes the MaxPro criterion: `cargo run --release -- --iterations 100000 --samples 50 --ndims 2 --metric max-pro`
 - Generate many random latin hypercubes, calculate the maximin metric, and return the LHD that maximizes the minimum distance between points: `cargo run --release -- --iterations 100000 --samples 50 --ndims 2 --metric maxi-min`
 - Using `maturin develop --release --features pyo3-bindings`, can `import maxpro` and generate optimal MaxPro LHDs in Python directly.
-- Anneal a LHD to optimize its metric
+- Perturb a LHD to optimize its metric
 
 ## Planned work 
 ### 0.1.0
 - Add testing
-- Comparisons to R implementation for further metric, performance benchmarking and validation.
+- Documentation for PyO3 bindings
 - Crates.io and PyPI deployment
+- Comparisons to R implementation for further metric, performance benchmarking and validation.
 
 ### 0.2.0
 - Ordering the designs for optimal execution order
