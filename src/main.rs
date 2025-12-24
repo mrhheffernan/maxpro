@@ -14,19 +14,19 @@ enum Metrics {
 struct Args {
     // The pattern to look for
     #[arg(short, long)]
-    samples: usize,
+    samples: u64,
     #[arg(short, long)]
-    iterations: usize,
+    iterations: u64,
     #[arg(short, long)]
     plot: bool,
     #[arg(short, long)]
-    ndims: usize,
+    ndims: u64,
     #[arg(short, long)]
     output_path: String,
     #[arg(short, long, value_enum, default_value_t = Metrics::MaxPro)]
     metric: Metrics,
     #[arg(long, default_value_t = 100000)]
-    anneal_iterations: usize,
+    anneal_iterations: u64,
     #[arg(long, default_value_t = 0.99)]
     anneal_cooling: f64,
     #[arg(long, default_value_t = 1.0)]
@@ -35,9 +35,9 @@ struct Args {
 
 fn main() {
     let args: Args = Args::parse();
-    let n_samples: usize = args.samples;
-    let n_iterations: usize = args.iterations;
-    let n_dims: usize = args.ndims;
+    let n_samples: u64 = args.samples;
+    let n_iterations: u64 = args.iterations;
+    let n_dims: u64 = args.ndims;
     let plot: bool = args.plot;
     let metric = args.metric;
     let annealing_iterations = args.anneal_iterations;

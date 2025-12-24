@@ -70,26 +70,35 @@ pub mod lhd {
 
     /// Generates an LHD by taking in a number of samples and a number of dimensions
     /// (parameters). This then creates a non-centered latin hypercube design.
-    pub fn generate_lhd(n_samples: usize, n_dim: usize) -> Vec<Vec<f64>> {
+    pub fn generate_lhd(n_samples: u64, n_dim: u64) -> Vec<Vec<f64>> {
+        assert!(
+            n_samples > 0,
+            "n_samples must be a positive, nonzero integer"
+        );
+        assert!(n_dim > 0, "n_dim must be a positive, nonzero integer");
         // initialize empty lhd
         // TODO: Make this seedable
         let mut rng: ThreadRng = rand::rng();
-        let mut lhd: Vec<Vec<f64>> = vec![vec![0.0; n_dim]; n_samples];
+        let mut lhd: Vec<Vec<f64>> =
+            vec![vec![0.0; n_dim.try_into().unwrap()]; n_samples.try_into().unwrap()];
 
         // For each dimension, start by generating a shuffle
         for j in 0..n_dim {
-            let mut permutation: Vec<usize> = (0..n_samples).collect();
+            let j_idx: usize = j.try_into().unwrap();
+            let mut permutation: Vec<usize> = (0..n_samples.try_into().unwrap()).collect();
             // Shuffle the 0..n_samples iterator
             permutation.shuffle(&mut rng);
 
             for i in 0..n_samples {
+                let i_idx: usize = i.try_into().unwrap();
+
                 // Get the range of the interval for this sample
-                let interval_start: f64 = permutation[i] as f64 / n_samples as f64;
-                let interval_end: f64 = (permutation[i] + 1) as f64 / n_samples as f64;
+                let interval_start: f64 = permutation[i_idx] as f64 / n_samples as f64;
+                let interval_end: f64 = (permutation[i_idx] + 1) as f64 / n_samples as f64;
                 // Generate a random sample in the box
                 let sample: f64 = rng.random_range(interval_start..interval_end);
                 // lhd[[i, j]] = sample;
-                lhd[i][j] = sample;
+                lhd[i_idx][j_idx] = sample;
             }
         }
         lhd
@@ -99,8 +108,8 @@ pub mod lhd {
     /// Makes a simple test of a latin hypercube checking that,
     /// for any interval in any dimension, there should be only one sample.
     fn test_generate_lhd() {
-        let n_samples: usize = 100;
-        let n_dim: usize = 4;
+        let n_samples: u64 = 100;
+        let n_dim: u64 = 4;
         let design = generate_lhd(n_samples, n_dim);
 
         for dimension in 0..n_dim {
@@ -188,7 +197,10 @@ pub mod maxpro_utils {
     }
 
     /// Using many iterations, choose the best LHD according to the MaxPro metric
-    pub fn build_maxpro_lhd(n_samples: usize, n_dim: usize, n_iterations: usize) -> Vec<Vec<f64>> {
+    pub fn build_maxpro_lhd(n_samples: u64, n_dim: u64, n_iterations: u64) -> Vec<Vec<f64>> {
+        assert!(n_samples > 0, "n_samples must be positive and nonzero");
+        assert!(n_dim > 0, "n_dim must be positive and nonzero");
+        assert!(n_iterations > 0, "n_dim must be positive and nonzero");
         let best_lhd_metric_pair: (Vec<Vec<f64>>, f64) = (0..n_iterations)
             .into_par_iter()
             .map(|_| {
@@ -235,19 +247,15 @@ pub mod maxpro_utils {
     /// Returns:
     ///     list[list[float]]: A semi-optimal maxpro latin hypercube design
     #[pyfunction(name = "build_maxpro_lhd")]
-    pub fn py_build_maxpro_lhd(
-        n_samples: usize,
-        n_dim: usize,
-        n_iterations: usize,
-    ) -> Vec<Vec<f64>> {
+    pub fn py_build_maxpro_lhd(n_samples: u64, n_dim: u64, n_iterations: u64) -> Vec<Vec<f64>> {
         build_maxpro_lhd(n_samples, n_dim, n_iterations)
     }
 
     #[test]
     fn test_maxpro_criterion() {
-        let n_iterations: usize = 10;
-        let n_samples: usize = 100;
-        let n_dim: usize = 5;
+        let n_iterations: u64 = 10;
+        let n_samples: u64 = 100;
+        let n_dim: u64 = 5;
         for _i in 0..n_iterations {
             let lhd = generate_lhd(n_samples, n_dim);
             let maxpro_metric: f64 = maxpro_criterion(&lhd);
@@ -295,7 +303,13 @@ pub mod maximin_utils {
     }
 
     /// Using many iterations, select a LHD that maximizes the minimum pairwise distance between points.
-    pub fn build_maximin_lhd(n_samples: usize, n_dim: usize, n_iterations: usize) -> Vec<Vec<f64>> {
+    pub fn build_maximin_lhd(n_samples: u64, n_dim: u64, n_iterations: u64) -> Vec<Vec<f64>> {
+        assert!(n_samples > 0, "n_samples must be positive and nonzero");
+        assert!(n_dim > 0, "n_dim must be positive and nonzero");
+        assert!(
+            n_iterations > 0,
+            "n_iterations must be positive and nonzero"
+        );
         let best_lhd_metric_pair: (Vec<Vec<f64>>, f64) = (0..n_iterations)
             .into_par_iter()
             .map(|_| {
@@ -355,11 +369,7 @@ pub mod maximin_utils {
     /// Returns:
     ///     list[list[float]]: A semi-optimal maximin latin hypercube design
     #[pyfunction(name = "build_maximin_lhd")]
-    pub fn py_build_maximin_lhd(
-        n_samples: usize,
-        n_dim: usize,
-        n_iterations: usize,
-    ) -> Vec<Vec<f64>> {
+    pub fn py_build_maximin_lhd(n_samples: u64, n_dim: u64, n_iterations: u64) -> Vec<Vec<f64>> {
         build_maximin_lhd(n_samples, n_dim, n_iterations)
     }
 }
@@ -377,7 +387,7 @@ pub mod anneal {
     /// Simulated annealing for improving (maximizing or minimizing) a given metric.
     pub fn anneal_lhd<F>(
         design: &Vec<Vec<f64>>,
-        n_iterations: usize,
+        n_iterations: u64,
         initial_temp: f64,
         cooling_rate: f64,
         metric: F,
@@ -469,7 +479,7 @@ pub mod anneal {
     #[pyfunction(name = "anneal_lhd")]
     pub fn py_anneal_lhd(
         design: Vec<Vec<f64>>,
-        n_iterations: i64,
+        n_iterations: u64,
         initial_temp: f64,
         cooling_rate: f64,
         metric_name: String,
@@ -485,7 +495,7 @@ pub mod anneal {
         };
         anneal_lhd(
             &design,
-            n_iterations as usize,
+            n_iterations,
             initial_temp,
             cooling_rate,
             metric,

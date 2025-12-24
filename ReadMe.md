@@ -22,7 +22,7 @@ This implementation also includes the often-less-optimal, but more standard, Max
 - Generate many random latin hypercubes, calculate the maximum projection metric, and return the LHD that minimizes the MaxPro criterion: `cargo run --release -- --iterations 100000 --samples 50 --ndims 2 --metric max-pro`
 - Generate many random latin hypercubes, calculate the maximin metric, and return the LHD that maximizes the minimum distance between points: `cargo run --release -- --iterations 100000 --samples 50 --ndims 2 --metric maxi-min`
 - Using `maturin develop --release --features pyo3-bindings`, can `import maxpro` and generate optimal MaxPro LHDs in Python directly.
-- Perturb a LHD to optimize its metric
+- Anneal a LHD to optimize its metric
 
 ## Planned work 
 ### 0.1.0
