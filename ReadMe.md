@@ -44,3 +44,10 @@ Rust formatting by `cargo fmt`. Python formatting by `ruff`. `flake8` used for P
 
 ## Contributing and feature requests
 For both contributing and feature requests, please begin by filing an issue specifying either a bug or a feature request. The issues will then be prioritized for inclusion in the next release against other open issues or planned features. To resolve an issue, open a pull request and link it to the issue.
+
+## Benchmarking
+MaxPro design and optimization: The Rust version usually finds a better metric (e.g. 5.95 instead of 7.51) and is ~84x faster; (0.0035s instead of 0.3s for the Python implementation on a M2) for 5 samples in 2D across 10,000 iterations. Increasing this to 50 samples in 3D, this implementation's result continues to best the Python result (72.5 vs 91) and is ~1440x faster (0.0178s vs 25.72s)
+
+Maximin design and optimization is benchmarked against PyDOE3 as the reference implementation. The Rust and Python implementations return almost identical results (0.22 in this implementation vs 0.21 in PyDOE3) with this implementation offering a 2.63x speedup for 5 samples in 2X across 10,000 iterations. Increasing this to 50 samples in 3D, this implememntation returns a better result than PyDOE3 (0.2138 vs 0.2188) with a 2.9x speedup (0.0286s vs. 0.083s).
+
+Benchmarks are run with `python/comparisons.py`.
