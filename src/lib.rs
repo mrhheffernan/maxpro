@@ -132,16 +132,16 @@ pub mod lhd {
         let n_samples: u64 = 0;
         let n_dim: u64 = 4;
         generate_lhd(n_samples, n_dim);
-        }
+    }
 
     #[test]
     #[should_panic]
-    /// Ensure for 0 samples, generate_lhd panics.
+    /// Ensure for 0 dimensions, generate_lhd panics.
     fn test_generate_lhd_0_dimension() {
         let n_samples: u64 = 10;
         let n_dim: u64 = 0;
         generate_lhd(n_samples, n_dim);
-        }
+    }
 
     #[cfg(feature = "pyo3-bindings")]
     /// Generates an unoptimized latin hypercube design
@@ -273,8 +273,9 @@ pub mod maxpro_utils {
     }
 
     #[test]
+    /// Ensures maxpro criterion is well-conditioned over randomized inputs
     fn test_maxpro_criterion() {
-        let n_iterations: u64 = 10;
+        let n_iterations: u64 = 1000;
         let n_samples: u64 = 100;
         let n_dim: u64 = 5;
         for _i in 0..n_iterations {
@@ -283,6 +284,24 @@ pub mod maxpro_utils {
             assert!(maxpro_metric >= 0.0);
             assert!(maxpro_metric < f64::INFINITY)
         }
+    }
+
+    #[test]
+    /// Test that the value matches expectations to high tolerance
+    fn test_maxpro_criterion_value_1() {
+        let design = vec![vec![0.0, 1.0], vec![1.0, 0.0]];
+        let maxpro_value = maxpro_criterion(&design);
+        let expected_value = 1.0;
+        assert!((maxpro_value - expected_value).abs() < 10.0_f64.powf(-9.0))
+    }
+
+    #[test]
+    /// Test that the value matches expectations to high tolerance
+    fn test_maxpro_criterion_value_2() {
+        let design = vec![vec![0.0, 2.0], vec![1.0, 0.0]];
+        let maxpro_value = maxpro_criterion(&design);
+        let expected_value = 0.5;
+        assert!((maxpro_value - expected_value).abs() < 10.0_f64.powf(-9.0))
     }
 }
 
@@ -356,7 +375,7 @@ pub mod maximin_utils {
 
     #[test]
     fn test_maximin_criterion() {
-        let n_iterations: u64 = 10;
+        let n_iterations: u64 = 1000;
         let n_samples: u64 = 100;
         let n_dim: u64 = 5;
         for _i in 0..n_iterations {
@@ -365,6 +384,24 @@ pub mod maximin_utils {
             assert!(maximin_metric >= 0.0);
             assert!(maximin_metric < f64::INFINITY)
         }
+    }
+
+    #[test]
+    /// Test that the value matches expectations to high tolerance
+    fn test_maximin_criterion_value_1() {
+        let design = vec![vec![0.0, 1.0], vec![1.0, 0.0]];
+        let maximin_value = maximin_criterion(&design);
+        let expected_value = 2.0_f64.powf(0.5);
+        assert!((maximin_value - expected_value).abs() < 10.0_f64.powf(-9.0));
+    }
+
+    #[test]
+    /// Test that the value matches expectations to high tolerance
+    fn test_maximin_criterion_value_2() {
+        let design = vec![vec![0.0, 2.0], vec![1.0, 0.0]];
+        let maximin_value = maximin_criterion(&design);
+        let expected_value = 5.0_f64.powf(0.5);
+        assert!((maximin_value - expected_value).abs() < 10.0_f64.powf(-9.0))
     }
 
     #[cfg(feature = "pyo3-bindings")]
