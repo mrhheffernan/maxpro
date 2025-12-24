@@ -135,7 +135,7 @@ pub mod lhd {
     /// Returns:
     ///     list[list[float]]: Latin hypercube design
     #[pyfunction(name = "generate_lhd")]
-    pub fn py_generate_lhd(n_samples: usize, n_dim: usize) -> Vec<Vec<f64>> {
+    pub fn py_generate_lhd(n_samples: u64, n_dim: u64) -> Vec<Vec<f64>> {
         generate_lhd(n_samples, n_dim)
     }
 }
@@ -152,6 +152,7 @@ pub mod maxpro_utils {
     /// The minimized term is: sum_{i<j} [ 1 / product_{l=1}^{d} (x_il - x_jl)^2 ]
     fn maxpro_sum(design: &Vec<Vec<f64>>) -> f64 {
         let n: usize = design.len();
+        assert!(n > 0, "Cannot pass an empty design");
         if n < 2 {
             return 0.0;
         }
@@ -187,10 +188,12 @@ pub mod maxpro_utils {
     /// Calculates the full, complete MaxPro criterion
     pub fn maxpro_criterion(design: &Vec<Vec<f64>>) -> f64 {
         let n: usize = design.len();
+        assert!(n > 0, "Cannot pass an empty design");
         if n < 2 {
             return 0.0;
         }
         let d: usize = design[0].len();
+        assert!(d > 0, "Must have finite, positive number of dimensions");
         let inverse_product_sum: f64 = maxpro_sum(design);
         let n_pairs: f64 = n as f64 * (n as f64 - 1.0) / 2.0;
         (inverse_product_sum / n_pairs).powf(1.0 / d as f64)
@@ -290,6 +293,7 @@ pub mod maximin_utils {
     /// Calculate the minimum pairwise distance between points, to be maximized
     pub fn maximin_criterion(design: &Vec<Vec<f64>>) -> f64 {
         let n: usize = design.len();
+        assert!(n > 0, "Cannot pass an empty design");
         let mut min_distance: f64 = f64::INFINITY;
         for i in 0..n {
             for j in (i + 1)..n {
@@ -334,9 +338,9 @@ pub mod maximin_utils {
 
     #[test]
     fn test_maximin_criterion() {
-        let n_iterations: usize = 10;
-        let n_samples: usize = 100;
-        let n_dim: usize = 5;
+        let n_iterations: u64 = 10;
+        let n_samples: u64 = 100;
+        let n_dim: u64 = 5;
         for _i in 0..n_iterations {
             let lhd = generate_lhd(n_samples, n_dim);
             let maximin_metric: f64 = maximin_criterion(&lhd);
@@ -399,6 +403,14 @@ pub mod anneal {
         if design.is_empty() {
             return design.to_vec();
         }
+        assert!(
+            n_iterations > 0,
+            "n_iterations must be positive and nonzero"
+        );
+        assert!(
+            initial_temp > 0.0,
+            "initial_temp must be positive and nonzero"
+        );
         // Set max step size as +/- 1% of the size of the design interval
         let n_samples: usize = design.len();
         let n_dim: usize = design[0].len();
