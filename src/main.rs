@@ -12,7 +12,6 @@ enum Metrics {
 
 #[derive(Parser)]
 struct Args {
-    // The pattern to look for
     #[arg(short, long)]
     samples: u64,
     #[arg(short, long)]
@@ -34,6 +33,7 @@ struct Args {
 }
 
 fn main() {
+    // Set configurations from input parameters
     let args: Args = Args::parse();
     let n_samples: u64 = args.samples;
     let n_iterations: u64 = args.iterations;
@@ -44,6 +44,7 @@ fn main() {
     let annealing_t = args.anneal_t;
     let annealing_cooling = args.anneal_cooling;
 
+    // Ensure basic sanity checks are respected
     assert!(n_samples > 0, "n_samples must be positive and nonzero");
     assert!(
         n_iterations > 0,
@@ -55,6 +56,7 @@ fn main() {
         "annealing_iterations must be positive and nonzero"
     );
 
+    // Construct the initial latin hypercube
     let lhd: Vec<Vec<f64>> = match metric {
         Metrics::MaxPro => build_maxpro_lhd(n_samples, n_dims, n_iterations),
         Metrics::MaxiMin => build_maximin_lhd(n_samples, n_dims, n_iterations),
@@ -66,6 +68,7 @@ fn main() {
     };
 
     let metric_value = metric_fn(&lhd);
+    // Optimize the metric
     let annealed_design = anneal_lhd(
         &lhd,
         annealing_iterations,
@@ -80,6 +83,7 @@ fn main() {
     println!("{:?}", annealed_design);
     println!("Original metric: {metric_value}");
     println!("Annealed metric: {annealed_metric}");
+    // Plot, if requested
     if plot {
         let _ = plot_x_vs_y(&annealed_design, std::path::Path::new(&args.output_path));
     }
