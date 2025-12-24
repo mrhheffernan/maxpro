@@ -8,6 +8,15 @@ pub mod lhd {
     use rand::Rng;
     use rand::prelude::{SliceRandom, ThreadRng};
 
+    /// A simple function to plot a scatter plot of the first two dimensions
+    /// of a Vec<Vec<f64>> for diagnostics.
+    ///
+    /// Arguments:
+    ///     data (&Vec<Vec<f64>>): Points to plot
+    ///     output_path (&std::path::Path): Where to save the figure
+    ///
+    /// Raises:
+    ///     Err if data has fewer than 2 columns or 1 sample
     pub fn plot_x_vs_y(
         data: &Vec<Vec<f64>>,
         output_path: &std::path::Path,
@@ -70,6 +79,17 @@ pub mod lhd {
 
     /// Generates an LHD by taking in a number of samples and a number of dimensions
     /// (parameters). This then creates a non-centered latin hypercube design.
+    ///
+    /// Arguments:
+    ///     n_samples (u64): Number of samples for the LHD
+    ///     n_dim (u64): Number of dimensions for the LHD
+    ///
+    /// Returns:
+    ///     Vec<Vec<f64>>: A latin hypercube design
+    ///
+    /// Panics:
+    ///     n_samples == 0: n_samples must be positive and nonzero
+    ///     n_dim == 0: n_dim must be positive and nonzero
     pub fn generate_lhd(n_samples: u64, n_dim: u64) -> Vec<Vec<f64>> {
         assert!(
             n_samples > 0,
@@ -164,10 +184,19 @@ pub mod maxpro_utils {
     use pyo3::prelude::*;
     use rayon::prelude::*;
 
-    /// Calculates the internal sum term of the MaxPro criterion (psi(D)).
+    /// Helper function to calculate the internal sum term of the MaxPro criterion (psi(D)).
     /// This sum is the term that is directly minimized in the optimization
     /// process.
     /// The minimized term is: sum_{i<j} [ 1 / product_{l=1}^{d} (x_il - x_jl)^2 ]
+    ///
+    /// Arguments:
+    ///     design (&Vec<Vec<f64>>): Design for which to calculate the metric
+    ///
+    /// Returns:
+    ///     f64: Maxpro inner sum value
+    ///
+    /// Panics:
+    ///     design.len() == 0: Design cannot be empty
     fn maxpro_sum(design: &Vec<Vec<f64>>) -> f64 {
         let n: usize = design.len();
         assert!(n > 0, "Cannot pass an empty design");
@@ -204,6 +233,15 @@ pub mod maxpro_utils {
     }
 
     /// Calculates the full, complete MaxPro criterion
+    ///
+    /// Arguments:
+    ///     design (&Vec<Vec<f64>>): Design for which to calculate the criterion
+    ///
+    /// Returns:
+    ///     f64: Value of the maximum projection criterion
+    ///
+    /// Panics:
+    ///     design.len() == 0: Cannot pass an empty design
     pub fn maxpro_criterion(design: &Vec<Vec<f64>>) -> f64 {
         let n: usize = design.len();
         assert!(n > 0, "Cannot pass an empty design");
@@ -217,7 +255,21 @@ pub mod maxpro_utils {
         (inverse_product_sum / n_pairs).powf(1.0 / d as f64)
     }
 
-    /// Using many iterations, choose the best LHD according to the MaxPro metric
+    /// Using many iterations, choose the best LHD according to the MaxPro metric.
+    ///
+    /// Arguments:
+    ///     n_samples (u64): Number of samples the latin hypercube should contain
+    ///     n_dim (u64): Number of dimensions the latin hypercube is composed of
+    ///     n_iterations (u64): Number of iterations to generate latin hypercubes
+    ///         for in order to determine an optimal design.
+    ///
+    /// Returns:
+    ///     Vec<Vec<f64>>: A optimized latin hypercube design that maximizes the MaxPro criterion
+    ///
+    /// Panics:
+    ///     n_samples == 0: n_samples must be positive and nonzero
+    ///     n_dim == 0: n_dim must be positive and nonzero
+    ///     n_iterations == 0: n_iterations must be positive and nonzero
     pub fn build_maxpro_lhd(n_samples: u64, n_dim: u64, n_iterations: u64) -> Vec<Vec<f64>> {
         assert!(n_samples > 0, "n_samples must be positive and nonzero");
         assert!(n_dim > 0, "n_dim must be positive and nonzero");
@@ -310,9 +362,26 @@ pub mod maximin_utils {
     #[cfg(feature = "pyo3-bindings")]
     use pyo3::prelude::*;
     use rayon::prelude::*;
-    /// Calculate the L2 distance between two points
+    /// Calculate the L2 distance between two points, also known as the
+    /// Euclidean distance.
+    ///
+    /// Arguments:
+    ///     point_a (&Vec<f64>): First point
+    ///     point_b (&Vec<f64>): Second point
+    ///
+    /// Returns:
+    ///     f64: Euclidean distance between them
+    ///
+    /// Panics:
+    ///     point_a.len() != point_b.len(): Points must have the same number of dimensions
+    ///     point_a.len() == 0: Points cannot have 0 dimension
     fn calculate_l2_distance(point_a: &Vec<f64>, point_b: &Vec<f64>) -> f64 {
-        assert_eq!(point_a.len(), point_b.len());
+        assert_eq!(
+            point_a.len(),
+            point_b.len(),
+            "point_a and point_b must have the same length"
+        );
+        assert!(point_a.len() != 0, "Points must have nonzero length");
         // Iterator below is equivalent to this less idiomatic approach.
         // let mut distance: f64 = 0.0;
         // for i in 0..point_a.len() {
