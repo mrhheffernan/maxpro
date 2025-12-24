@@ -44,6 +44,17 @@ fn main() {
     let annealing_t = args.anneal_t;
     let annealing_cooling = args.anneal_cooling;
 
+    assert!(n_samples > 0, "n_samples must be positive and nonzero");
+    assert!(
+        n_iterations > 0,
+        "n_iterations must be positive and nonzero"
+    );
+    assert!(n_dims > 0, "n_dims must be positive and nonzero");
+    assert!(
+        annealing_iterations > 0,
+        "annealing_iterations must be positive and nonzero"
+    );
+
     let lhd: Vec<Vec<f64>> = match metric {
         Metrics::MaxPro => build_maxpro_lhd(n_samples, n_dims, n_iterations),
         Metrics::MaxiMin => build_maximin_lhd(n_samples, n_dims, n_iterations),
