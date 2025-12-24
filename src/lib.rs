@@ -397,6 +397,12 @@ pub mod maximin_utils {
     }
 
     /// Calculate the minimum pairwise distance between points, to be maximized
+    ///
+    /// Arguments:
+    ///     design (&Vec<Vec<f64>>): Collection of input coordinates
+    ///
+    /// Returns:
+    ///     f64: Minimum pairwise distance between points
     pub fn maximin_criterion(design: &Vec<Vec<f64>>) -> f64 {
         let n: usize = design.len();
         assert!(n > 0, "Cannot pass an empty design");
@@ -413,6 +419,15 @@ pub mod maximin_utils {
     }
 
     /// Using many iterations, select a LHD that maximizes the minimum pairwise distance between points.
+    ///
+    /// Arguments:
+    ///     n_samples (u64): Number of samples
+    ///     n_dim (u64): Number of dimensions
+    ///     n_iterations (u64): Number of iterations
+    ///
+    /// Returns:
+    ///     Vec<Vec<f64>>: Latin hypercube design that maximizes the minimum pairwise distance
+    ///         between points from n_iterations of random sampling
     pub fn build_maximin_lhd(n_samples: u64, n_dim: u64, n_iterations: u64) -> Vec<Vec<f64>> {
         assert!(n_samples > 0, "n_samples must be positive and nonzero");
         assert!(n_dim > 0, "n_dim must be positive and nonzero");
@@ -443,6 +458,7 @@ pub mod maximin_utils {
     }
 
     #[test]
+    /// Test that the maximin criterion obeys simple properties across many iterations
     fn test_maximin_criterion() {
         let n_iterations: u64 = 1000;
         let n_samples: u64 = 100;
@@ -513,6 +529,17 @@ pub mod anneal {
     use rand::prelude::ThreadRng;
 
     /// Simulated annealing for improving (maximizing or minimizing) a given metric.
+    ///
+    /// Arguments:
+    ///     design (&Vec<Vec<f64>>): Initial design of points
+    ///     n_iterations (u64): Number of iterations for annealing
+    ///     initial_temp (f64): Initial temperature, used to control the metropolis algorithm acceptance
+    ///     cooling rate (f64): Cooling rate, used to simulate annealing by reducing the metropolis algorithm acceptance
+    ///     metric (F): A callable function that maps &Vec<Vec<f64>> to f64, used to minimize or maximize
+    ///     minimize (bool): Whether to minimize or maximize the metric
+    ///
+    /// Returns:
+    ///     Vec<Vec<f64>>: A metric-optimized collection of points, not necessarily a latin hypercube.
     pub fn anneal_lhd<F>(
         design: &Vec<Vec<f64>>,
         n_iterations: u64,
