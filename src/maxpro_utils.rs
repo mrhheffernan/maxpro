@@ -96,7 +96,10 @@ pub fn maxpro_criterion(design: &Vec<Vec<f64>>) -> f64 {
 pub fn build_maxpro_lhd(n_samples: u64, n_dim: u64, n_iterations: u64) -> Vec<Vec<f64>> {
     assert!(n_samples > 0, "n_samples must be positive and nonzero");
     assert!(n_dim > 0, "n_dim must be positive and nonzero");
-    assert!(n_iterations > 0, "n_iterations must be positive and nonzero");
+    assert!(
+        n_iterations > 0,
+        "n_iterations must be positive and nonzero"
+    );
     let best_lhd_metric_pair: (Vec<Vec<f64>>, f64) = (0..n_iterations)
         .into_par_iter()
         .map(|_| {

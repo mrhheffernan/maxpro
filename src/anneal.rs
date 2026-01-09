@@ -131,6 +131,14 @@ pub fn py_anneal_lhd(
     metric_name: String,
     minimize: bool,
 ) -> PyResult<Vec<Vec<f64>>> {
+    if n_iterations == 0 {
+        return Err(PyValueError::new_err(
+            "n_iterations must be positive and nonzero",
+        ));
+    }
+    if initial_temp <= 0.0 {
+        return Err(PyValueError::new_err("initial_temp must be positive"));
+    }
     let metric = match metric_name.to_lowercase().as_str() {
         "maxpro" => maxpro_criterion,
         "maximin" => maximin_criterion,
