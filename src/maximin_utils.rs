@@ -25,7 +25,7 @@ fn calculate_l2_distance(point_a: &Vec<f64>, point_b: &Vec<f64>) -> f64 {
         point_b.len(),
         "point_a and point_b must have the same length"
     );
-    assert!(point_a.len() != 0, "Points must have nonzero length");
+    assert!(!point_a.is_empty(), "Points must have nonzero length");
     // Iterator below is equivalent to this less idiomatic approach.
     // let mut distance: f64 = 0.0;
     // for i in 0..point_a.len() {
