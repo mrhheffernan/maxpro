@@ -35,9 +35,9 @@ def benchmark_time_maxpro():
     """
     Benchmark rust vs. python implementation for time.
     """
-    n_samples = 5
+    n_samples = 50
     n_iterations = 10000
-    n_dim = 2
+    n_dim = 3
 
     time_rust_start = time.time()
     maxpro_lhd = maxpro.build_maxpro_lhd(n_samples, n_dim, n_iterations)

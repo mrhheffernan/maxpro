@@ -12,21 +12,20 @@ enum Metrics {
 
 #[derive(Parser)]
 struct Args {
-    // The pattern to look for
     #[arg(short, long)]
-    samples: usize,
+    samples: u64,
     #[arg(short, long)]
-    iterations: usize,
+    iterations: u64,
     #[arg(short, long)]
     plot: bool,
     #[arg(short, long)]
-    ndims: usize,
+    ndims: u64,
     #[arg(short, long)]
     output_path: String,
     #[arg(short, long, value_enum, default_value_t = Metrics::MaxPro)]
     metric: Metrics,
     #[arg(long, default_value_t = 100000)]
-    anneal_iterations: usize,
+    anneal_iterations: u64,
     #[arg(long, default_value_t = 0.99)]
     anneal_cooling: f64,
     #[arg(long, default_value_t = 1.0)]
@@ -34,16 +33,30 @@ struct Args {
 }
 
 fn main() {
+    // Set configurations from input parameters
     let args: Args = Args::parse();
-    let n_samples: usize = args.samples;
-    let n_iterations: usize = args.iterations;
-    let n_dims: usize = args.ndims;
+    let n_samples: u64 = args.samples;
+    let n_iterations: u64 = args.iterations;
+    let n_dims: u64 = args.ndims;
     let plot: bool = args.plot;
     let metric = args.metric;
     let annealing_iterations = args.anneal_iterations;
     let annealing_t = args.anneal_t;
     let annealing_cooling = args.anneal_cooling;
 
+    // Ensure basic sanity checks are respected
+    assert!(n_samples > 0, "n_samples must be positive and nonzero");
+    assert!(
+        n_iterations > 0,
+        "n_iterations must be positive and nonzero"
+    );
+    assert!(n_dims > 0, "n_dims must be positive and nonzero");
+    assert!(
+        annealing_iterations > 0,
+        "annealing_iterations must be positive and nonzero"
+    );
+
+    // Construct the initial latin hypercube
     let lhd: Vec<Vec<f64>> = match metric {
         Metrics::MaxPro => build_maxpro_lhd(n_samples, n_dims, n_iterations),
         Metrics::MaxiMin => build_maximin_lhd(n_samples, n_dims, n_iterations),
@@ -55,6 +68,7 @@ fn main() {
     };
 
     let metric_value = metric_fn(&lhd);
+    // Optimize the metric
     let annealed_design = anneal_lhd(
         &lhd,
         annealing_iterations,
@@ -69,6 +83,7 @@ fn main() {
     println!("{:?}", annealed_design);
     println!("Original metric: {metric_value}");
     println!("Annealed metric: {annealed_metric}");
+    // Plot, if requested
     if plot {
         let _ = plot_x_vs_y(&annealed_design, std::path::Path::new(&args.output_path));
     }
