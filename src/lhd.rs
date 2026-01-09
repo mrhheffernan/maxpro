@@ -91,23 +91,26 @@ pub fn generate_lhd(n_samples: u64, n_dim: u64) -> Vec<Vec<f64>> {
         n_samples > 0,
         "n_samples must be a positive, nonzero integer"
     );
+
+    assert!(n_samples <= usize::MAX as u64, "n_dim too large to index");
     assert!(n_dim > 0, "n_dim must be a positive, nonzero integer");
+    assert!(n_dim <= usize::MAX as u64, "n_dim too large to index");
+
+    let n_samples_index: usize = n_samples.try_into().unwrap();
+    let n_dim_index: usize = n_dim.try_into().unwrap();
+
     // initialize empty lhd
     // TODO: Make this seedable
     let mut rng: ThreadRng = rand::rng();
-    let mut lhd: Vec<Vec<f64>> =
-        vec![vec![0.0; n_dim.try_into().unwrap()]; n_samples.try_into().unwrap()];
+    let mut lhd: Vec<Vec<f64>> = vec![vec![0.0; n_dim_index]; n_samples_index];
 
     // For each dimension, start by generating a shuffle
-    for j in 0..n_dim {
-        let j_idx: usize = j.try_into().unwrap();
-        let mut permutation: Vec<usize> = (0..n_samples.try_into().unwrap()).collect();
+    for j_idx in 0..n_dim_index {
+        let mut permutation: Vec<usize> = (0..n_samples_index).collect();
         // Shuffle the 0..n_samples iterator
         permutation.shuffle(&mut rng);
 
-        for i in 0..n_samples {
-            let i_idx: usize = i.try_into().unwrap();
-
+        for i_idx in 0..n_samples_index {
             // Get the range of the interval for this sample
             let interval_start: f64 = permutation[i_idx] as f64 / n_samples as f64;
             let interval_end: f64 = (permutation[i_idx] + 1) as f64 / n_samples as f64;
