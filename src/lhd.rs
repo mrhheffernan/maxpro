@@ -1,5 +1,9 @@
 use plotters::prelude::*;
 #[cfg(feature = "pyo3-bindings")]
+use pyo3::PyResult;
+#[cfg(feature = "pyo3-bindings")]
+use pyo3::exceptions::PyValueError;
+#[cfg(feature = "pyo3-bindings")]
 use pyo3::prelude::*;
 use rand::Rng;
 use rand::prelude::{SliceRandom, ThreadRng};
@@ -92,7 +96,10 @@ pub fn generate_lhd(n_samples: u64, n_dim: u64) -> Vec<Vec<f64>> {
         "n_samples must be a positive, nonzero integer"
     );
 
-    assert!(n_samples <= usize::MAX as u64, "n_dim too large to index");
+    assert!(
+        n_samples <= usize::MAX as u64,
+        "n_samples too large to index"
+    );
     assert!(n_dim > 0, "n_dim must be a positive, nonzero integer");
     assert!(n_dim <= usize::MAX as u64, "n_dim too large to index");
 
@@ -172,6 +179,22 @@ fn test_generate_lhd_0_dimension() {
 /// Returns:
 ///     list[list[float]]: Latin hypercube design
 #[pyfunction(name = "generate_lhd")]
-pub fn py_generate_lhd(n_samples: u64, n_dim: u64) -> Vec<Vec<f64>> {
-    generate_lhd(n_samples, n_dim)
+pub fn py_generate_lhd(n_samples: u64, n_dim: u64) -> PyResult<Vec<Vec<f64>>> {
+    if n_samples == 0 {
+        return Err(PyValueError::new_err(
+            "n_samples must be a positive, nonzero integer",
+        ));
+    }
+    if n_dim == 0 {
+        return Err(PyValueError::new_err(
+            "n_dim must be a positive, nonzero integer",
+        ));
+    }
+    if n_samples > usize::MAX as u64 {
+        return Err(PyValueError::new_err("n_samples too large to index"));
+    }
+    if n_dim > usize::MAX as u64 {
+        return Err(PyValueError::new_err("n_dim too large to index"));
+    }
+    Ok(generate_lhd(n_samples, n_dim))
 }

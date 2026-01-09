@@ -1,5 +1,9 @@
 use crate::lhd::generate_lhd;
 #[cfg(feature = "pyo3-bindings")]
+use pyo3::PyResult;
+#[cfg(feature = "pyo3-bindings")]
+use pyo3::exceptions::PyValueError;
+#[cfg(feature = "pyo3-bindings")]
 use pyo3::prelude::*;
 use rayon::prelude::*;
 /// Calculate the L2 distance between two points, also known as the
@@ -138,8 +142,11 @@ fn test_maximin_criterion_value_2() {
 /// Returns:
 ///     float: Maximin criterion for the input design
 #[pyfunction(name = "maximin_criterion")]
-pub fn py_maximin_criterion(design: Vec<Vec<f64>>) -> f64 {
-    maximin_criterion(&design)
+pub fn py_maximin_criterion(design: Vec<Vec<f64>>) -> PyResult<f64> {
+    if design.is_empty() {
+        return Err(PyValueError::new_err("Design cannot be empty"));
+    }
+    Ok(maximin_criterion(&design))
 }
 
 #[cfg(feature = "pyo3-bindings")]
@@ -153,6 +160,29 @@ pub fn py_maximin_criterion(design: Vec<Vec<f64>>) -> f64 {
 /// Returns:
 ///     list[list[float]]: A semi-optimal maximin latin hypercube design
 #[pyfunction(name = "build_maximin_lhd")]
-pub fn py_build_maximin_lhd(n_samples: u64, n_dim: u64, n_iterations: u64) -> Vec<Vec<f64>> {
-    build_maximin_lhd(n_samples, n_dim, n_iterations)
+pub fn py_build_maximin_lhd(
+    n_samples: u64,
+    n_dim: u64,
+    n_iterations: u64,
+) -> PyResult<Vec<Vec<f64>>> {
+    if n_samples == 0 {
+        return Err(PyValueError::new_err(
+            "n_samples must be positive and nonzero",
+        ));
+    }
+    if n_dim == 0 {
+        return Err(PyValueError::new_err("n_dim must be positive and nonzero"));
+    }
+    if n_iterations == 0 {
+        return Err(PyValueError::new_err(
+            "n_iterations must be positive and nonzero",
+        ));
+    }
+    if n_samples > usize::MAX as u64 {
+        return Err(PyValueError::new_err("n_samples too large to index"));
+    }
+    if n_dim > usize::MAX as u64 {
+        return Err(PyValueError::new_err("n_dim too large to index"));
+    }
+    Ok(build_maximin_lhd(n_samples, n_dim, n_iterations))
 }

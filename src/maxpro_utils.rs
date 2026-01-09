@@ -1,5 +1,9 @@
 use crate::lhd::generate_lhd;
 #[cfg(feature = "pyo3-bindings")]
+use pyo3::PyResult;
+#[cfg(feature = "pyo3-bindings")]
+use pyo3::exceptions::PyValueError;
+#[cfg(feature = "pyo3-bindings")]
 use pyo3::prelude::*;
 use rayon::prelude::*;
 
@@ -124,8 +128,11 @@ pub fn build_maxpro_lhd(n_samples: u64, n_dim: u64, n_iterations: u64) -> Vec<Ve
 /// Returns:
 ///     float: Maximum projection criterion value
 #[pyfunction(name = "maxpro_criterion")]
-pub fn py_maxpro_criterion(design: Vec<Vec<f64>>) -> f64 {
-    maxpro_criterion(&design)
+pub fn py_maxpro_criterion(design: Vec<Vec<f64>>) -> PyResult<f64> {
+    if design.is_empty() {
+        return Err(PyValueError::new_err("Design cannot be empty"));
+    }
+    Ok(maxpro_criterion(&design))
 }
 
 #[cfg(feature = "pyo3-bindings")]
@@ -139,8 +146,31 @@ pub fn py_maxpro_criterion(design: Vec<Vec<f64>>) -> f64 {
 /// Returns:
 ///     list[list[float]]: A semi-optimal maxpro latin hypercube design
 #[pyfunction(name = "build_maxpro_lhd")]
-pub fn py_build_maxpro_lhd(n_samples: u64, n_dim: u64, n_iterations: u64) -> Vec<Vec<f64>> {
-    build_maxpro_lhd(n_samples, n_dim, n_iterations)
+pub fn py_build_maxpro_lhd(
+    n_samples: u64,
+    n_dim: u64,
+    n_iterations: u64,
+) -> PyResult<Vec<Vec<f64>>> {
+    if n_samples == 0 {
+        return Err(PyValueError::new_err(
+            "n_samples must be positive and nonzero",
+        ));
+    }
+    if n_dim == 0 {
+        return Err(PyValueError::new_err("n_dim must be positive and nonzero"));
+    }
+    if n_iterations == 0 {
+        return Err(PyValueError::new_err(
+            "n_iterations must be positive and nonzero",
+        ));
+    }
+    if n_samples > usize::MAX as u64 {
+        return Err(PyValueError::new_err("n_samples too large to index"));
+    }
+    if n_dim > usize::MAX as u64 {
+        return Err(PyValueError::new_err("n_dim too large to index"));
+    }
+    Ok(build_maxpro_lhd(n_samples, n_dim, n_iterations))
 }
 
 #[test]

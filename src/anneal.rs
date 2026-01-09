@@ -3,6 +3,10 @@ use crate::maximin_utils::maximin_criterion;
 #[cfg(feature = "pyo3-bindings")]
 use crate::maxpro_utils::maxpro_criterion;
 #[cfg(feature = "pyo3-bindings")]
+use pyo3::PyResult;
+#[cfg(feature = "pyo3-bindings")]
+use pyo3::exceptions::PyValueError;
+#[cfg(feature = "pyo3-bindings")]
 use pyo3::prelude::*;
 use rand::Rng;
 use rand::prelude::ThreadRng;
@@ -126,21 +130,23 @@ pub fn py_anneal_lhd(
     cooling_rate: f64,
     metric_name: String,
     minimize: bool,
-) -> Vec<Vec<f64>> {
+) -> PyResult<Vec<Vec<f64>>> {
     let metric = match metric_name.to_lowercase().as_str() {
         "maxpro" => maxpro_criterion,
         "maximin" => maximin_criterion,
-        _ => panic!(
-            "Unknown metric: '{}'. Available metrics are 'maxpro' and 'maximin'.",
-            metric_name
-        ),
+        _ => {
+            return Err(PyValueError::new_err(format!(
+                "Unknown metric: '{}'. Available metrics are 'maxpro' and 'maximin'.",
+                metric_name
+            )));
+        }
     };
-    anneal_lhd(
+    Ok(anneal_lhd(
         &design,
         n_iterations,
         initial_temp,
         cooling_rate,
         metric,
         minimize,
-    )
+    ))
 }
