@@ -5,7 +5,7 @@ edition = "2024"
 repository = "https://github.com/mrhheffernan/maxpro"
 license = "MIT OR Apache-2.0"
 description = "Maximum Projection and Maximin Latin Hypercube Design creation and optimization"
-authors = "Matthew Heffernan"
+authors = ["Matthew Heffernan"]
 keywords = [
     "machine-learning",
     "doe",
