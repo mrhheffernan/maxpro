@@ -1,9 +1,8 @@
 from itertools import combinations
 
 import matplotlib.pyplot as plt
-import numpy as np
-
 import maxpro
+import numpy as np
 
 # Small buffer for stability
 EPSILON = 1e-5
@@ -119,7 +118,7 @@ def calculate_maximin_projections(
         "generalized_maximin": [],
     }
     for q in range(1, n_dimensions):
-        projected_design = lhd[:, : -q].tolist()
+        projected_design = lhd[:, :-q].tolist()
         projected_maxpro = maxpro.maxpro_criterion(projected_design)
         projected_metrics["maxpro_metric"].append([q, projected_maxpro])
 

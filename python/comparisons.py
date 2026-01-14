@@ -1,10 +1,9 @@
 import time
 
+import maxpro
 import numpy as np
 import pyDOE3
 import pymaxpro
-
-import maxpro
 
 
 def calculate_pymaxpro_criterion(maxpro_lhd: list[list[float]]) -> float:
