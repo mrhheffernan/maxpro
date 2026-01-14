@@ -2,6 +2,21 @@
 name = "maxpro"
 version = "0.1.0"
 edition = "2024"
+repository = "https://github.com/mrhheffernan/maxpro"
+license = "MIT OR Apache-2.0"
+description = "Maximum Projection and Maximin Latin Hypercube Design creation and optimization"
+authors = "Matthew Heffernan"
+keywords = [
+    "machine-learning",
+    "doe",
+    "latin-hypercube",
+    "gaussian-process",
+    "optimization",
+]
+categories = ["algorithms", "mathematics", "science"]
+exclude = [".github/", ".ruff_cache/", ".venv/"]
+readme = "ReadMe.md"
+
 
 [lib]
 name = "maxpro"
