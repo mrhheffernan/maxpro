@@ -42,7 +42,6 @@ jobs:
           args: --release --out dist --find-interpreter --features pyo3-bindings
           sccache: ${{ !startsWith(github.ref, 'refs/tags/') }}
           manylinux: auto
-          before-script-linux: "apt install -y fontconfig-devel"
       - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:
@@ -76,7 +75,6 @@ jobs:
           args: --release --out dist --find-interpreter --features pyo3-bindings
           sccache: ${{ !startsWith(github.ref, 'refs/tags/') }}
           manylinux: musllinux_1_2
-          before-script-linux: "apt install -y fontconfig-devel"
       - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:
