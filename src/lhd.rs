@@ -1,3 +1,4 @@
+#[cfg(feature = "debug")]
 use plotters::prelude::*;
 #[cfg(feature = "pyo3-bindings")]
 use pyo3::PyResult;
@@ -8,6 +9,7 @@ use pyo3::prelude::*;
 use rand::Rng;
 use rand::prelude::{SliceRandom, ThreadRng};
 
+#[cfg(feature = "debug")]
 /// A simple function to plot a scatter plot of the first two dimensions
 /// of a Vec<Vec<f64>> for diagnostics.
 ///

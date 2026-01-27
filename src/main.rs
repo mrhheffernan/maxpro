@@ -1,5 +1,6 @@
 use clap::{Parser, ValueEnum};
 use maxpro::anneal::anneal_lhd;
+#[cfg(feature = "debug")]
 use maxpro::lhd::plot_x_vs_y;
 use maxpro::maximin_utils::{build_maximin_lhd, maximin_criterion};
 use maxpro::maxpro_utils::{build_maxpro_lhd, maxpro_criterion};
@@ -84,7 +85,13 @@ fn main() {
     println!("Original metric: {metric_value}");
     println!("Annealed metric: {annealed_metric}");
     // Plot, if requested
+
     if plot {
-        let _ = plot_x_vs_y(&annealed_design, std::path::Path::new(&args.output_path));
+        if cfg!(feature = "debug") {
+            #[cfg(feature = "debug")]
+            let _ = plot_x_vs_y(&annealed_design, std::path::Path::new(&args.output_path));
+        } else {
+            println!("Plotting is only enabled with the debug feature flag.")
+        }
     }
 }
