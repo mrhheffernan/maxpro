@@ -1,9 +1,9 @@
-name: CI
+name: python-build
 
 on:
-  push:
-    tags:
-      - '*'
+  # push:
+  #   tags:
+  #     - '*'
   pull_request:
     types: [ready_for_review]
   workflow_dispatch:
