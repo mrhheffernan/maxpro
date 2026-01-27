@@ -14,7 +14,7 @@ keywords = [
     "optimization",
 ]
 categories = ["algorithms", "mathematics", "science"]
-exclude = [".github/", "python/"]
+exclude = [".github/", "python/", "requirements.txt"]
 readme = "README.md"
 
 
@@ -41,3 +41,4 @@ default = []
 # Define the feature that enables the PyO3 code, pulling in the optional dependency
 pyo3-bindings = ["dep:pyo3"]
 debug = ["dep:plotters"]
+
