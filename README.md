@@ -44,6 +44,8 @@ import maxpro
 
 ## Planned work 
 
+Versions 0.1.* are reserved for bug fixes and performance improvements to existing functionality, new features will land in 0.2.0.
+
 ### 0.1.1
 - Resolve python import syntax
 - Make output path optional
