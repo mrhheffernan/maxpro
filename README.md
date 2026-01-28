@@ -26,15 +26,32 @@ The Maximin metric is included for additional functionality and performance benc
 - Using `maturin develop --release --features pyo3-bindings`, can `import maxpro` and generate optimal MaxPro LHDs in Python directly.
 - Perturb a LHD to optimize its metric
 
+## Usage
+
+### Rust
+Add the crate to your project via Cargo, then `using maxpro::<>` you can use any of the underlying components.
+
+### Python
+
+In version 0.1.0, you must import as
+```
+import _maxpro as maxpro
+```
+in 0.1.1, this will be replaced with
+```
+import maxpro
+```
+
 ## Planned work 
 
 ### 0.1.1
+- Resolve python import syntax
+- Make output path optional
+
+### 0.2.0
+- Ordering the designs for optimal execution order
 - Seedable RNGs
 - Performance benchmarking and validation against the R implementation of MaxPro
-
-### 0.1.2
-- Ordering the designs for optimal execution order
-
 
 ## AI Policy
 This project's AI policy is that no AI-written code is included in the core Rust module or in the python bindings. AI-written code may be present in the `python/` directory but is restricted to analysis. AI code is not used for benchmarking either correctness or speed. 
