@@ -8,7 +8,7 @@ pub mod maxpro_utils;
 // Python module definition
 #[cfg(feature = "pyo3-bindings")]
 #[pymodule]
-fn _maxpro(_py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
+fn maxpro(_py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(lhd::py_generate_lhd, m)?)?;
     m.add_function(wrap_pyfunction!(maxpro_utils::py_build_maxpro_lhd, m)?)?;
     m.add_function(wrap_pyfunction!(maxpro_utils::py_maxpro_criterion, m)?)?;
