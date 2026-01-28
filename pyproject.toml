@@ -4,7 +4,7 @@ build-backend = "maturin"
 
 [project]
 name = "maxpro"
-version = "0.1.0"
+version = "0.1.1"
 description = "Maximum Projection and Maximin Latin Hypercube Design creation and optimization"
 authors = [
     { name = "Matthew Heffernan" }
@@ -37,4 +37,4 @@ requires-python = ">=3.8"
 
 [tool.maturin]
 features = ["pyo3-bindings"]
-module-name = "maxpro._maxpro"
+module-name = "maxpro.maxpro"
