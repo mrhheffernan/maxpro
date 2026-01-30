@@ -88,15 +88,12 @@ fn main() {
     // Plot, if requested
     if plot {
         if cfg!(feature = "debug") {
-            if args.output_path == None {
-                println!("No output path provided, not plotting.");
-                return;
+            if let Some(output_path) = args.output_path {
+                #[cfg(feature = "debug")]
+                let _ = plot_x_vs_y(&annealed_design, std::path::Path::new(&output_path));
+            } else {
+                println!("--output-path not specified, not writing to file.")
             }
-            #[cfg(feature = "debug")]
-            let _ = plot_x_vs_y(
-                &annealed_design,
-                std::path::Path::new(&args.output_path.unwrap()),
-            );
         } else {
             println!("Plotting is only enabled with the debug feature flag.")
         }
