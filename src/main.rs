@@ -22,7 +22,7 @@ struct Args {
     #[arg(short, long)]
     ndims: u64,
     #[arg(short, long)]
-    output_path: String,
+    output_path: Option<String>,
     #[arg(short, long, value_enum, default_value_t = Metrics::MaxPro)]
     metric: Metrics,
     #[arg(long, default_value_t = 100000)]
@@ -84,12 +84,16 @@ fn main() {
     println!("{:?}", annealed_design);
     println!("Original metric: {metric_value}");
     println!("Annealed metric: {annealed_metric}");
-    // Plot, if requested
 
+    // Plot, if requested
     if plot {
         if cfg!(feature = "debug") {
-            #[cfg(feature = "debug")]
-            let _ = plot_x_vs_y(&annealed_design, std::path::Path::new(&args.output_path));
+            if let Some(output_path) = args.output_path {
+                #[cfg(feature = "debug")]
+                let _ = plot_x_vs_y(&annealed_design, std::path::Path::new(&output_path));
+            } else {
+                println!("--output-path not specified, not writing to file.")
+            }
         } else {
             println!("Plotting is only enabled with the debug feature flag.")
         }
