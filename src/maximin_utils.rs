@@ -62,45 +62,6 @@ pub fn maximin_criterion(design: &Vec<Vec<f64>>) -> f64 {
     min_distance
 }
 
-/// Using many iterations, select a LHD that maximizes the minimum pairwise distance between points.
-///
-/// Arguments:
-///     n_samples (u64): Number of samples
-///     n_dim (u64): Number of dimensions
-///     n_iterations (u64): Number of iterations
-///
-/// Returns:
-///     Vec<Vec<f64>>: Latin hypercube design that maximizes the minimum pairwise distance
-///         between points from n_iterations of random sampling
-pub fn build_maximin_lhd(n_samples: u64, n_dim: u64, n_iterations: u64) -> Vec<Vec<f64>> {
-    assert!(n_samples > 0, "n_samples must be positive and nonzero");
-    assert!(n_dim > 0, "n_dim must be positive and nonzero");
-    assert!(
-        n_iterations > 0,
-        "n_iterations must be positive and nonzero"
-    );
-    let best_lhd_metric_pair: (Vec<Vec<f64>>, f64) = (0..n_iterations)
-        .into_par_iter()
-        .map(|_| {
-            // Generate lhd, metric pairs in parallel via rayon's into_par_iter
-            let lhd: Vec<Vec<f64>> = generate_lhd(n_samples, n_dim);
-            let metric = maximin_criterion(&lhd);
-            (lhd, metric)
-        })
-        .reduce(
-            || (Vec::new(), f64::NEG_INFINITY), // Starting value
-            // Iterate through at the op stage to find the highest of any two pairs of comparison
-            |(lhd1, metric1), (lhd2, metric2)| {
-                if metric1 > metric2 {
-                    (lhd1, metric1)
-                } else {
-                    (lhd2, metric2)
-                }
-            },
-        );
-    best_lhd_metric_pair.0 // only return the lhd, not the metric
-}
-
 #[test]
 /// Test that the maximin criterion obeys simple properties across many iterations
 fn test_maximin_criterion() {
@@ -147,42 +108,4 @@ pub fn py_maximin_criterion(design: Vec<Vec<f64>>) -> PyResult<f64> {
         return Err(PyValueError::new_err("Design cannot be empty"));
     }
     Ok(maximin_criterion(&design))
-}
-
-#[cfg(feature = "pyo3-bindings")]
-/// Build a maximin LHD
-///
-/// Args:
-///     n_samples (int): Number of samples for the LHD
-///     n_dim (int): Number of dimensions in which to generate points
-///     n_iterations (int): Number of iterations to use to search for an optimal LHD
-///
-/// Returns:
-///     list[list[float]]: A semi-optimal maximin latin hypercube design
-#[pyfunction(name = "build_maximin_lhd")]
-pub fn py_build_maximin_lhd(
-    n_samples: u64,
-    n_dim: u64,
-    n_iterations: u64,
-) -> PyResult<Vec<Vec<f64>>> {
-    if n_samples == 0 {
-        return Err(PyValueError::new_err(
-            "n_samples must be positive and nonzero",
-        ));
-    }
-    if n_dim == 0 {
-        return Err(PyValueError::new_err("n_dim must be positive and nonzero"));
-    }
-    if n_iterations == 0 {
-        return Err(PyValueError::new_err(
-            "n_iterations must be positive and nonzero",
-        ));
-    }
-    if n_samples > usize::MAX as u64 {
-        return Err(PyValueError::new_err("n_samples too large to index"));
-    }
-    if n_dim > usize::MAX as u64 {
-        return Err(PyValueError::new_err("n_dim too large to index"));
-    }
-    Ok(build_maximin_lhd(n_samples, n_dim, n_iterations))
 }
