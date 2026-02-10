@@ -1,15 +1,11 @@
 use clap::{Parser, ValueEnum};
 use maxpro::anneal::anneal_lhd;
+use maxpro::build_lhd;
+use maxpro::enums::Metrics;
 #[cfg(feature = "debug")]
 use maxpro::lhd::plot_x_vs_y;
-use maxpro::maximin_utils::{build_maximin_lhd, maximin_criterion};
-use maxpro::maxpro_utils::{build_maxpro_lhd, maxpro_criterion};
-
-#[derive(ValueEnum, Clone, Debug)]
-enum Metrics {
-    MaxPro,
-    MaxiMin,
-}
+use maxpro::maximin_utils::maximin_criterion;
+use maxpro::maxpro_utils::maxpro_criterion;
 
 #[derive(Parser)]
 struct Args {
@@ -57,16 +53,13 @@ fn main() {
         "annealing_iterations must be positive and nonzero"
     );
 
-    // Construct the initial latin hypercube
-    let lhd: Vec<Vec<f64>> = match metric {
-        Metrics::MaxPro => build_maxpro_lhd(n_samples, n_dims, n_iterations),
-        Metrics::MaxiMin => build_maximin_lhd(n_samples, n_dims, n_iterations),
-    };
-
     let (metric_fn, minimize) = match metric {
         Metrics::MaxPro => (maxpro_criterion as fn(&Vec<Vec<f64>>) -> f64, true),
         Metrics::MaxiMin => (maximin_criterion as fn(&Vec<Vec<f64>>) -> f64, false),
     };
+
+    // Construct the initial latin hypercube
+    let lhd: Vec<Vec<f64>> = build_lhd(n_samples, n_dims, n_iterations, Some(metric));
 
     let metric_value = metric_fn(&lhd);
     // Optimize the metric
