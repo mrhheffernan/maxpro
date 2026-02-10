@@ -1,5 +1,11 @@
 #[cfg(feature = "pyo3-bindings")]
+use pyo3::PyResult;
+#[cfg(feature = "pyo3-bindings")]
+use pyo3::exceptions::PyValueError;
+#[cfg(feature = "pyo3-bindings")]
 use pyo3::prelude::*;
+#[cfg(feature = "pyo3-bindings")]
+use pyo3::types::PyString;
 use rayon::prelude::*;
 pub mod anneal;
 pub mod enums;
@@ -90,12 +96,12 @@ pub fn build_lhd(
 ///
 /// Returns:
 ///     list[list[float]]: A semi-optimal maximin latin hypercube design
-#[pyfunction(name = "build_maximin_lhd")]
+#[pyfunction(name = "build_lhd")]
 pub fn py_build_lhd(
     n_samples: u64,
     n_dim: u64,
     n_iterations: u64,
-    metric: str,
+    metric: &Bound<'_, PyString>,
 ) -> PyResult<Vec<Vec<f64>>> {
     if n_samples == 0 {
         return Err(PyValueError::new_err(
@@ -116,16 +122,19 @@ pub fn py_build_lhd(
     if n_dim > usize::MAX as u64 {
         return Err(PyValueError::new_err("n_dim too large to index"));
     }
-    if metric == "maxpro" {
-        let pymetric = enums::Metrics::MaxPro;
-    } else if metric == "maximin" {
-        let pymetric = enums::Metrics::MaxiMin;
+
+    let metric_str = metric.to_string();
+
+    let pymetric = if metric_str == "maxpro" {
+        enums::Metrics::MaxPro
+    } else if metric_str == "maximin" {
+        enums::Metrics::MaxiMin
     } else {
         return Err(PyValueError::new_err(
             "Metric must be 'maxpro' or 'maximin'.",
         ));
-    }
-    Ok(build_lhd(n_samples, n_dim, n_iterations, pymetric))
+    };
+    Ok(build_lhd(n_samples, n_dim, n_iterations, Some(pymetric)))
 }
 
 // Python module definition
@@ -133,9 +142,9 @@ pub fn py_build_lhd(
 #[pymodule]
 fn maxpro(_py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(lhd::py_generate_lhd, m)?)?;
-    m.add_function(wrap_pyfunction!(maxpro_utils::py_build_maxpro_lhd, m)?)?;
     m.add_function(wrap_pyfunction!(maxpro_utils::py_maxpro_criterion, m)?)?;
-    m.add_function(wrap_pyfunction!(py_build_lhd, m)?)?;
+    m.add_function(wrap_pyfunction!(maximin_utils::py_maximin_criterion, m)?)?;
+    m.add_function(wrap_pyfunction!(crate::py_build_lhd, m)?)?;
     m.add_function(wrap_pyfunction!(anneal::py_anneal_lhd, m)?)?;
     Ok(())
 }
