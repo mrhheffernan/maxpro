@@ -60,7 +60,7 @@ pub fn build_lhd(
             // Generate lhd, metric pairs in parallel via rayon's into_par_iter
             let lhd: Vec<Vec<f64>> = lhd::generate_lhd(n_samples, n_dim);
             let metric = metric_fn(&lhd);
-            assert!(metric > 0.0, "Metric must be positive and nonzero");
+            assert!(metric >= 0.0, "Metric must be non-negative");
             (lhd, metric)
         })
         .reduce(
@@ -68,7 +68,7 @@ pub fn build_lhd(
             // Iterate through at the op stage to find the highest of any two pairs of comparison
             |(lhd1, metric1), (lhd2, metric2)| {
                 if minimize {
-                    if metric1 < metric2 && metric1 > 0.0 {
+                    if metric1 < metric2 {
                         (lhd1, metric1)
                     } else {
                         (lhd2, metric2)
@@ -125,14 +125,14 @@ pub fn py_build_lhd(
 
     let metric_str = metric.to_string();
 
-    let pymetric = if metric_str == "maxpro" {
-        enums::Metrics::MaxPro
-    } else if metric_str == "maximin" {
-        enums::Metrics::MaxiMin
-    } else {
-        return Err(PyValueError::new_err(
-            "Metric must be 'maxpro' or 'maximin'.",
-        ));
+    let pymetric = match metric.to_str()? {
+        "maxpro" => enums::Metrics::MaxPro,
+        "maximin" => enums::Metrics::MaxiMin,
+        _ => {
+            return Err(PyValueError::new_err(
+                "Metric must be 'maxpro' or 'maximin'.",
+            ));
+        }
     };
     Ok(build_lhd(n_samples, n_dim, n_iterations, Some(pymetric)))
 }
