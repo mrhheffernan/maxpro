@@ -64,7 +64,7 @@ pub fn build_lhd(
             (lhd, metric)
         })
         .reduce(
-            || (Vec::new(), f64::NEG_INFINITY), // Starting value
+            || if minimize { (Vec::new(), f64::INFINITY) } else { (Vec::new(), f64::NEG_INFINITY) }, // Starting value
             // Iterate through at the op stage to find the highest of any two pairs of comparison
             |(lhd1, metric1), (lhd2, metric2)| {
                 if minimize {
