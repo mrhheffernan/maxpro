@@ -1,12 +1,9 @@
-use crate::lhd::generate_lhd;
 #[cfg(feature = "pyo3-bindings")]
 use pyo3::PyResult;
 #[cfg(feature = "pyo3-bindings")]
 use pyo3::exceptions::PyValueError;
 #[cfg(feature = "pyo3-bindings")]
 use pyo3::prelude::*;
-use rand::SeedableRng;
-use rand::rngs::StdRng;
 
 /// Helper function to calculate the internal sum term of the MaxPro criterion (psi(D)).
 /// This sum is the term that is directly minimized in the optimization

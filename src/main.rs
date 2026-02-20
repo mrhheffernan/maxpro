@@ -1,4 +1,4 @@
-use clap::{Parser, ValueEnum};
+use clap::Parser;
 use maxpro::anneal::anneal_lhd;
 use maxpro::build_lhd;
 use maxpro::enums::Metrics;
@@ -90,9 +90,9 @@ fn main() {
     // Plot, if requested
     if plot {
         if cfg!(feature = "debug") {
-            if let Some(output_path) = args.output_path {
+            if let Some(_output_path) = args.output_path {
                 #[cfg(feature = "debug")]
-                let _ = plot_x_vs_y(&annealed_design, std::path::Path::new(&output_path));
+                let _ = plot_x_vs_y(&annealed_design, std::path::Path::new(&_output_path));
             } else {
                 println!("--output-path not specified, not writing to file.")
             }
