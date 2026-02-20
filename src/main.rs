@@ -79,6 +79,7 @@ fn main() {
         annealing_cooling,
         metric_fn,
         minimize,
+        seed + 1,
     );
     let annealed_metric = metric_fn(&annealed_design);
 

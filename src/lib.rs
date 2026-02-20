@@ -88,12 +88,10 @@ pub fn build_lhd(
                     } else {
                         (lhd2, metric2)
                     }
+                } else if metric1 > metric2 {
+                    (lhd1, metric1)
                 } else {
-                    if metric1 > metric2 {
-                        (lhd1, metric1)
-                    } else {
-                        (lhd2, metric2)
-                    }
+                    (lhd2, metric2)
                 }
             },
         );

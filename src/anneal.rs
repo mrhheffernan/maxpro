@@ -9,7 +9,8 @@ use pyo3::exceptions::PyValueError;
 #[cfg(feature = "pyo3-bindings")]
 use pyo3::prelude::*;
 use rand::Rng;
-use rand::prelude::ThreadRng;
+use rand::SeedableRng;
+use rand::rngs::StdRng;
 
 /// Simulated annealing for improving (maximizing or minimizing) a given metric.
 ///
@@ -30,6 +31,7 @@ pub fn anneal_lhd<F>(
     cooling_rate: f64,
     metric: F,
     minimize: bool,
+    seed: u64,
 ) -> Vec<Vec<f64>>
 where
     F: Fn(&Vec<Vec<f64>>) -> f64,
@@ -50,8 +52,7 @@ where
     let n_dim: usize = design[0].len();
     let step_size: f64 = 0.01 / n_samples as f64;
     let mut temp = initial_temp;
-    // TODO: Make this seedable
-    let mut rng: ThreadRng = rand::rng();
+    let mut rng: StdRng = SeedableRng::seed_from_u64(seed);
 
     let mut best_design = design.clone();
     let mut best_metric = metric(design);
