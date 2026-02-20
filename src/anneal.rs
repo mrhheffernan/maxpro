@@ -120,6 +120,7 @@ where
 ///     cooling_rate (float): Cooling rate for annealing
 ///     metric_name (str): metric name; options are "maxpro" and "maximin"
 ///     minimize (bool): Whether to minimize the metric
+///     seed (int, optional): Seed for the random number generator.
 ///
 /// Returns:
 ///     list[list[float]]: Optimized latin hypercube design
@@ -131,6 +132,7 @@ pub fn py_anneal_lhd(
     cooling_rate: f64,
     metric_name: String,
     minimize: bool,
+    seed: Option<u64>,
 ) -> PyResult<Vec<Vec<f64>>> {
     if n_iterations == 0 {
         return Err(PyValueError::new_err(
@@ -150,6 +152,10 @@ pub fn py_anneal_lhd(
             )));
         }
     };
+    let seed = match args.seed {
+        Some(x) => x,
+        None => rand::rng().random_range(1..1000000) as u64,
+    };
     Ok(anneal_lhd(
         &design,
         n_iterations,
@@ -157,5 +163,6 @@ pub fn py_anneal_lhd(
         cooling_rate,
         metric,
         minimize,
+        seed,
     ))
 }

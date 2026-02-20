@@ -7,6 +7,7 @@ use pyo3::exceptions::PyValueError;
 #[cfg(feature = "pyo3-bindings")]
 use pyo3::prelude::*;
 use rand::Rng;
+use rand::SeedableRng;
 use rand::prelude::SliceRandom;
 use rand::rngs::StdRng;
 
@@ -182,11 +183,12 @@ fn test_generate_lhd_0_dimension() {
 /// Args:
 ///     n_samples (int): Number of samples
 ///     n_dim (int): Number of dimensions
+///     seed (int, optional): Seed for the random number generator
 ///
 /// Returns:
 ///     list[list[float]]: Latin hypercube design
 #[pyfunction(name = "generate_lhd")]
-pub fn py_generate_lhd(n_samples: u64, n_dim: u64, seed: u64) -> PyResult<Vec<Vec<f64>>> {
+pub fn py_generate_lhd(n_samples: u64, n_dim: u64, seed: Option<u64>) -> PyResult<Vec<Vec<f64>>> {
     if n_samples == 0 {
         return Err(PyValueError::new_err(
             "n_samples must be a positive, nonzero integer",
@@ -203,6 +205,10 @@ pub fn py_generate_lhd(n_samples: u64, n_dim: u64, seed: u64) -> PyResult<Vec<Ve
     if n_dim > usize::MAX as u64 {
         return Err(PyValueError::new_err("n_dim too large to index"));
     }
+    let seed = match args.seed {
+        Some(x) => x,
+        None => rand::rng().random_range(1..1000000) as u64,
+    };
     let mut rng: StdRng = SeedableRng::seed_from_u64(seed);
     Ok(generate_lhd(n_samples, n_dim, &mut rng))
 }

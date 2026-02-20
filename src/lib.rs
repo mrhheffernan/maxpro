@@ -106,6 +106,7 @@ pub fn build_lhd(
 ///     n_dim (int): Number of dimensions in which to generate points
 ///     n_iterations (int): Number of iterations to use to search for an optimal LHD
 ///     metric (str): Metric to use. Must be either 'maximin' or 'maxpro'.
+///     seed (int, optional): Seed for the random number generator. If not provided, this is randomly chosen.
 ///
 /// Returns:
 ///     list[list[float]]: A semi-optimal maximin latin hypercube design
@@ -115,6 +116,7 @@ pub fn py_build_lhd(
     n_dim: u64,
     n_iterations: u64,
     metric: &Bound<'_, PyString>,
+    seed: Option<u64>,
 ) -> PyResult<Vec<Vec<f64>>> {
     if n_samples == 0 {
         return Err(PyValueError::new_err(
@@ -135,6 +137,11 @@ pub fn py_build_lhd(
     if n_dim > usize::MAX as u64 {
         return Err(PyValueError::new_err("n_dim too large to index"));
     }
+
+    let seed = match args.seed {
+        Some(x) => x,
+        None => rand::rng().random_range(1..1000000) as u64,
+    };
 
     let metric_str = metric.to_string();
 
