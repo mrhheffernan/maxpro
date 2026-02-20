@@ -7,7 +7,9 @@ use pyo3::exceptions::PyValueError;
 #[cfg(feature = "pyo3-bindings")]
 use pyo3::prelude::*;
 use rand::Rng;
-use rand::prelude::{SliceRandom, ThreadRng};
+use rand::SeedableRng;
+use rand::prelude::SliceRandom;
+use rand::rngs::StdRng;
 
 #[cfg(feature = "debug")]
 /// A simple function to plot a scatter plot of the first two dimensions
@@ -92,7 +94,7 @@ pub fn plot_x_vs_y(
 /// Panics:
 ///     n_samples == 0: n_samples must be positive and nonzero
 ///     n_dim == 0: n_dim must be positive and nonzero
-pub fn generate_lhd(n_samples: u64, n_dim: u64) -> Vec<Vec<f64>> {
+pub fn generate_lhd(n_samples: u64, n_dim: u64, rng: &mut StdRng) -> Vec<Vec<f64>> {
     assert!(
         n_samples > 0,
         "n_samples must be a positive, nonzero integer"
@@ -109,15 +111,13 @@ pub fn generate_lhd(n_samples: u64, n_dim: u64) -> Vec<Vec<f64>> {
     let n_dim_index: usize = n_dim.try_into().unwrap();
 
     // initialize empty lhd
-    // TODO: Make this seedable
-    let mut rng: ThreadRng = rand::rng();
     let mut lhd: Vec<Vec<f64>> = vec![vec![0.0; n_dim_index]; n_samples_index];
 
     // For each dimension, start by generating a shuffle
     for j_idx in 0..n_dim_index {
         let mut permutation: Vec<usize> = (0..n_samples_index).collect();
         // Shuffle the 0..n_samples iterator
-        permutation.shuffle(&mut rng);
+        permutation.shuffle(rng);
 
         for i_idx in 0..n_samples_index {
             // Get the range of the interval for this sample
@@ -138,7 +138,9 @@ pub fn generate_lhd(n_samples: u64, n_dim: u64) -> Vec<Vec<f64>> {
 fn test_generate_lhd() {
     let n_samples: u64 = 100;
     let n_dim: u64 = 4;
-    let design = generate_lhd(n_samples, n_dim);
+    let seed: u64 = 12345;
+    let mut rng: StdRng = SeedableRng::seed_from_u64(seed);
+    let design = generate_lhd(n_samples, n_dim, &mut rng);
 
     for dimension in 0..n_dim {
         // n_samples in an LHD is the same as the number of intervals to fill
@@ -159,7 +161,9 @@ fn test_generate_lhd() {
 fn test_generate_lhd_0_samples() {
     let n_samples: u64 = 0;
     let n_dim: u64 = 4;
-    generate_lhd(n_samples, n_dim);
+    let seed: u64 = 12345;
+    let mut rng: StdRng = SeedableRng::seed_from_u64(seed);
+    generate_lhd(n_samples, n_dim, &mut rng);
 }
 
 #[test]
@@ -168,7 +172,9 @@ fn test_generate_lhd_0_samples() {
 fn test_generate_lhd_0_dimension() {
     let n_samples: u64 = 10;
     let n_dim: u64 = 0;
-    generate_lhd(n_samples, n_dim);
+    let seed: u64 = 12345;
+    let mut rng: StdRng = SeedableRng::seed_from_u64(seed);
+    generate_lhd(n_samples, n_dim, &mut rng);
 }
 
 #[cfg(feature = "pyo3-bindings")]
@@ -181,7 +187,7 @@ fn test_generate_lhd_0_dimension() {
 /// Returns:
 ///     list[list[float]]: Latin hypercube design
 #[pyfunction(name = "generate_lhd")]
-pub fn py_generate_lhd(n_samples: u64, n_dim: u64) -> PyResult<Vec<Vec<f64>>> {
+pub fn py_generate_lhd(n_samples: u64, n_dim: u64, seed: u64) -> PyResult<Vec<Vec<f64>>> {
     if n_samples == 0 {
         return Err(PyValueError::new_err(
             "n_samples must be a positive, nonzero integer",
@@ -198,5 +204,6 @@ pub fn py_generate_lhd(n_samples: u64, n_dim: u64) -> PyResult<Vec<Vec<f64>>> {
     if n_dim > usize::MAX as u64 {
         return Err(PyValueError::new_err("n_dim too large to index"));
     }
-    Ok(generate_lhd(n_samples, n_dim))
+    let mut rng: StdRng = SeedableRng::seed_from_u64(seed);
+    Ok(generate_lhd(n_samples, n_dim, &mut rng))
 }

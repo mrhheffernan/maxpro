@@ -12,6 +12,8 @@ pub mod enums;
 pub mod lhd;
 pub mod maximin_utils;
 pub mod maxpro_utils;
+use rand::SeedableRng;
+use rand::rngs::StdRng;
 
 /// Using many iterations, select a LHD that optimizes an allowed metric.
 ///
@@ -20,6 +22,7 @@ pub mod maxpro_utils;
 ///     n_dim (u64): Number of dimensions
 ///     n_iterations (u64): Number of iterations
 ///     metric (Some(enums::Metrics)): Metric to consider
+///     seed (u64): Random number seed
 ///
 /// Returns:
 ///     Vec<Vec<f64>>: Latin hypercube design that optimizes a metric using random sampling
@@ -28,6 +31,7 @@ pub fn build_lhd(
     n_dim: u64,
     n_iterations: u64,
     metric: Option<enums::Metrics>,
+    seed: &u64,
 ) -> Vec<Vec<f64>> {
     assert!(n_samples > 0, "n_samples must be positive and nonzero");
     assert!(n_dim > 0, "n_dim must be positive and nonzero");
@@ -36,8 +40,11 @@ pub fn build_lhd(
         "n_iterations must be positive and nonzero"
     );
 
+    let mut rng: StdRng = SeedableRng::seed_from_u64(*seed);
+
     if metric.is_none() {
-        let lhd: Vec<Vec<f64>> = lhd::generate_lhd(n_samples, n_dim);
+        // Can afford to clone here since we are just making one call
+        let lhd: Vec<Vec<f64>> = lhd::generate_lhd(n_samples, n_dim, &mut rng);
         return lhd;
     }
 
@@ -54,17 +61,25 @@ pub fn build_lhd(
         ),
     };
 
-    let best_lhd_metric_pair: (Vec<Vec<f64>>, f64) = (0..n_iterations)
+    let best_lhd_metric_pair: (Vec<Vec<f64>>, f64) = (0..n_iterations as usize)
         .into_par_iter()
-        .map(|_| {
+        .enumerate()
+        .map(|(i, _)| {
             // Generate lhd, metric pairs in parallel via rayon's into_par_iter
-            let lhd: Vec<Vec<f64>> = lhd::generate_lhd(n_samples, n_dim);
+            let mut local_rng = StdRng::seed_from_u64(*seed + i as u64);
+            let lhd: Vec<Vec<f64>> = lhd::generate_lhd(n_samples, n_dim, &mut local_rng);
             let metric = metric_fn(&lhd);
             assert!(metric >= 0.0, "Metric must be non-negative");
             (lhd, metric)
         })
         .reduce(
-            || if minimize { (Vec::new(), f64::INFINITY) } else { (Vec::new(), f64::NEG_INFINITY) }, // Starting value
+            || {
+                if minimize {
+                    (Vec::new(), f64::INFINITY)
+                } else {
+                    (Vec::new(), f64::NEG_INFINITY)
+                }
+            }, // Starting value
             // Iterate through at the op stage to find the highest of any two pairs of comparison
             |(lhd1, metric1), (lhd2, metric2)| {
                 if minimize {

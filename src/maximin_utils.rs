@@ -5,6 +5,8 @@ use pyo3::PyResult;
 use pyo3::exceptions::PyValueError;
 #[cfg(feature = "pyo3-bindings")]
 use pyo3::prelude::*;
+use rand::SeedableRng;
+use rand::rngs::StdRng;
 /// Calculate the L2 distance between two points, also known as the
 /// Euclidean distance.
 ///
@@ -67,8 +69,10 @@ fn test_maximin_criterion() {
     let n_iterations: u64 = 1000;
     let n_samples: u64 = 100;
     let n_dim: u64 = 5;
+    let seed: u64 = 12345;
+    let mut rng: StdRng = SeedableRng::seed_from_u64(seed);
     for _i in 0..n_iterations {
-        let lhd = generate_lhd(n_samples, n_dim);
+        let lhd = generate_lhd(n_samples, n_dim, &mut rng);
         let maximin_metric: f64 = maximin_criterion(&lhd);
         assert!(maximin_metric >= 0.0);
         assert!(maximin_metric < f64::INFINITY)

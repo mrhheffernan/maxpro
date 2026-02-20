@@ -6,6 +6,7 @@ use maxpro::enums::Metrics;
 use maxpro::lhd::plot_x_vs_y;
 use maxpro::maximin_utils::maximin_criterion;
 use maxpro::maxpro_utils::maxpro_criterion;
+use rand::Rng;
 
 #[derive(Parser)]
 struct Args {
@@ -19,6 +20,8 @@ struct Args {
     ndims: u64,
     #[arg(short, long)]
     output_path: Option<String>,
+    #[arg(long)]
+    seed: Option<u64>,
     #[arg(short, long, value_enum, default_value_t = Metrics::MaxPro)]
     metric: Metrics,
     #[arg(long, default_value_t = 100000)]
@@ -41,6 +44,12 @@ fn main() {
     let annealing_t = args.anneal_t;
     let annealing_cooling = args.anneal_cooling;
 
+    let seed = match args.seed {
+        Some(x) => x,
+        None => rand::rng().random_range(1..1000000) as u64,
+    };
+    println!("Generating hypercube with seed {}", seed);
+
     // Ensure basic sanity checks are respected
     assert!(n_samples > 0, "n_samples must be positive and nonzero");
     assert!(
@@ -59,7 +68,7 @@ fn main() {
     };
 
     // Construct the initial latin hypercube
-    let lhd: Vec<Vec<f64>> = build_lhd(n_samples, n_dims, n_iterations, Some(metric));
+    let lhd: Vec<Vec<f64>> = build_lhd(n_samples, n_dims, n_iterations, Some(metric), &seed);
 
     let metric_value = metric_fn(&lhd);
     // Optimize the metric

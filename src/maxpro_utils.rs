@@ -5,6 +5,8 @@ use pyo3::PyResult;
 use pyo3::exceptions::PyValueError;
 #[cfg(feature = "pyo3-bindings")]
 use pyo3::prelude::*;
+use rand::SeedableRng;
+use rand::rngs::StdRng;
 
 /// Helper function to calculate the internal sum term of the MaxPro criterion (psi(D)).
 /// This sum is the term that is directly minimized in the optimization
@@ -99,8 +101,10 @@ fn test_maxpro_criterion() {
     let n_iterations: u64 = 1000;
     let n_samples: u64 = 100;
     let n_dim: u64 = 5;
+    let seed: u64 = 12345;
+    let mut rng: StdRng = SeedableRng::seed_from_u64(seed);
     for _i in 0..n_iterations {
-        let lhd = generate_lhd(n_samples, n_dim);
+        let lhd = generate_lhd(n_samples, n_dim, &mut rng);
         let maxpro_metric: f64 = maxpro_criterion(&lhd);
         assert!(maxpro_metric >= 0.0);
         assert!(maxpro_metric < f64::INFINITY)
