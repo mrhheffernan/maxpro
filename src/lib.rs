@@ -141,7 +141,7 @@ pub fn py_build_lhd(
 
     let rng_seed = match seed {
         Some(x) => x,
-        None => rand::rng().random_range(1..1000000) as u64,
+        None => rand::random::<u64>(),
     };
 
     let pymetric = match metric.to_str()? {

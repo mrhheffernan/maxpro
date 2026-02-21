@@ -46,7 +46,7 @@ fn main() {
 
     let seed = match args.seed {
         Some(x) => x,
-        None => rand::rng().random_range(1..1000000) as u64,
+        None => rand::random::<u64>(),
     };
     println!("Generating hypercube with seed {}", seed);
 
