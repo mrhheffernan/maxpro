@@ -49,7 +49,6 @@ where
     );
     // Set max step size as +/- 1% of the size of the design interval
     let n_samples: usize = design.len();
-    let n_dim: usize = design[0].len();
     let step_size: f64 = 0.01 / n_samples as f64;
     let mut temp = initial_temp;
     let mut rng: StdRng = SeedableRng::seed_from_u64(seed);
