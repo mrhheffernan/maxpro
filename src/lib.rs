@@ -32,7 +32,7 @@ pub fn build_lhd(
     n_dim: u64,
     n_iterations: u64,
     metric: Option<enums::Metrics>,
-    seed: &u64,
+    seed: u64,
 ) -> Vec<Vec<f64>> {
     assert!(n_samples > 0, "n_samples must be positive and nonzero");
     assert!(n_dim > 0, "n_dim must be positive and nonzero");
@@ -41,7 +41,7 @@ pub fn build_lhd(
         "n_iterations must be positive and nonzero"
     );
 
-    let mut rng: StdRng = SeedableRng::seed_from_u64(*seed);
+    let mut rng: StdRng = SeedableRng::seed_from_u64(seed);
 
     if metric.is_none() {
         // Can afford to clone here since we are just making one call
@@ -67,7 +67,7 @@ pub fn build_lhd(
         .enumerate()
         .map(|(i, _)| {
             // Generate lhd, metric pairs in parallel via rayon's into_par_iter
-            let mut local_rng = StdRng::seed_from_u64(*seed + i as u64);
+            let mut local_rng = StdRng::seed_from_u64(seed + i as u64);
             let lhd: Vec<Vec<f64>> = lhd::generate_lhd(n_samples, n_dim, &mut local_rng);
             let metric = metric_fn(&lhd);
             assert!(metric >= 0.0, "Metric must be non-negative");

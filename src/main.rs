@@ -68,7 +68,7 @@ fn main() {
     };
 
     // Construct the initial latin hypercube
-    let lhd: Vec<Vec<f64>> = build_lhd(n_samples, n_dims, n_iterations, Some(metric), &seed);
+    let lhd: Vec<Vec<f64>> = build_lhd(n_samples, n_dims, n_iterations, Some(metric), seed);
 
     let metric_value = metric_fn(&lhd);
     // Optimize the metric
