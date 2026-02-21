@@ -64,12 +64,11 @@ where
     for _it in 0..n_iterations {
         // Modify the design
         let mut annealed_design = best_design.clone();
-        for i in 0..n_samples {
-            for j in 0..n_dim {
-                // Perturb the point, ensuring the point remains on the unit interval.
-                annealed_design[i][j] = (annealed_design[i][j]
-                    + rng.random_range(-step_size..step_size))
-                .clamp(0.0, 1.0)
+
+        for row in annealed_design.iter_mut() {
+            for elem in row.iter_mut() {
+                // Dereference to update elem in place
+                *elem = (*elem + rng.random_range(-step_size..step_size)).clamp(0.0, 1.0)
             }
         }
 
