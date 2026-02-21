@@ -144,8 +144,6 @@ pub fn py_build_lhd(
         None => rand::rng().random_range(1..1000000) as u64,
     };
 
-    let metric_str = metric.to_string();
-
     let pymetric = match metric.to_str()? {
         "maxpro" => enums::Metrics::MaxPro,
         "maximin" => enums::Metrics::MaxiMin,
