@@ -205,10 +205,10 @@ pub fn py_generate_lhd(n_samples: u64, n_dim: u64, seed: Option<u64>) -> PyResul
     if n_dim > usize::MAX as u64 {
         return Err(PyValueError::new_err("n_dim too large to index"));
     }
-    let seed = match args.seed {
+    let rng_seed = match seed {
         Some(x) => x,
         None => rand::rng().random_range(1..1000000) as u64,
     };
-    let mut rng: StdRng = SeedableRng::seed_from_u64(seed);
+    let mut rng: StdRng = SeedableRng::seed_from_u64(rng_seed);
     Ok(generate_lhd(n_samples, n_dim, &mut rng))
 }

@@ -12,6 +12,7 @@ pub mod enums;
 pub mod lhd;
 pub mod maximin_utils;
 pub mod maxpro_utils;
+use rand::Rng;
 use rand::SeedableRng;
 use rand::rngs::StdRng;
 
@@ -138,7 +139,7 @@ pub fn py_build_lhd(
         return Err(PyValueError::new_err("n_dim too large to index"));
     }
 
-    let seed = match args.seed {
+    let rng_seed = match seed {
         Some(x) => x,
         None => rand::rng().random_range(1..1000000) as u64,
     };
@@ -154,7 +155,13 @@ pub fn py_build_lhd(
             ));
         }
     };
-    Ok(build_lhd(n_samples, n_dim, n_iterations, Some(pymetric)))
+    Ok(build_lhd(
+        n_samples,
+        n_dim,
+        n_iterations,
+        Some(pymetric),
+        &rng_seed,
+    ))
 }
 
 // Python module definition

@@ -152,7 +152,7 @@ pub fn py_anneal_lhd(
             )));
         }
     };
-    let seed = match args.seed {
+    let rng_seed = match seed {
         Some(x) => x,
         None => rand::rng().random_range(1..1000000) as u64,
     };
@@ -163,6 +163,6 @@ pub fn py_anneal_lhd(
         cooling_rate,
         metric,
         minimize,
-        seed,
+        rng_seed,
     ))
 }
