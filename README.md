@@ -29,15 +29,16 @@ The Maximin metric is included for additional functionality and performance benc
 ## Usage
 
 ### Rust
-Add the crate to your project via Cargo, then `using maxpro::<>` you can use any of the underlying components.
+Add the crate to your project via Cargo (`cargo add maxpro`), then `using maxpro::<>` you can use any of the underlying components.
 
 ### Python
+Install with `pip install maxpro`, `uv add maxpro`, or your other favorite package management tool.
 
 In version 0.1.0, you must import as
 ```
 import _maxpro as maxpro
 ```
-in 0.1.1, this will be replaced with
+in 0.1.1, this is replaced with
 ```
 import maxpro
 ```
@@ -49,16 +50,16 @@ Versions 0.1.* are reserved for bug fixes and performance improvements to existi
 ### 0.1.1
 - Resolve python import syntax
 - Make output path optional
+- Seedable RNGs (pulled in from 0.2.0)
 
 ### 0.2.0
 - Ordering the designs for optimal execution order
-- Seedable RNGs
 - Performance benchmarking and validation against the R implementation of MaxPro
 
 ## AI Policy
 This project's AI policy is that no AI-written code is included in the core Rust module or in the python bindings. AI-written code may be present in the `python/` directory but is restricted to analysis. AI code is not used for benchmarking either correctness or speed. 
 
-Gemini code review is used in development and any code suggestions must be human tested.
+Gemini code review is used in development and any code suggestions must be human tested. No AI-generated or vibe-coded contributions will be accepted.
 
 ## Style
 Rust formatting by `cargo fmt`. Python formatting by `ruff`. `flake8` used for PEP, line length not enforced in docstrings within reason.
@@ -71,4 +72,16 @@ MaxPro design and optimization: The Rust implementation usually finds a better m
 
 Maximin design and optimization is benchmarked against PyDOE3 as the reference implementation. The Rust and Python implementations return almost identical results (0.22 in this implementation vs 0.21 in PyDOE3) with this implementation offering a 2.63x speedup for 5 samples in 2D across 10,000 iterations. Increasing this to 50 samples in 3D, this implementation returns a better result than PyDOE3 (0.2204 vs 0.2072) with a 2.9x speedup (0.0286s vs. 0.083s).
 
+
 Benchmarks are run with `python/comparisons.py`.
+Last PR's benchmarks:
+```
+Rust calculation: 72.39111811323957 in 0.016954898834228516 s
+Python calculation: 89.75996904868765 in 25.15124797821045 s
+Python / Rust ratio: 1483.4207047838681
+Benchmarking Maximin time against reference implementation
+Rust criterion 0.22187155920586812 in 0.02622389793395996 s
+Python criterion 0.21295020774372542 in 0.07755494117736816 s
+Python/Rust ratio: 2.9574146975661644
+```
+
