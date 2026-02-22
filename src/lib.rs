@@ -158,7 +158,7 @@ pub fn py_build_lhd(
         n_dim,
         n_iterations,
         Some(pymetric),
-        &rng_seed,
+        rng_seed,
     ))
 }
 
