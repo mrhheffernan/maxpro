@@ -6,7 +6,6 @@ use maxpro::enums::Metrics;
 use maxpro::lhd::plot_x_vs_y;
 use maxpro::maximin_utils::maximin_criterion;
 use maxpro::maxpro_utils::maxpro_criterion;
-use rand::Rng;
 
 #[derive(Parser)]
 struct Args {
