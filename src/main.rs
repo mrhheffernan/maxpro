@@ -1,4 +1,4 @@
-use clap::{Parser, ValueEnum};
+use clap::Parser;
 use maxpro::anneal::anneal_lhd;
 use maxpro::build_lhd;
 use maxpro::enums::Metrics;
@@ -6,6 +6,7 @@ use maxpro::enums::Metrics;
 use maxpro::lhd::plot_x_vs_y;
 use maxpro::maximin_utils::maximin_criterion;
 use maxpro::maxpro_utils::maxpro_criterion;
+use rand::Rng;
 
 #[derive(Parser)]
 struct Args {
@@ -19,6 +20,8 @@ struct Args {
     ndims: u64,
     #[arg(short, long)]
     output_path: Option<String>,
+    #[arg(long)]
+    seed: Option<u64>,
     #[arg(short, long, value_enum, default_value_t = Metrics::MaxPro)]
     metric: Metrics,
     #[arg(long, default_value_t = 100000)]
@@ -41,6 +44,12 @@ fn main() {
     let annealing_t = args.anneal_t;
     let annealing_cooling = args.anneal_cooling;
 
+    let seed = match args.seed {
+        Some(x) => x,
+        None => rand::random::<u64>(),
+    };
+    println!("Generating hypercube with seed {}", seed);
+
     // Ensure basic sanity checks are respected
     assert!(n_samples > 0, "n_samples must be positive and nonzero");
     assert!(
@@ -59,7 +68,7 @@ fn main() {
     };
 
     // Construct the initial latin hypercube
-    let lhd: Vec<Vec<f64>> = build_lhd(n_samples, n_dims, n_iterations, Some(metric));
+    let lhd: Vec<Vec<f64>> = build_lhd(n_samples, n_dims, n_iterations, Some(metric), seed);
 
     let metric_value = metric_fn(&lhd);
     // Optimize the metric
@@ -70,6 +79,7 @@ fn main() {
         annealing_cooling,
         metric_fn,
         minimize,
+        seed + 1,
     );
     let annealed_metric = metric_fn(&annealed_design);
 
@@ -81,9 +91,9 @@ fn main() {
     // Plot, if requested
     if plot {
         if cfg!(feature = "debug") {
-            if let Some(output_path) = args.output_path {
+            if let Some(_output_path) = args.output_path {
                 #[cfg(feature = "debug")]
-                let _ = plot_x_vs_y(&annealed_design, std::path::Path::new(&output_path));
+                let _ = plot_x_vs_y(&annealed_design, std::path::Path::new(&_output_path));
             } else {
                 println!("--output-path not specified, not writing to file.")
             }

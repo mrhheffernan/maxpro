@@ -9,7 +9,8 @@ use pyo3::exceptions::PyValueError;
 #[cfg(feature = "pyo3-bindings")]
 use pyo3::prelude::*;
 use rand::Rng;
-use rand::prelude::ThreadRng;
+use rand::SeedableRng;
+use rand::rngs::StdRng;
 
 /// Simulated annealing for improving (maximizing or minimizing) a given metric.
 ///
@@ -30,6 +31,7 @@ pub fn anneal_lhd<F>(
     cooling_rate: f64,
     metric: F,
     minimize: bool,
+    seed: u64,
 ) -> Vec<Vec<f64>>
 where
     F: Fn(&Vec<Vec<f64>>) -> f64,
@@ -47,11 +49,9 @@ where
     );
     // Set max step size as +/- 1% of the size of the design interval
     let n_samples: usize = design.len();
-    let n_dim: usize = design[0].len();
     let step_size: f64 = 0.01 / n_samples as f64;
     let mut temp = initial_temp;
-    // TODO: Make this seedable
-    let mut rng: ThreadRng = rand::rng();
+    let mut rng: StdRng = SeedableRng::seed_from_u64(seed);
 
     let mut best_design = design.clone();
     let mut best_metric = metric(design);
@@ -63,12 +63,11 @@ where
     for _it in 0..n_iterations {
         // Modify the design
         let mut annealed_design = best_design.clone();
-        for i in 0..n_samples {
-            for j in 0..n_dim {
-                // Perturb the point, ensuring the point remains on the unit interval.
-                annealed_design[i][j] = (annealed_design[i][j]
-                    + rng.random_range(-step_size..step_size))
-                .clamp(0.0, 1.0)
+
+        for row in annealed_design.iter_mut() {
+            for elem in row.iter_mut() {
+                // Dereference to update elem in place
+                *elem = (*elem + rng.random_range(-step_size..step_size)).clamp(0.0, 1.0)
             }
         }
 
@@ -119,6 +118,7 @@ where
 ///     cooling_rate (float): Cooling rate for annealing
 ///     metric_name (str): metric name; options are "maxpro" and "maximin"
 ///     minimize (bool): Whether to minimize the metric
+///     seed (int, optional): Seed for the random number generator.
 ///
 /// Returns:
 ///     list[list[float]]: Optimized latin hypercube design
@@ -130,6 +130,7 @@ pub fn py_anneal_lhd(
     cooling_rate: f64,
     metric_name: String,
     minimize: bool,
+    seed: Option<u64>,
 ) -> PyResult<Vec<Vec<f64>>> {
     if n_iterations == 0 {
         return Err(PyValueError::new_err(
@@ -149,6 +150,10 @@ pub fn py_anneal_lhd(
             )));
         }
     };
+    let rng_seed = match seed {
+        Some(x) => x,
+        None => rand::random::<u64>(),
+    };
     Ok(anneal_lhd(
         &design,
         n_iterations,
@@ -156,5 +161,6 @@ pub fn py_anneal_lhd(
         cooling_rate,
         metric,
         minimize,
+        rng_seed,
     ))
 }

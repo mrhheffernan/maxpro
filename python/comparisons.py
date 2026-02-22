@@ -5,6 +5,8 @@ import numpy as np
 import pyDOE3
 import pymaxpro
 
+SEED = 42
+
 
 def calculate_pymaxpro_criterion(maxpro_lhd: list[list[float]]) -> float:
     maxpro_inner = pymaxpro.maxpro_criterion(np.array(maxpro_lhd))
@@ -21,13 +23,15 @@ def test_parity():
     n_dims = [2, 4, 10]
     n_samples = [10, 100, 1000]
     iterations = 1000
+    seed = SEED
     for nd in n_dims:
         for ns in n_samples:
             print(f"Checking {ns} samples in {nd} dimensions")
-            maxpro_lhd = maxpro.build_lhd(ns, nd, iterations, "maxpro")
+            maxpro_lhd = maxpro.build_lhd(ns, nd, iterations, "maxpro", seed)
             rust_criterion = maxpro.maxpro_criterion(maxpro_lhd)
             python_criterion = calculate_pymaxpro_criterion(maxpro_lhd)
             assert np.isclose(rust_criterion, python_criterion)
+            seed += 1
 
 
 def benchmark_time_maxpro():
@@ -39,8 +43,8 @@ def benchmark_time_maxpro():
     n_dim = 3
 
     time_rust_start = time.time()
-    maxpro_lhd = maxpro.build_lhd(n_samples, n_dim, n_iterations, "maxpro")
-    maxpro_lhd = maxpro.anneal_lhd(maxpro_lhd, 1000, 1.0, 0.99, "maxpro", True)
+    maxpro_lhd = maxpro.build_lhd(n_samples, n_dim, n_iterations, "maxpro", SEED)
+    maxpro_lhd = maxpro.anneal_lhd(maxpro_lhd, 1000, 1.0, 0.99, "maxpro", True, SEED)
     maxpro_criterion = maxpro.maxpro_criterion(maxpro_lhd)
     time_rust_end = time.time()
 
@@ -62,8 +66,10 @@ def benchmark_time_maximin():
     n_iterations = 1000
 
     time_rust_start = time.time()
-    maximin_lhd = maxpro.build_lhd(n_samples, n_dim, n_iterations, "maximin")
-    maximin_lhd = maxpro.anneal_lhd(maximin_lhd, 1000, 1.0, 0.99, "maximin", False)
+    maximin_lhd = maxpro.build_lhd(n_samples, n_dim, n_iterations, "maximin", SEED)
+    maximin_lhd = maxpro.anneal_lhd(
+        maximin_lhd, 1000, 1.0, 0.99, "maximin", False, SEED
+    )
     time_rust_end = time.time()
 
     time_python_start = time.time()
