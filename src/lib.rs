@@ -12,6 +12,7 @@ pub mod enums;
 pub mod lhd;
 pub mod maximin_utils;
 pub mod maxpro_utils;
+use rand::Rng;
 use rand::SeedableRng;
 use rand::rngs::StdRng;
 
