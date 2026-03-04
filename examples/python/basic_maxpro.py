@@ -1,5 +1,6 @@
 import maxpro
 
+
 def main():
     # Fix the randomness
     SEED = 42
@@ -10,7 +11,7 @@ def main():
     n_iterations = 500
 
     # Use the maximum projection metric
-    metric = 'maxpro'
+    metric = "maxpro"
 
     # Generate a semi-optimal latin hypercube design
     lhd = maxpro.build_lhd(n_samples, n_dim, n_iterations, metric, SEED)
@@ -23,10 +24,19 @@ def main():
     cooling_rate = 0.99
     minimize = True
 
-    lhd_annealed = maxpro.anneal_lhd(lhd, n_anneal_iterations, initial_temperature, cooling_rate, metric, minimize, SEED)
+    lhd_annealed = maxpro.anneal_lhd(
+        lhd,
+        n_anneal_iterations,
+        initial_temperature,
+        cooling_rate,
+        metric,
+        minimize,
+        SEED,
+    )
 
     metric_value_annealed = maxpro.maxpro_criterion(lhd_annealed)
     print(f"Annealed maximum projection metric value: {metric_value_annealed}")
+
 
 if __name__ == "__main__":
     main()
