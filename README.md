@@ -54,7 +54,6 @@ Versions 0.1.* are reserved for bug fixes and performance improvements to existi
 
 ### 0.2.0
 - Ordering the designs for optimal execution order
-- Performance benchmarking and validation against the R implementation of MaxPro
 
 ## AI Policy
 This project's AI policy is that no AI-written code is included in the core Rust module or in the python bindings. AI-written code may be present in the `python/` directory but is restricted to analysis. AI code is not used for benchmarking either correctness or speed. 
@@ -83,5 +82,21 @@ Benchmarking Maximin time against reference implementation
 Rust criterion 0.22187155920586812 in 0.02622389793395996 s
 Python criterion 0.21295020774372542 in 0.07755494117736816 s
 Python/Rust ratio: 2.9574146975661644
+```
+
+The MaxPro metric calculation can be differentially tested against the R package as the source of truth. 
+Current comparisons show agreement up to a relative tolerance of 1e-7.
+
+Design generation can also be benchmarked for speed and metric value. A comparison of metric calculation
+is shown below for the same design, as well as design generation with approximately matching parameters.
+The R implementation presently generates a more optimal design than this implementation due in part
+to this implementation's simplistic annealing approach as of v0.1.1.
+
+Benchmarks below can be reproduced [here](https://colab.research.google.com/drive/1-cgXaP92jp1tPd3w7SQtVEr2WJogOM3u?usp=sharing) with source for local reproduction, including R design generation, in `python/comparison_r.py`.
+```
+R calculation: 95.98506 
+Rust calculation: 95.98505099515629
+Design with metric 136.20062378481447 found in 3.3881406784057617 seconds
+Rust/R runtime ratio: 0.6156059584849821
 ```
 
