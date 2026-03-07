@@ -230,7 +230,8 @@ where
 **Example:**
 
 ```rust
-use maxpro::{anneal_lhd, maxpro_utils::maxpro_criterion};
+use maxpro::anneal::anneal_lhd;
+use maxpro::maxpro_utils::maxpro_criterion;
 
 let optimized = anneal_lhd(
     &lhd,
