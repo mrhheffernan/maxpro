@@ -136,7 +136,7 @@ def main():
     ndim = 10
     nsamples = 100
     niterations = 10000
-    maxpro_lhd = maxpro.build_maxpro_lhd(nsamples, ndim, niterations)
+    maxpro_lhd = maxpro.build_lhd(nsamples, ndim, niterations, "maxpro", seed=12345)
     optimal_maxpro_lhd = maxpro.anneal_lhd(
         maxpro_lhd,
         1000,
@@ -144,6 +144,7 @@ def main():
         cooling_rate=0.1,
         metric_name="maxpro",
         minimize=True,
+        seed=12346,
     )
     projected_metrics = calculate_maximin_projections(optimal_maxpro_lhd)
 

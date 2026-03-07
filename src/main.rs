@@ -95,10 +95,10 @@ fn main() {
                 #[cfg(feature = "debug")]
                 let _ = plot_x_vs_y(&annealed_design, std::path::Path::new(&_output_path));
             } else {
-                println!("--output-path not specified, not writing to file.")
+                eprintln!("--output-path not specified, not writing to file.")
             }
         } else {
-            println!("Plotting is only enabled with the debug feature flag.")
+            eprintln!("Plotting is only enabled with the debug feature flag.")
         }
     }
 }
