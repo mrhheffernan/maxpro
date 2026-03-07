@@ -14,7 +14,7 @@ keywords = [
     "optimization",
 ]
 categories = ["algorithms", "mathematics", "science"]
-exclude = [".github/", "python/", "requirements.txt"]
+exclude = [".github/", "docs/", "python/", "requirements.txt"]
 readme = "README.md"
 
 
