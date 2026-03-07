@@ -114,7 +114,7 @@ Design generation can also be benchmarked for speed and metric value. A comparis
 |--------|------|------|
 | MaxPro criterion | 95.98506 | 95.98505099515629 |
 
-The Rust implementation runs at **~0.62x** the speed of R (i.e., it's faster) for design generation. Note that the R implementation may generate more optimal designs due to its more sophisticated optimization approach compared to this implementation's simplistic annealing approach.
+The Rust implementation is **~1.6x faster** than R for design generation. Note that the R implementation may generate more optimal designs due to its more sophisticated optimization approach compared to this implementation's simplistic annealing approach.
 
 Benchmarks can be reproduced using the [Google Colab notebook](https://colab.research.google.com/drive/1-cgXaP92jp1tPd3w7SQtVEr2WJogOM3u) or locally using `python/comparison_r.py`.
 

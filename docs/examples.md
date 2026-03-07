@@ -29,7 +29,13 @@ def main():
     metric = "maxpro"
 
     # Generate a semi-optimal latin hypercube design
-    lhd = maxpro.build_lhd(n_samples, n_dim, n_iterations, metric, SEED)
+    lhd = maxpro.build_lhd(
+        n_samples=n_samples,
+        n_dim=n_dim,
+        n_iterations=n_iterations,
+        metric=metric,
+        seed=SEED
+    )
     metric_value = maxpro.maxpro_criterion(lhd)
     print(f"Initial maximum projection metric value: {metric_value}")
 
@@ -40,13 +46,13 @@ def main():
     minimize = True
 
     lhd_annealed = maxpro.anneal_lhd(
-        lhd,
-        n_anneal_iterations,
-        initial_temperature,
-        cooling_rate,
-        metric,
-        minimize,
-        SEED,
+        design=lhd,
+        n_iterations=n_anneal_iterations,
+        initial_temp=initial_temperature,
+        cooling_rate=cooling_rate,
+        metric_name=metric,
+        minimize=minimize,
+        seed=SEED,
     )
 
     metric_value_annealed = maxpro.maxpro_criterion(lhd_annealed)
@@ -85,7 +91,13 @@ def main():
     metric = "maximin"
 
     # Generate a semi-optimal latin hypercube design
-    lhd = maxpro.build_lhd(n_samples, n_dim, n_iterations, metric, SEED)
+    lhd = maxpro.build_lhd(
+        n_samples=n_samples,
+        n_dim=n_dim,
+        n_iterations=n_iterations,
+        metric=metric,
+        seed=SEED
+    )
     metric_value = maxpro.maximin_criterion(lhd)
     print(f"Initial maximin metric value: {metric_value}")
 
@@ -96,13 +108,13 @@ def main():
     minimize = False  # Maximize for maximin!
 
     lhd_annealed = maxpro.anneal_lhd(
-        lhd,
-        n_anneal_iterations,
-        initial_temperature,
-        cooling_rate,
-        metric,
-        minimize,
-        SEED,
+        design=lhd,
+        n_iterations=n_anneal_iterations,
+        initial_temp=initial_temperature,
+        cooling_rate=cooling_rate,
+        metric_name=metric,
+        minimize=minimize,
+        seed=SEED,
     )
 
     metric_value_annealed = maxpro.maximin_criterion(lhd_annealed)

@@ -237,11 +237,17 @@ maxpro.anneal_lhd(
 import maxpro
 
 # First generate a design
-lhd = maxpro.build_lhd(100, 5, 500, "maxpro", 42)
+lhd = maxpro.build_lhd(
+    n_samples=100,
+    n_dim=5,
+    n_iterations=500,
+    metric="maxpro",
+    seed=42
+)
 
 # Then optimize with annealing
 optimized = maxpro.anneal_lhd(
-    lhd,
+    design=lhd,
     n_iterations=5000,
     initial_temp=1.0,
     cooling_rate=0.99,
