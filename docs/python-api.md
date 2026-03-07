@@ -1,0 +1,280 @@
+---
+title: Python API Reference
+description: Complete API reference for MaxPro Python bindings
+icon: lucide/braces
+---
+
+# Python API Reference
+
+This section provides complete documentation for the MaxPro Python module.
+
+## Installation
+
+```bash
+pip install maxpro
+```
+
+## Module Functions
+
+### generate_lhd
+
+Generates a random Latin Hypercube Design without optimization.
+
+```python
+maxpro.generate_lhd(n_samples: int, n_dim: int, seed: int | None = None) -> list[list[float]]
+```
+
+**Parameters:**
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `n_samples` | `int` | Number of samples for the LHD. Must be positive and nonzero. |
+| `n_dim` | `int` | Number of dimensions for the LHD. Must be positive and nonzero. |
+| `seed` | `int`, optional | Seed for the random number generator. If not provided, a random seed is used. |
+
+**Returns:**
+
+`list[list[float]]` - A Latin Hypercube Design as a list of rows.
+
+**Raises:**
+
+- `ValueError` if `n_samples` or `n_dim` is 0
+- `ValueError` if `n_samples` or `n_dim` is too large to index
+
+**Example:**
+
+```python
+import maxpro
+
+lhd = maxpro.generate_lhd(n_samples=50, n_dim=5, seed=42)
+```
+
+---
+
+### build_lhd
+
+Builds an optimal Latin Hypercube Design by searching through multiple random candidates and selecting the one that optimizes the specified metric.
+
+```python
+maxpro.build_lhd(
+    n_samples: int,
+    n_dim: int,
+    n_iterations: int,
+    metric: str,
+    seed: int | None = None
+) -> list[list[float]]
+```
+
+**Parameters:**
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `n_samples` | `int` | Number of samples for the LHD. Must be positive and nonzero. |
+| `n_dim` | `int` | Number of dimensions in which to generate points. Must be positive and nonzero. |
+| `n_iterations` | `int` | Number of iterations to use to search for an optimal LHD. Must be positive and nonzero. |
+| `metric` | `str` | Metric to use. Must be either `'maximin'` or `'maxpro'`. |
+| `seed` | `int`, optional | Seed for the random number generator. If not provided, this is randomly chosen. |
+
+**Returns:**
+
+`list[list[float]]` - A semi-optimal Latin Hypercube Design that optimizes the specified metric.
+
+**Raises:**
+
+- `ValueError` if any parameter is 0
+- `ValueError` if `n_samples` or `n_dim` is too large to index
+- `ValueError` if `metric` is not `'maxpro'` or `'maximin'`
+
+**Example:**
+
+```python
+import maxpro
+
+# Generate a MaxPro design
+lhd = maxpro.build_lhd(
+    n_samples=100,
+    n_dim=10,
+    n_iterations=500,
+    metric="maxpro",
+    seed=42
+)
+
+# Generate a Maximin design
+lhd = maxpro.build_lhd(
+    n_samples=100,
+    n_dim=3,
+    n_iterations=500,
+    metric="maximin",
+    seed=42
+)
+```
+
+---
+
+### maxpro_criterion
+
+Calculates the Maximum Projection (MaxPro) criterion for an input design.
+
+```python
+maxpro.maxpro_criterion(design: list[list[float]]) -> float
+```
+
+**Parameters:**
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `design` | `list[list[float]]` | Design of interest. Must not be empty. |
+
+**Returns:**
+
+`float` - Maximum projection criterion value. Lower values indicate better space-filling properties.
+
+**Raises:**
+
+- `ValueError` if design is empty
+
+**Mathematical Background:**
+
+The MaxPro criterion is calculated as:
+
+$$\psi(D) = \left( \frac{2}{n(n-1)} \sum_{i<j} \frac{1}{\prod_{l=1}^{d} (x_{il} - x_{jl})^2} \right)^{1/d}$$
+
+where $n$ is the number of samples and $d$ is the number of dimensions.
+
+**Example:**
+
+```python
+import maxpro
+
+design = [[0.1, 0.2], [0.5, 0.1], [0.9, 0.8]]
+value = maxpro.maxpro_criterion(design)
+print(f"MaxPro value: {value}")  # Lower is better
+```
+
+---
+
+### maximin_criterion
+
+Calculates the Maximin criterion for an input design.
+
+```python
+maxpro.maximin_criterion(design: list[list[float]]) -> float
+```
+
+**Parameters:**
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `design` | `list[list[float]]` | Input design. Must not be empty. |
+
+**Returns:**
+
+`float` - Maximin criterion value (minimum pairwise distance). Higher values indicate better spread.
+
+**Raises:**
+
+- `ValueError` if design is empty
+
+**Mathematical Background:**
+
+The Maximin criterion is the minimum Euclidean distance between any pair of points in the design:
+
+$$\text{maximin}(D) = \min_{i < j} \| x_i - x_j \|$$
+
+**Example:**
+
+```python
+import maxpro
+
+design = [[0.1, 0.2], [0.5, 0.1], [0.9, 0.8]]
+value = maxpro.maximin_criterion(design)
+print(f"Maximin value: {value}")  # Higher is better
+```
+
+---
+
+### anneal_lhd
+
+Anneals a Latin Hypercube Design to optimize its metric value using simulated annealing.
+
+```python
+maxpro.anneal_lhd(
+    design: list[list[float]],
+    n_iterations: int,
+    initial_temp: float,
+    cooling_rate: float,
+    metric_name: str,
+    minimize: bool,
+    seed: int | None = None
+) -> list[list[float]]
+```
+
+**Parameters:**
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `design` | `list[list[float]]` | Input Latin Hypercube Design to optimize |
+| `n_iterations` | `int` | Number of optimization iterations. Must be positive and nonzero. |
+| `initial_temp` | `float` | Initial temperature for annealing. Must be positive. |
+| `cooling_rate` | `float` | Cooling rate for annealing (multiplied by temperature each iteration) |
+| `metric_name` | `str` | Metric name; options are `"maxpro"` and `"maximin"` |
+| `minimize` | `bool` | Whether to minimize the metric (True for MaxPro, False for Maximin) |
+| `seed` | `int`, optional | Seed for the random number generator |
+
+**Returns:**
+
+`list[list[float]]` - Optimized design (note: may not preserve LHD properties)
+
+**Raises:**
+
+- `ValueError` if `n_iterations` is 0
+- `ValueError` if `initial_temp` is not positive
+- `ValueError` if `metric_name` is not recognized
+
+**Example:**
+
+```python
+import maxpro
+
+# First generate a design
+lhd = maxpro.build_lhd(
+    n_samples=100,
+    n_dim=5,
+    n_iterations=500,
+    metric="maxpro",
+    seed=42
+)
+
+# Then optimize with annealing
+optimized = maxpro.anneal_lhd(
+    design=lhd,
+    n_iterations=5000,
+    initial_temp=1.0,
+    cooling_rate=0.99,
+    metric_name="maxpro",
+    minimize=True,
+    seed=42
+)
+```
+
+**Annealing Tips:**
+
+- `initial_temp`: Higher values allow more exploration but may take longer to converge
+- `cooling_rate`: Closer to 1.0 means slower cooling (more refinement)
+- `n_iterations`: More iterations = more refinement but slower
+
+<script id="MathJax-script" async src="https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js"></script>
+<script>
+  window.MathJax = {
+    tex: {
+      inlineMath: [["\\(", "\\)"]],
+      displayMath: [["\\[", "\\]"]],
+      processEscapes: true,
+      processEnvironments: true
+    },
+    options: {
+      ignoreHtmlClass: ".*|",
+      processHtmlClass: "arithmatex"
+    }
+  };
+</script>

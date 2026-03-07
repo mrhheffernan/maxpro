@@ -1,6 +1,9 @@
 # MaxPro
 
 [![Rust build](https://github.com/mrhheffernan/maxpro/actions/workflows/rust-build-test.yml/badge.svg)](https://github.com/mrhheffernan/maxpro/actions/workflows/rust-build-test.yml)
+[![Documentation](https://img.shields.io/badge/docs-mrhheffernan.github.io/maxpro-blue)](https://mrhheffernan.github.io/maxpro/)
+
+**[Documentation](https://mrhheffernan.github.io/maxpro/)**
 
 This is a minimal Rust implementation of Latin Hypercube Design (LHD) generation with the Maximum Projection metric. 
 It pursues an initial random search for a relatively-optimal candidate and allows for further 
