@@ -17,7 +17,7 @@ site_name = "MaxPro"
 # meaningful description of your project for use by search engines.
 #
 # Read more: https://zensical.org/docs/setup/basics/#site_description
-site_description = "A minimal Rust implementation of Latin Hypercube Design generation with Maximum Projection metric."
+site_description = "A minimal Rust implementation of Latin Hypercube Design generation with the Maximum Projection (MaxPro) metric."
 
 # The site_author attribute. This is used in the HTML head element.
 #
