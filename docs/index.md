@@ -95,12 +95,14 @@ The Maximin criterion maximizes the minimum distance between any two points in t
 
 ## Benchmarks
 
-MaxPro design and optimization:
+### MaxPro
+
 - The Rust implementation usually finds a better metric than Python alternatives (e.g., 5.95 instead of 7.51)
 - ~84x faster than Python on Macbook Air M2 for 5 samples in 2D across 10,000 iterations
 - ~1440x faster for 50 samples in 3D
 
-Maximin design:
+### Maximin
+
 - Returns almost identical results to PyDOE3 reference implementation
 - ~2.9x speedup for 50 samples in 3D
 
