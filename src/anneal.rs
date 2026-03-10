@@ -100,10 +100,10 @@ where
     let mut global_best_metric = best_metric;
 
     for _it in 0..n_iterations {
-        let mut annealed_design = design.clone();
+        let mut annealed_design = global_best_design.clone();
         if swap {
             // Swap rows
-            annealed_design = swap_rows(design, &mut rng);
+            annealed_design = swap_rows(&annealed_design, &mut rng);
         } else {
             for row in annealed_design.iter_mut() {
                 for elem in row.iter_mut() {
