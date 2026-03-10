@@ -99,7 +99,7 @@ Benchmarks below can be reproduced [here](https://colab.research.google.com/driv
 ```
 R calculation: 95.98506 
 Rust calculation: 95.98505099515629
-Design with metric 136.20062378481447 found in 3.3881406784057617 seconds
-Rust/R runtime ratio: 0.6156059584849821
+Design with metric 92.61901238146892 found in 22.75386095046997 seconds
+Rust/R runtime ratio: 4.134247573875547
 ```
 

@@ -159,6 +159,7 @@ where
 ///     cooling_rate (float): Cooling rate for annealing
 ///     metric_name (str): metric name; options are "maxpro" and "maximin"
 ///     minimize (bool): Whether to minimize the metric
+///     swap (bool): Whether to use coordinate swap annealing
 ///     seed (int, optional): Seed for the random number generator.
 ///
 /// Returns:
@@ -171,6 +172,7 @@ pub fn py_anneal_lhd(
     cooling_rate: f64,
     metric_name: String,
     minimize: bool,
+    swap: bool,
     seed: Option<u64>,
 ) -> PyResult<Vec<Vec<f64>>> {
     if n_iterations == 0 {
@@ -203,5 +205,6 @@ pub fn py_anneal_lhd(
         metric,
         minimize,
         rng_seed,
+        swap,
     ))
 }
