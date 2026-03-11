@@ -98,8 +98,8 @@ to this implementation's simplistic annealing approach as of v0.1.1.
 Benchmarks below can be reproduced [here](https://colab.research.google.com/drive/1-cgXaP92jp1tPd3w7SQtVEr2WJogOM3u?usp=sharing) with source for local reproduction, including R design generation, in `python/comparison_r.py`.
 ```
 R calculation: 95.98506 
-Rust calculation: 95.98505099515629
-Design with metric 92.61901238146892 found in 22.75386095046997 seconds
-Rust/R runtime ratio: 4.134247573875547
+Rust calculation: 95.98505099515626
+Design with metric 92.61063616523754 found in 12.107218980789185 seconds
+Rust/R runtime ratio: 2.1998130693803777
 ```
 
