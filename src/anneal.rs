@@ -14,7 +14,7 @@ use rand::rngs::StdRng;
 
 const N_SWAP_ITERATIONS: usize = 10;
 
-pub fn swap_rows(lhd: &Vec<Vec<f64>>, rng: &mut StdRng) -> Vec<Vec<f64>> {
+fn swap_rows(lhd: &Vec<Vec<f64>>, rng: &mut StdRng) -> Vec<Vec<f64>> {
     // First clone the original LHD
     let mut lhd_swapped = lhd.clone();
 
