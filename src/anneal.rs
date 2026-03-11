@@ -14,6 +14,14 @@ use rand::rngs::StdRng;
 
 const N_SWAP_ITERATIONS: usize = 10;
 
+/// Perform a coordinate swap of two rows in a column
+///
+/// Arguments:
+///     lhd (&Vec<Vec<f64>>): Initial design
+///     rng (&mut StdRung): RNG for generating random indices
+///
+/// Returns:
+///     Vec<Vec<f64>>: lhd with a coordinate swap
 fn swap_rows(lhd: &Vec<Vec<f64>>, rng: &mut StdRng) -> Vec<Vec<f64>> {
     // First clone the original LHD
     let mut lhd_swapped = lhd.clone();
