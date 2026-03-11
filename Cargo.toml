@@ -42,3 +42,6 @@ default = []
 pyo3-bindings = ["dep:pyo3"]
 debug = ["dep:plotters"]
 
+[profile.profiling]
+inherits = "release"
+debug = true

@@ -7,6 +7,7 @@ use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
 use rand::SeedableRng;
 use rand::rngs::StdRng;
+use rayon::prelude::*;
 
 /// Helper function to calculate the internal sum term of the MaxPro criterion (psi(D)).
 /// This sum is the term that is directly minimized in the optimization
@@ -28,31 +29,30 @@ fn maxpro_sum(design: &Vec<Vec<f64>>) -> f64 {
         return 0.0;
     }
 
-    let mut inverse_product_sum: f64 = 0.0;
     let epsilon: f64 = 1e-12; // Small constant to prevent division by zero
 
-    for i in 0..n {
-        for j in (i + 1)..n {
-            // Calculate the product term: product_{l=1}^{d} (x_il - x_jl)^2
+    // Calculate the product term: product_{l=1}^{d} (x_il - x_jl)^2
+    let inverse_product_sum: f64 = (0..n)
+        .into_par_iter()
+        .map(|i| {
             let row_i: &Vec<f64> = &design[i];
-            let row_j: &Vec<f64> = &design[j];
-            let mut product_of_squared_diffs: f64 = 1.0;
-
-            // Use zip to iterate over both rows simultaneously
-            for (x_i_l, x_j_l) in row_i.iter().zip(row_j.iter()) {
-                let diff: f64 = x_i_l - x_j_l;
-                let diff_sq: f64 = diff * diff;
-                product_of_squared_diffs *= diff_sq;
+            let mut inverse_product: f64 = 0.0;
+            for j in (i + 1)..n {
+                let row_j: &Vec<f64> = &design[j];
+                let mut product_of_squared_diffs: f64 = 1.0;
+                // Use zip to iterate over both rows simultaneously
+                for (x_i_l, x_j_l) in row_i.iter().zip(row_j.iter()) {
+                    let diff: f64 = x_i_l - x_j_l;
+                    let diff_sq: f64 = diff * diff;
+                    product_of_squared_diffs *= diff_sq;
+                }
+                // Add epsilon to prevent division by zero
+                product_of_squared_diffs += epsilon;
+                inverse_product += 1.0 / product_of_squared_diffs;
             }
-
-            // Add epsilon to prevent division by zero
-            product_of_squared_diffs += epsilon;
-
-            // // Sum the inverse products
-            inverse_product_sum += 1.0 / product_of_squared_diffs;
-        }
-    }
-
+            inverse_product
+        })
+        .sum();
     inverse_product_sum
 }
 

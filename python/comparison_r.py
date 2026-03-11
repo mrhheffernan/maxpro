@@ -135,8 +135,8 @@ def main():
     # Compare runtimes
     SEED = 42
     start_time = time.time()
-    # Use half the R iterations on searching for an LHD, half on annealing.
-    n_iterations = R_ITERATIONS / 2
+    # Split the R iterations between generation and annealing
+    n_iterations = int(R_ITERATIONS / 3)
     maxpro_lhd = maxpro.build_lhd(100, 2, n_iterations, "maxpro", SEED)
 
     initial_temperature = 1.0
@@ -148,6 +148,17 @@ def main():
         cooling_rate,
         "maxpro",
         True,
+        True,
+        SEED,
+    )
+    optimal_maxpro_lhd = maxpro.anneal_lhd(
+        optimal_maxpro_lhd,
+        n_iterations,
+        initial_temperature,
+        cooling_rate,
+        "maxpro",
+        True,
+        False,
         SEED,
     )
     end_time = time.time()

@@ -12,6 +12,48 @@ use rand::Rng;
 use rand::SeedableRng;
 use rand::rngs::StdRng;
 
+const N_SWAP_ITERATIONS: usize = 10;
+
+/// Perform a coordinate swap of two rows in a column
+///
+/// Arguments:
+///     lhd (&Vec<Vec<f64>>): Initial design
+///     rng (&mut StdRung): RNG for generating random indices
+///
+/// Returns:
+///     Vec<Vec<f64>>: lhd with a coordinate swap
+fn swap_rows(lhd: &Vec<Vec<f64>>, rng: &mut StdRng) -> Vec<Vec<f64>> {
+    // First clone the original LHD
+    let mut lhd_swapped = lhd.clone();
+
+    // Identify row and columns to switch
+    // Start by defining muts in outer scope
+    let mut swap_idx_1_row = 0;
+    let mut swap_idx_2_row = 0;
+    let mut swap_idx_col = 0;
+
+    for _ in 0..N_SWAP_ITERATIONS {
+        // Iterate to find different values
+        swap_idx_1_row = rng.random_range(0..lhd.len());
+        swap_idx_2_row = rng.random_range(0..lhd.len());
+        swap_idx_col = rng.random_range(0..lhd[0].len());
+        if (swap_idx_1_row, swap_idx_col) != (swap_idx_2_row, swap_idx_col) {
+            // Break once different values are found
+            break;
+        }
+    }
+
+    // Get swap values
+    let swap_value_1 = lhd[swap_idx_1_row][swap_idx_col];
+    let swap_value_2 = lhd[swap_idx_2_row][swap_idx_col];
+
+    // Swap values
+    lhd_swapped[swap_idx_1_row][swap_idx_col] = swap_value_2;
+    lhd_swapped[swap_idx_2_row][swap_idx_col] = swap_value_1;
+
+    lhd_swapped
+}
+
 /// Simulated annealing for improving (maximizing or minimizing) a given metric.
 ///
 /// Arguments:
@@ -21,6 +63,7 @@ use rand::rngs::StdRng;
 ///     cooling rate (f64): Cooling rate, used to simulate annealing by reducing the metropolis algorithm acceptance
 ///     metric (F): A callable function that maps &Vec<Vec<f64>> to f64, used to minimize or maximize
 ///     minimize (bool): Whether to minimize or maximize the metric
+///     swap (bool): Whether to use swapping or random jitter to find a more optimal design
 ///
 /// Returns:
 ///     Vec<Vec<f64>>: A metric-optimized collection of points, not necessarily a latin hypercube.
@@ -32,6 +75,7 @@ pub fn anneal_lhd<F>(
     metric: F,
     minimize: bool,
     seed: u64,
+    swap: bool,
 ) -> Vec<Vec<f64>>
 where
     F: Fn(&Vec<Vec<f64>>) -> f64,
@@ -47,11 +91,14 @@ where
         initial_temp > 0.0,
         "initial_temp must be positive and nonzero"
     );
-    // Set max step size as +/- 1% of the size of the design interval
-    let n_samples: usize = design.len();
-    let step_size: f64 = 0.01 / n_samples as f64;
+
     let mut temp = initial_temp;
     let mut rng: StdRng = SeedableRng::seed_from_u64(seed);
+
+    // Set max step size as +/- 1% of the size of the design interval
+    // for jitter annealing
+    let n_samples: usize = design.len();
+    let step_size: f64 = 0.01 / n_samples as f64;
 
     let mut best_design = design.clone();
     let mut best_metric = metric(design);
@@ -61,16 +108,18 @@ where
     let mut global_best_metric = best_metric;
 
     for _it in 0..n_iterations {
-        // Modify the design
         let mut annealed_design = best_design.clone();
-
-        for row in annealed_design.iter_mut() {
-            for elem in row.iter_mut() {
-                // Dereference to update elem in place
-                *elem = (*elem + rng.random_range(-step_size..step_size)).clamp(0.0, 1.0)
+        if swap {
+            // Swap rows
+            annealed_design = swap_rows(&annealed_design, &mut rng);
+        } else {
+            for row in annealed_design.iter_mut() {
+                for elem in row.iter_mut() {
+                    // Dereference to update elem in place
+                    *elem = (*elem + rng.random_range(-step_size..step_size)).clamp(0.0, 1.0)
+                }
             }
         }
-
         // Calculate new metric
         let new_metric = metric(&annealed_design);
         let mut metric_diff = new_metric - best_metric;
@@ -118,6 +167,7 @@ where
 ///     cooling_rate (float): Cooling rate for annealing
 ///     metric_name (str): metric name; options are "maxpro" and "maximin"
 ///     minimize (bool): Whether to minimize the metric
+///     swap (bool): Whether to use coordinate swap annealing
 ///     seed (int, optional): Seed for the random number generator.
 ///
 /// Returns:
@@ -130,6 +180,7 @@ pub fn py_anneal_lhd(
     cooling_rate: f64,
     metric_name: String,
     minimize: bool,
+    swap: bool,
     seed: Option<u64>,
 ) -> PyResult<Vec<Vec<f64>>> {
     if n_iterations == 0 {
@@ -162,5 +213,6 @@ pub fn py_anneal_lhd(
         metric,
         minimize,
         rng_seed,
+        swap,
     ))
 }
