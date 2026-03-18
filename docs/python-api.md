@@ -195,7 +195,7 @@ print(f"Maximin value: {value}")  # Higher is better
 
 ### anneal_lhd
 
-Anneals a Latin Hypercube Design to optimize its metric value using simulated annealing.
+Anneals a Latin Hypercube Design to optimize its metric value using simulated annealing. Supports two strategies: coordinate swap (faster convergence, maintains LHD structure better) or jitter (fine-grained exploration).
 
 ```python
 maxpro.anneal_lhd(
@@ -205,6 +205,7 @@ maxpro.anneal_lhd(
     cooling_rate: float,
     metric_name: str,
     minimize: bool,
+    swap: bool,
     seed: int | None = None
 ) -> list[list[float]]
 ```
@@ -219,6 +220,7 @@ maxpro.anneal_lhd(
 | `cooling_rate` | `float` | Cooling rate for annealing (multiplied by temperature each iteration) |
 | `metric_name` | `str` | Metric name; options are `"maxpro"` and `"maximin"` |
 | `minimize` | `bool` | Whether to minimize the metric (True for MaxPro, False for Maximin) |
+| `swap` | `bool` | Use coordinate swap annealing (True) or jitter annealing (False) |
 | `seed` | `int`, optional | Seed for the random number generator |
 
 **Returns:**
@@ -245,7 +247,7 @@ lhd = maxpro.build_lhd(
     seed=42
 )
 
-# Then optimize with annealing
+# Coordinate swap annealing (faster convergence)
 optimized = maxpro.anneal_lhd(
     design=lhd,
     n_iterations=5000,
@@ -253,15 +255,64 @@ optimized = maxpro.anneal_lhd(
     cooling_rate=0.99,
     metric_name="maxpro",
     minimize=True,
+    swap=True,
+    seed=42
+)
+
+# Jitter annealing (fine-grained exploration)
+optimized = maxpro.anneal_lhd(
+    design=lhd,
+    n_iterations=5000,
+    initial_temp=1.0,
+    cooling_rate=0.99,
+    metric_name="maxpro",
+    minimize=True,
+    swap=False,
     seed=42
 )
 ```
 
 **Annealing Tips:**
 
+- Use `swap=True` for faster convergence while preserving LHD structure
+- Use `swap=False` (jitter) for fine-grained exploration but may break LHD properties
 - `initial_temp`: Higher values allow more exploration but may take longer to converge
 - `cooling_rate`: Closer to 1.0 means slower cooling (more refinement)
 - `n_iterations`: More iterations = more refinement but slower
+
+**Recommended Strategy**
+
+A good rule of thumb is to use **20% of iterations for coordinate swap annealing** and **80% for jitter annealing**. **Coordinate swap annealing should always be performed before jitter annealing** - swap first to quickly converge toward a good solution, then use jitter for fine-grained refinement.
+
+For example, with 50,000 total annealing iterations:
+
+```python
+# 20% swap (10k iterations) - perform this FIRST
+swap_annealed = maxpro.anneal_lhd(
+    design=lhd,
+    n_iterations=10000,
+    initial_temp=1.0,
+    cooling_rate=0.99,
+    metric_name="maxpro",
+    minimize=True,
+    swap=True,
+    seed=42
+)
+
+# 80% jitter (40k iterations) - perform this SECOND
+optimized = maxpro.anneal_lhd(
+    design=swap_annealed,
+    n_iterations=40000,
+    initial_temp=1.0,
+    cooling_rate=0.99,
+    metric_name="maxpro",
+    minimize=True,
+    swap=False,
+    seed=43
+)
+```
+
+**Important**: It is only possible to achieve state-of-the-art performance using at least some coordinate swap annealing steps. Using jitter annealing alone (without coordinate swap) will not achieve competitive results.
 
 <script id="MathJax-script" async src="https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js"></script>
 <script>

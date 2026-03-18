@@ -21,7 +21,8 @@ Usage of this code should cite both this package as implementation and the MaxPr
 - **Generate a random Latin Hypercube**: Create random LHDs with configurable samples and dimensions
 - **MaxPro Optimization**: Generate many random LHDs and return the one that minimizes the MaxPro criterion
 - **Maximin Optimization**: Generate many random LHDs and return the one that maximizes the minimum distance between points
-- **Simulated Annealing**: Further optimize any design using simulated annealing
+- **Simulated Annealing**: Further optimize any design using simulated annealing with jitter or coordinate swap
+- **Coordinate Swap Annealing**: Specialized annealing that swaps coordinates between points for faster convergence
 - **Python Bindings**: Use the library directly from Python via PyO3 bindings
 
 ## Installation
@@ -100,6 +101,7 @@ The Maximin criterion maximizes the minimum distance between any two points in t
 - The Rust implementation usually finds a better metric than Python alternatives (e.g., 5.95 instead of 7.51)
 - ~84x faster than Python on Macbook Air M2 for 5 samples in 2D across 10,000 iterations
 - ~1440x faster for 50 samples in 3D
+- **2x faster** than Python for design generation with combined coordinate swap + jitter annealing optimization
 
 ### Maximin
 
