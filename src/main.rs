@@ -74,7 +74,7 @@ fn main() {
     // Optimize the metric, first by swapping
     let swap_annealed_design = anneal_lhd(
         &lhd,
-        annealing_iterations / 10,
+        annealing_iterations / 5,
         annealing_t,
         annealing_cooling,
         metric_fn,
@@ -86,7 +86,7 @@ fn main() {
     // Optimize the metric, then by jitter
     let annealed_design = anneal_lhd(
         &swap_annealed_design,
-        annealing_iterations - (annealing_iterations / 10),
+        annealing_iterations - (annealing_iterations / 5),
         annealing_t,
         annealing_cooling,
         metric_fn,

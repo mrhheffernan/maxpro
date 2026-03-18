@@ -78,13 +78,13 @@ Maximin design and optimization is benchmarked against PyDOE3 as the reference i
 Benchmarks are run with `python/comparisons.py`.
 Last PR's benchmarks, with `maturin develop --features pyo3-bindings --release` to build locally:
 ```
-Rust calculation: 72.39111811323956 in 0.04288196563720703 s
-Python calculation: 88.08540472310199 in 25.065167903900146 s
-Python / Rust ratio: 584.5153675080618
+Rust calculation: 72.39111811323956 in 0.0381779670715332 s
+Python calculation: 93.14236082134553 in 25.153131008148193 s
+Python / Rust ratio: 658.8389308686692
 Benchmarking Maximin time against reference implementation
-Rust criterion 0.22187155920586812 in 0.02629995346069336 s
-Python criterion 0.21743947754068282 in 0.0779728889465332 s
-Python/Rust ratio: 2.9647538754419362
+Rust criterion 0.22187155920586812 in 0.026096105575561523 s
+Python criterion 0.22642738855220698 in 0.0776219367980957 s
+Python/Rust ratio: 2.9744643917591707
 ```
 
 The MaxPro metric calculation can be differentially tested against the R package as the source of truth. 
@@ -92,14 +92,12 @@ Current comparisons show agreement up to a relative tolerance of 1e-7.
 
 Design generation can also be benchmarked for speed and metric value. A comparison of metric calculation
 is shown below for the same design, as well as design generation with approximately matching parameters.
-The R implementation presently generates a more optimal design than this implementation due in part
-to this implementation's simplistic annealing approach as of v0.1.1.
 
 Benchmarks below can be reproduced [here](https://colab.research.google.com/drive/1-cgXaP92jp1tPd3w7SQtVEr2WJogOM3u?usp=sharing) with source for local reproduction, including R design generation, in `python/comparison_r.py`.
 ```
 R calculation: 95.98506 
 Rust calculation: 95.98505099515626
-Design with metric 92.61063616523754 found in 10.24436092376709 seconds
-Rust/R runtime ratio: 1.8613423184391384
+Design with metric 94.60228692529198 found in 1.3302018642425537 seconds
+Rust/R runtime ratio: 0.24169013961983982
 ```
 

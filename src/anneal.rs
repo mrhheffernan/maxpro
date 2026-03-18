@@ -12,8 +12,6 @@ use rand::Rng;
 use rand::SeedableRng;
 use rand::rngs::StdRng;
 
-const N_SWAP_ITERATIONS: usize = 10;
-
 /// Perform a coordinate swap of two rows in a column
 ///
 /// Arguments:
@@ -22,36 +20,23 @@ const N_SWAP_ITERATIONS: usize = 10;
 ///
 /// Returns:
 ///     Vec<Vec<f64>>: lhd with a coordinate swap
-fn swap_rows(lhd: &Vec<Vec<f64>>, rng: &mut StdRng) -> Vec<Vec<f64>> {
-    // First clone the original LHD
-    let mut lhd_swapped = lhd.clone();
-
+fn swap_rows(lhd: &mut Vec<Vec<f64>>, rng: &mut StdRng) -> () {
     // Identify row and columns to switch
-    // Start by defining muts in outer scope
-    let mut swap_idx_1_row = 0;
-    let mut swap_idx_2_row = 0;
-    let mut swap_idx_col = 0;
+    let n_rows = lhd.len();
+    let n_cols = lhd[0].len();
 
-    for _ in 0..N_SWAP_ITERATIONS {
-        // Iterate to find different values
-        swap_idx_1_row = rng.random_range(0..lhd.len());
-        swap_idx_2_row = rng.random_range(0..lhd.len());
-        swap_idx_col = rng.random_range(0..lhd[0].len());
-        if (swap_idx_1_row, swap_idx_col) != (swap_idx_2_row, swap_idx_col) {
-            // Break once different values are found
-            break;
-        }
-    }
+    // Iterate to find different values
+    let swap_idx_1_row = rng.random_range(0..n_rows);
+    let swap_idx_2_row = rng.random_range(0..n_rows);
+    let swap_idx_col = rng.random_range(0..n_cols);
 
     // Get swap values
     let swap_value_1 = lhd[swap_idx_1_row][swap_idx_col];
     let swap_value_2 = lhd[swap_idx_2_row][swap_idx_col];
 
     // Swap values
-    lhd_swapped[swap_idx_1_row][swap_idx_col] = swap_value_2;
-    lhd_swapped[swap_idx_2_row][swap_idx_col] = swap_value_1;
-
-    lhd_swapped
+    lhd[swap_idx_1_row][swap_idx_col] = swap_value_2;
+    lhd[swap_idx_2_row][swap_idx_col] = swap_value_1;
 }
 
 /// Simulated annealing for improving (maximizing or minimizing) a given metric.
@@ -111,7 +96,7 @@ where
         let mut annealed_design = best_design.clone();
         if swap {
             // Swap rows
-            annealed_design = swap_rows(&annealed_design, &mut rng);
+            swap_rows(&mut annealed_design, &mut rng);
         } else {
             for row in annealed_design.iter_mut() {
                 for elem in row.iter_mut() {
