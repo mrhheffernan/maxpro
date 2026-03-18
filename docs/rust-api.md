@@ -195,7 +195,7 @@ pub fn maximin_criterion(design: &Vec<Vec<f64>>) -> f64
 
 ### anneal_lhd
 
-Simulated annealing for improving (maximizing or minimizing) a given metric.
+Simulated annealing for improving (maximizing or minimizing) a given metric. Supports two annealing strategies: coordinate swap (faster convergence) or jitter (fine-grained exploration).
 
 ```rust
 pub fn anneal_lhd<F>(
@@ -205,7 +205,8 @@ pub fn anneal_lhd<F>(
     cooling_rate: f64,
     metric: F,
     minimize: bool,
-    seed: u64
+    seed: u64,
+    swap: bool
 ) -> Vec<Vec<f64>>
 where
     F: Fn(&Vec<Vec<f64>>) -> f64,
@@ -222,6 +223,7 @@ where
 | `metric` | `F` | A callable function that maps `&Vec<Vec<f64>>` to `f64` |
 | `minimize` | `bool` | Whether to minimize or maximize the metric |
 | `seed` | `u64` | Random seed |
+| `swap` | `bool` | Use coordinate swap annealing (true) or jitter annealing (false) |
 
 **Returns:**
 
@@ -233,6 +235,7 @@ where
 use maxpro::anneal::anneal_lhd;
 use maxpro::maxpro_utils::maxpro_criterion;
 
+// Coordinate swap annealing (faster convergence)
 let optimized = anneal_lhd(
     &lhd,
     5000,      // n_iterations
@@ -240,9 +243,35 @@ let optimized = anneal_lhd(
     0.99,      // cooling_rate
     maxpro_criterion,
     true,      // minimize
-    42         // seed
+    42,        // seed
+    true       // use coordinate swap
+);
+
+// Jitter annealing (fine-grained exploration)
+let optimized = anneal_lhd(
+    &lhd,
+    5000,
+    1.0,
+    0.99,
+    maxpro_criterion,
+    true,
+    42,
+    false      // use jitter
 );
 ```
+
+**Recommended Strategy**
+
+A good rule of thumb is to use **20% of iterations for coordinate swap annealing** and **80% for jitter annealing**. **Coordinate swap annealing should always be performed before jitter annealing** - swap first to quickly converge toward a good solution, then use jitter for fine-grained refinement.
+
+For example, with 100,000 total annealing iterations:
+
+```rust
+let swap_annealed = anneal_lhd(&lhd, 20000, 1.0, 0.99, metric_fn, true, seed, true);
+let final_annealed = anneal_lhd(&swap_annealed, 80000, 1.0, 0.99, metric_fn, true, seed + 1, false);
+```
+
+**Important**: It is only possible to achieve state-of-the-art performance using at least some coordinate swap annealing steps. Using jitter annealing alone (without coordinate swap) will not achieve competitive results.
 
 ---
 
@@ -262,6 +291,12 @@ cargo run --release -- [OPTIONS]
 | `--samples <SAMPLES>` | Number of samples in the design |
 | `--ndims <NDIMS>` | Number of dimensions |
 | `--metric <METRIC>` | Metric to use: `max-pro` or `maxi-min` |
+| `--seed <SEED>` | Random seed for reproducibility |
+| `--anneal-iterations <ANNEAL_ITERATIONS>` | Number of annealing iterations (default: 100000) |
+| `--anneal-t <ANNEAL_T>` | Initial temperature for annealing (default: 1.0) |
+| `--anneal-cooling <ANNEAL_COOLING>` | Cooling rate for annealing (default: 0.99) |
+| `--output-path <OUTPUT_PATH>` | Path to save output design |
+| `--plot` | Enable plotting (requires debug feature) |
 
 ### Examples
 

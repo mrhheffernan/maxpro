@@ -76,15 +76,15 @@ Maximin design and optimization is benchmarked against PyDOE3 as the reference i
 
 
 Benchmarks are run with `python/comparisons.py`.
-Last PR's benchmarks:
+Last PR's benchmarks, with `maturin develop --features pyo3-bindings --release` to build locally:
 ```
-Rust calculation: 72.39111811323957 in 0.016954898834228516 s
-Python calculation: 89.75996904868765 in 25.15124797821045 s
-Python / Rust ratio: 1483.4207047838681
+Rust calculation: 72.39111811323956 in 0.0381779670715332 s
+Python calculation: 93.14236082134553 in 25.153131008148193 s
+Python / Rust ratio: 658.8389308686692
 Benchmarking Maximin time against reference implementation
-Rust criterion 0.22187155920586812 in 0.02622389793395996 s
-Python criterion 0.21295020774372542 in 0.07755494117736816 s
-Python/Rust ratio: 2.9574146975661644
+Rust criterion 0.22187155920586812 in 0.026096105575561523 s
+Python criterion 0.22642738855220698 in 0.0776219367980957 s
+Python/Rust ratio: 2.9744643917591707
 ```
 
 The MaxPro metric calculation can be differentially tested against the R package as the source of truth. 
@@ -92,14 +92,12 @@ Current comparisons show agreement up to a relative tolerance of 1e-7.
 
 Design generation can also be benchmarked for speed and metric value. A comparison of metric calculation
 is shown below for the same design, as well as design generation with approximately matching parameters.
-The R implementation presently generates a more optimal design than this implementation due in part
-to this implementation's simplistic annealing approach as of v0.1.1.
 
 Benchmarks below can be reproduced [here](https://colab.research.google.com/drive/1-cgXaP92jp1tPd3w7SQtVEr2WJogOM3u?usp=sharing) with source for local reproduction, including R design generation, in `python/comparison_r.py`.
 ```
 R calculation: 95.98506 
-Rust calculation: 95.98505099515629
-Design with metric 136.20062378481447 found in 3.3881406784057617 seconds
-Rust/R runtime ratio: 0.6156059584849821
+Rust calculation: 95.98505099515626
+Design with metric 94.60228692529198 found in 1.3302018642425537 seconds
+Rust/R runtime ratio: 0.24169013961983982
 ```
 

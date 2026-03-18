@@ -71,21 +71,35 @@ fn main() {
     let lhd: Vec<Vec<f64>> = build_lhd(n_samples, n_dims, n_iterations, Some(metric), seed);
 
     let metric_value = metric_fn(&lhd);
-    // Optimize the metric
-    let annealed_design = anneal_lhd(
+    // Optimize the metric, first by swapping
+    let swap_annealed_design = anneal_lhd(
         &lhd,
-        annealing_iterations,
+        annealing_iterations / 5,
         annealing_t,
         annealing_cooling,
         metric_fn,
         minimize,
         seed + 1,
+        true,
+    );
+    let swap_annealed_metric = metric_fn(&swap_annealed_design);
+    // Optimize the metric, then by jitter
+    let annealed_design = anneal_lhd(
+        &swap_annealed_design,
+        annealing_iterations - (annealing_iterations / 5),
+        annealing_t,
+        annealing_cooling,
+        metric_fn,
+        minimize,
+        seed + 2,
+        false,
     );
     let annealed_metric = metric_fn(&annealed_design);
 
     // Outputs
     println!("{:?}", annealed_design);
     println!("Original metric: {metric_value}");
+    println!("Swapped metric: {swap_annealed_metric}");
     println!("Annealed metric: {annealed_metric}");
 
     // Plot, if requested
