@@ -76,15 +76,15 @@ Maximin design and optimization is benchmarked against PyDOE3 as the reference i
 
 
 Benchmarks are run with `python/comparisons.py`.
-Last PR's benchmarks:
+Last PR's benchmarks, with `maturin develop --features pyo3-bindings --release` to build locally:
 ```
-Rust calculation: 72.39111811323957 in 0.6073048114776611 s
-Python calculation: 91.68853790868829 in 24.695823907852173 s
-Python / Rust ratio: 40.66462745085723
+Rust calculation: 72.39111811323956 in 0.04288196563720703 s
+Python calculation: 88.08540472310199 in 25.065167903900146 s
+Python / Rust ratio: 584.5153675080618
 Benchmarking Maximin time against reference implementation
-Rust criterion 0.22187155920586812 in 1.256173849105835 s
-Python criterion 0.21981200135003268 in 0.07808876037597656 s
-Python/Rust ratio: 0.062163975497150664
+Rust criterion 0.22187155920586812 in 0.02629995346069336 s
+Python criterion 0.21743947754068282 in 0.0779728889465332 s
+Python/Rust ratio: 2.9647538754419362
 ```
 
 The MaxPro metric calculation can be differentially tested against the R package as the source of truth. 
