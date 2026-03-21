@@ -6,6 +6,7 @@ use maxpro::enums::Metrics;
 use maxpro::lhd::plot_x_vs_y;
 use maxpro::maximin_utils::maximin_criterion;
 use maxpro::maxpro_utils::maxpro_criterion;
+use maxpro::order::order_design;
 use rand::Rng;
 
 #[derive(Parser)]
@@ -101,6 +102,8 @@ fn main() {
     println!("Original metric: {metric_value}");
     println!("Swapped metric: {swap_annealed_metric}");
     println!("Annealed metric: {annealed_metric}");
+
+    let test = order_design(annealed_design, metric_fn, minimize, seed);
 
     // Plot, if requested
     if plot {

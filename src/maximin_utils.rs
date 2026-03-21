@@ -20,7 +20,7 @@ use rand::rngs::StdRng;
 /// Panics:
 ///     point_a.len() != point_b.len(): Points must have the same number of dimensions
 ///     point_a.len() == 0: Points cannot have 0 dimension
-fn calculate_l2_distance(point_a: &Vec<f64>, point_b: &Vec<f64>) -> f64 {
+pub fn calculate_l2_distance(point_a: &Vec<f64>, point_b: &Vec<f64>) -> f64 {
     assert_eq!(
         point_a.len(),
         point_b.len(),
