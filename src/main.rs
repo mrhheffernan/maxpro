@@ -103,7 +103,7 @@ fn main() {
     println!("Swapped metric: {swap_annealed_metric}");
     println!("Annealed metric: {annealed_metric}");
 
-    let test = order_design(annealed_design, metric_fn, minimize, seed);
+    let ordered_design = order_design(annealed_design, metric_fn, minimize);
 
     // Plot, if requested
     if plot {

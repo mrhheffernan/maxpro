@@ -20,7 +20,7 @@ use rand::rngs::StdRng;
 ///
 /// Returns:
 ///     Vec<Vec<f64>>: lhd with a coordinate swap
-fn swap_rows(lhd: &mut Vec<Vec<f64>>, rng: &mut StdRng) -> () {
+fn swap_rows(lhd: &mut Vec<Vec<f64>>, rng: &mut StdRng) {
     // Identify row and columns to switch
     let n_rows = lhd.len();
     let n_cols = lhd[0].len();
@@ -48,6 +48,7 @@ fn swap_rows(lhd: &mut Vec<Vec<f64>>, rng: &mut StdRng) -> () {
 ///     cooling rate (f64): Cooling rate, used to simulate annealing by reducing the metropolis algorithm acceptance
 ///     metric (F): A callable function that maps &Vec<Vec<f64>> to f64, used to minimize or maximize
 ///     minimize (bool): Whether to minimize or maximize the metric
+///     seed (u64): Random number seed
 ///     swap (bool): Whether to use swapping or random jitter to find a more optimal design
 ///
 /// Returns:
