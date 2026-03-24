@@ -7,7 +7,6 @@ use maxpro::lhd::plot_x_vs_y;
 use maxpro::maximin_utils::maximin_criterion;
 use maxpro::maxpro_utils::maxpro_criterion;
 use maxpro::order::order_design;
-use rand::Rng;
 
 #[derive(Parser)]
 struct Args {
@@ -103,7 +102,7 @@ fn main() {
     println!("Swapped metric: {swap_annealed_metric}");
     println!("Annealed metric: {annealed_metric}");
 
-    let ordered_design = order_design(annealed_design, metric_fn, minimize);
+    let _ordered_design = order_design(annealed_design, metric_fn, minimize);
 
     // Plot, if requested
     if plot {
