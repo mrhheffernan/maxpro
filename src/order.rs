@@ -5,6 +5,14 @@ use crate::maximin_utils::calculate_l2_distance;
 /// Order designs to select an optimal subset of the full design at each
 /// stopping point. This can be used to produce preliminary results
 /// with the best available subset's design characteristics.
+///
+/// Args:
+///     lhd (Vec<Vec<64>>): A design to order
+///     metric (F): A metric function that maps &Vec<Vec<f64>> to f64
+///     minimize (bool): Whether the metric is to be minimized
+///
+/// Returns:
+///     Vec<Vec<f64>>: lhd with elements reordered for optimal run order
 pub fn order_design<F>(lhd: Vec<Vec<f64>>, metric: F, minimize: bool) -> Vec<Vec<f64>>
 where
     F: Fn(&Vec<Vec<f64>>) -> f64,
