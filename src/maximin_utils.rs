@@ -1,3 +1,4 @@
+#[cfg(test)]
 use crate::lhd::generate_lhd;
 #[cfg(feature = "pyo3-bindings")]
 use pyo3::PyResult;
@@ -5,7 +6,9 @@ use pyo3::PyResult;
 use pyo3::exceptions::PyValueError;
 #[cfg(feature = "pyo3-bindings")]
 use pyo3::prelude::*;
+#[cfg(test)]
 use rand::SeedableRng;
+#[cfg(test)]
 use rand::rngs::StdRng;
 /// Calculate the L2 distance between two points, also known as the
 /// Euclidean distance.
