@@ -1,3 +1,4 @@
+use crate::lhd::generate_lhd;
 use crate::maximin_utils::calculate_l2_distance;
 use crate::maximin_utils::maximin_criterion;
 use crate::maxpro_utils::maxpro_criterion;
@@ -8,6 +9,11 @@ use pyo3::PyResult;
 use pyo3::exceptions::PyValueError;
 #[cfg(feature = "pyo3-bindings")]
 use pyo3::prelude::*;
+use std::f32::EPSILON;
+
+#[cfg(test)]
+use rand::SeedableRng;
+use rand::rngs::StdRng;
 
 /// Order designs to select an optimal subset of the full design at each
 /// stopping point. This can be used to produce preliminary results
@@ -76,6 +82,39 @@ where
         ordered_design.append(&mut vec![next_best_row.clone()]);
     }
     ordered_design
+}
+
+#[test]
+/// Test that the LHD has the same metric values before and after ordering
+fn test_ordered_criteria_parity() {
+    let n_iterations: u64 = 1000;
+    let n_samples: u64 = 50;
+    let n_dim: u64 = 5;
+    let seed: u64 = 12345;
+    let atol: f64 = 1e-10;
+
+    let mut rng: StdRng = SeedableRng::seed_from_u64(seed);
+    for _i in 0..n_iterations {
+        // Generate LHD
+        let lhd = generate_lhd(n_samples, n_dim, &mut rng);
+        let maxpro_metric_before: f64 = maxpro_criterion(&lhd);
+        let maximin_metric_before: f64 = maximin_criterion(&lhd);
+
+        // Order Design
+        let ordered_design = order_design(lhd, maximin_criterion, true);
+
+        // Ensure parity
+        let maxpro_metric_after: f64 = maxpro_criterion(&ordered_design);
+        let maximin_metric_after: f64 = maximin_criterion(&ordered_design);
+
+        assert!(maxpro_metric_after >= 0.0);
+        assert!(maxpro_metric_after < f64::INFINITY);
+        assert!(maximin_metric_after >= 0.0);
+        assert!(maximin_metric_after < f64::INFINITY);
+
+        assert!((maximin_metric_before - maximin_metric_after).abs() < atol);
+        assert!((maxpro_metric_before - maxpro_metric_after).abs() < atol);
+    }
 }
 
 #[cfg(feature = "pyo3-bindings")] // WORK IN PROGRESS
