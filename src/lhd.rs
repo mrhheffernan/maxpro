@@ -7,6 +7,7 @@ use pyo3::exceptions::PyValueError;
 #[cfg(feature = "pyo3-bindings")]
 use pyo3::prelude::*;
 use rand::Rng;
+#[cfg(any(test, feature = "pyo3-bindings"))]
 use rand::SeedableRng;
 use rand::prelude::SliceRandom;
 use rand::rngs::StdRng;

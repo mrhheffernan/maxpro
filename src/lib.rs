@@ -13,7 +13,6 @@ pub mod lhd;
 pub mod maximin_utils;
 pub mod maxpro_utils;
 pub mod order;
-use rand::Rng;
 use rand::SeedableRng;
 use rand::rngs::StdRng;
 

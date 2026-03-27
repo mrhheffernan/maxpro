@@ -1,6 +1,9 @@
+#[cfg(test)]
 use crate::lhd::generate_lhd;
 use crate::maximin_utils::calculate_l2_distance;
+#[cfg(any(test, feature = "pyo3-bindings"))]
 use crate::maximin_utils::maximin_criterion;
+#[cfg(any(test, feature = "pyo3-bindings"))]
 use crate::maxpro_utils::maxpro_criterion;
 use core::f64;
 #[cfg(feature = "pyo3-bindings")]
@@ -9,10 +12,10 @@ use pyo3::PyResult;
 use pyo3::exceptions::PyValueError;
 #[cfg(feature = "pyo3-bindings")]
 use pyo3::prelude::*;
-use std::f32::EPSILON;
 
 #[cfg(test)]
 use rand::SeedableRng;
+#[cfg(test)]
 use rand::rngs::StdRng;
 
 /// Order designs to select an optimal subset of the full design at each
