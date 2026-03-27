@@ -1,6 +1,13 @@
-use core::f64;
-
 use crate::maximin_utils::calculate_l2_distance;
+use crate::maximin_utils::maximin_criterion;
+use crate::maxpro_utils::maxpro_criterion;
+use core::f64;
+#[cfg(feature = "pyo3-bindings")]
+use pyo3::PyResult;
+#[cfg(feature = "pyo3-bindings")]
+use pyo3::exceptions::PyValueError;
+#[cfg(feature = "pyo3-bindings")]
+use pyo3::prelude::*;
 
 /// Order designs to select an optimal subset of the full design at each
 /// stopping point. This can be used to produce preliminary results
@@ -69,4 +76,33 @@ where
         ordered_design.append(&mut vec![next_best_row.clone()]);
     }
     ordered_design
+}
+
+#[cfg(feature = "pyo3-bindings")] // WORK IN PROGRESS
+/// Order the design to optimize the run order for optimal subset ordering
+///
+/// Args:
+///     design (list[list[float]]): Design of interest
+///     metric_name (str):
+///
+/// Returns:
+///     float: Maximum projection criterion value
+#[pyfunction(name = "order_design")]
+pub fn py_order_design(design: Vec<Vec<f64>>, metric_name: String) -> PyResult<Vec<Vec<f64>>> {
+    if design.is_empty() {
+        return Err(PyValueError::new_err("Design cannot be empty"));
+    }
+    // Note: The `as` here is required for this to compile as the match arms having different
+    // functions causes compilation errors despite matching signatures
+    let (metric, minimize) = match metric_name.to_lowercase().as_str() {
+        "maxpro" => (maxpro_criterion as fn(&Vec<Vec<f64>>) -> f64, true),
+        "maximin" => (maximin_criterion as fn(&Vec<Vec<f64>>) -> f64, false),
+        _ => {
+            return Err(PyValueError::new_err(format!(
+                "Unknown metric: '{}'. Available metrics are 'maxpro' and 'maximin'.",
+                metric_name
+            )));
+        }
+    };
+    Ok(order_design(design, metric, minimize))
 }

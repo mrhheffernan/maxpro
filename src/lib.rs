@@ -172,5 +172,6 @@ fn maxpro(_py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(maximin_utils::py_maximin_criterion, m)?)?;
     m.add_function(wrap_pyfunction!(crate::py_build_lhd, m)?)?;
     m.add_function(wrap_pyfunction!(anneal::py_anneal_lhd, m)?)?;
+    m.add_function(wrap_pyfunction!(order::py_order_design, m)?)?;
     Ok(())
 }
