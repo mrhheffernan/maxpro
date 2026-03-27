@@ -314,6 +314,68 @@ optimized = maxpro.anneal_lhd(
 
 **Important**: It is only possible to achieve state-of-the-art performance using at least some coordinate swap annealing steps. Using jitter annealing alone (without coordinate swap) will not achieve competitive results.
 
+---
+
+### order_design
+
+Reorders a design to optimize the run order for sequential experimentation. The algorithm selects a center point (closest to the design center), then greedily adds remaining points that optimize the chosen criterion at each step. This produces designs where early subsets are already well-distributed, making it ideal for surrogate modeling workflows where you want preliminary results from initial runs.
+
+```python
+maxpro.order_design(design: list[list[float]], metric_name: str) -> list[list[float]]
+```
+
+**Parameters:**
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `design` | `list[list[float]]` | Design to reorder. Must not be empty. |
+| `metric_name` | `str` | Criterion to use: `'maxpro'` or `'maximin'` |
+
+**Returns:**
+
+`list[list[float]]` - The design with elements reordered for optimal run order
+
+**Raises:**
+
+- `ValueError` if design is empty
+- `ValueError` if `metric_name` is not `'maxpro'` or `'maximin'`
+
+**Algorithm:**
+
+1. **Center Selection**: Find the point closest to the design center (0.5, 0.5, ...) and place it first
+2. **Greedy Selection**: For remaining points, evaluate each candidate by appending it to the current ordered design and computing the criterion value. Select the point that produces the best value.
+3. **Repeat** until all points are ordered
+
+**When to Use:**
+
+Use `order_design` when:
+- Running sequential experiments where early subsets should be well-distributed
+- Building surrogate models incrementally and need good coverage from initial runs
+- Comparing designs at multiple stopping points (e.g., 10, 25, 50, 100 samples)
+
+**Example:**
+
+```python
+import maxpro
+
+# Generate a design
+lhd = maxpro.build_lhd(
+    n_samples=100,
+    n_dim=5,
+    n_iterations=500,
+    metric="maxpro",
+    seed=42
+)
+
+# Order for optimal run order
+ordered = maxpro.order_design(lhd, metric_name="maxpro")
+
+# Now you can use subsets like ordered[:10], ordered[:25], etc.
+# and each subset will already be well-distributed
+```
+
+---
+
 <script id="MathJax-script" async src="https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js"></script>
 <script>
   window.MathJax = {
