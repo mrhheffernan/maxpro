@@ -90,6 +90,21 @@ def benchmark_time_maximin():
     print(f"Python/Rust ratio: {python_timer / rust_timer}")
 
 
+def benchmark_order_designs():
+    n_samples = 50
+    n_iterations = 1000
+    n_dim = 5
+    n_rounds = 100
+
+    maxpro_lhd = maxpro.build_lhd(n_samples, n_dim, n_iterations, "maxpro", SEED)
+
+    time_start = time.time()
+    for _ in range(n_rounds):
+        maxpro.order_design(maxpro_lhd, "maxpro")
+    time_end = time.time()
+    print(f"Mean time to order design: {(time_end - time_start) / n_rounds} s")
+
+
 def main():
     print("Checking parity")
     test_parity()
@@ -99,6 +114,9 @@ def main():
 
     print("Benchmarking Maximin time against reference implementation")
     benchmark_time_maximin()
+
+    print("Benchmark ordering designs")
+    benchmark_order_designs()
 
 
 if __name__ == "__main__":

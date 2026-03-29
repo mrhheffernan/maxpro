@@ -69,10 +69,12 @@ where
         };
         let mut best_metric_index = 0;
         for (i, row) in unordered_points.iter().enumerate() {
-            // There has to be a better, more efficient way to do this
-            let mut proposed_design = ordered_design.clone();
-            proposed_design.append(&mut vec![row.clone()]);
-            let metric_value = metric(&proposed_design);
+            // Add the row under consideration
+            ordered_design.push(row.clone());
+            // Calculate the metric
+            let metric_value = metric(&ordered_design);
+            // Remove the candidate row
+            ordered_design.pop();
             if minimize {
                 if metric_value < best_metric {
                     best_metric = metric_value;
@@ -86,7 +88,7 @@ where
             }
         }
         let next_best_row = unordered_points.swap_remove(best_metric_index);
-        ordered_design.append(&mut vec![next_best_row.clone()]);
+        ordered_design.push(next_best_row.clone());
     }
     ordered_design
 }
