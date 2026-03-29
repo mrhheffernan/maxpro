@@ -23,7 +23,7 @@ use rand::rngs::StdRng;
 /// with the best available subset's design characteristics.
 ///
 /// Args:
-///     lhd (Vec<Vec<64>>): A design to order
+///     lhd (Vec<Vec<f64>>): A design to order
 ///     metric (F): A metric function that maps &Vec<Vec<f64>> to f64
 ///     minimize (bool): Whether the metric is to be minimized
 ///
@@ -33,6 +33,10 @@ pub fn order_design<F>(lhd: Vec<Vec<f64>>, metric: F, minimize: bool) -> Vec<Vec
 where
     F: Fn(&Vec<Vec<f64>>) -> f64,
 {
+    if lhd.is_empty() {
+        println!("Cannot order an empty design!");
+        return lhd;
+    }
     // First: Choose middle point
     let ndim = lhd[0].len();
     let center = vec![0.5; ndim];
@@ -104,7 +108,7 @@ fn test_ordered_criteria_parity() {
         let maximin_metric_before: f64 = maximin_criterion(&lhd);
 
         // Order Design
-        let ordered_design = order_design(lhd, maximin_criterion, true);
+        let ordered_design = order_design(lhd, maximin_criterion, false);
 
         // Ensure parity
         let maxpro_metric_after: f64 = maxpro_criterion(&ordered_design);

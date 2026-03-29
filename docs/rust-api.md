@@ -312,6 +312,7 @@ where
 **Example:**
 
 ```rust
+use maxpro::enums::Metrics;
 use maxpro::order::order_design;
 use maxpro::maxpro_utils::maxpro_criterion;
 
