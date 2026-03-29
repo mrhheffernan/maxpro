@@ -3,8 +3,6 @@
 [![Rust build](https://github.com/mrhheffernan/maxpro/actions/workflows/rust-build-test.yml/badge.svg)](https://github.com/mrhheffernan/maxpro/actions/workflows/rust-build-test.yml)
 [![Documentation](https://img.shields.io/badge/docs-mrhheffernan.github.io/maxpro-blue)](https://mrhheffernan.github.io/maxpro/)
 
-**[Documentation](https://mrhheffernan.github.io/maxpro/)**
-
 This is a minimal Rust implementation of Latin Hypercube Design (LHD) generation with the Maximum Projection metric. 
 It pursues an initial random search for a relatively-optimal candidate and allows for further 
 optimization of that candidate (or any other supplied) in search of a better solution, although
@@ -28,35 +26,27 @@ The Maximin metric is included for additional functionality and performance benc
 - Generate many random latin hypercubes, calculate the maximin metric, and return the LHD that maximizes the minimum distance between points: `cargo run --release -- --iterations 100000 --samples 50 --ndims 2 --metric maxi-min`
 - Using `maturin develop --release --features pyo3-bindings`, can `import maxpro` and generate optimal MaxPro LHDs in Python directly.
 - Perturb a LHD to optimize its metric
+- Switch coordinates in a LHD to optimize its metric
+- Order the points in an LHD so that the first n points have as-optimal a space coverage as possible. This allows for higher-quality interim analyses.
 
 ## Usage
+For complete usage information and examples, see the **[Documentation](https://mrhheffernan.github.io/maxpro/)**. 
 
 ### Rust
 Add the crate to your project via Cargo (`cargo add maxpro`), then `using maxpro::<>` you can use any of the underlying components.
 
 ### Python
 Install with `pip install maxpro`, `uv add maxpro`, or your other favorite package management tool.
-
-In version 0.1.0, you must import as
-```
-import _maxpro as maxpro
-```
-in 0.1.1, this is replaced with
 ```
 import maxpro
 ```
 
 ## Planned work 
 
-Versions 0.1.* are reserved for bug fixes and performance improvements to existing functionality, new features will land in 0.2.0.
-
-### 0.1.1
-- Resolve python import syntax
-- Make output path optional
-- Seedable RNGs (pulled in from 0.2.0)
+Versions 0.1.* are reserved for bug fixes and performance improvements to existing functionality, and bringing features for continuous variable design construction to parity with the R implemented. 0.2.0 is the planned full-feature-parity release.
 
 ### 0.2.0
-- Ordering the designs for optimal execution order
+- Categorical design dimensions
 
 ## AI Policy
 This project's AI policy is that no AI-written code is included in the core Rust module or in the python bindings. AI-written code may be present in the `python/` directory but is restricted to analysis. AI code is not used for benchmarking either correctness or speed. 
@@ -74,17 +64,18 @@ MaxPro design and optimization: The Rust implementation usually finds a better m
 
 Maximin design and optimization is benchmarked against PyDOE3 as the reference implementation. The Rust and Python implementations return almost identical results (0.22 in this implementation vs 0.21 in PyDOE3) with this implementation offering a 2.63x speedup for 5 samples in 2D across 10,000 iterations. Increasing this to 50 samples in 3D, this implementation returns a better result than PyDOE3 (0.2204 vs 0.2072) with a 2.9x speedup (0.0286s vs. 0.083s).
 
-
 Benchmarks are run with `python/comparisons.py`.
 Last PR's benchmarks, with `maturin develop --features pyo3-bindings --release` to build locally:
 ```
-Rust calculation: 72.39111811323956 in 0.0381779670715332 s
-Python calculation: 93.14236082134553 in 25.153131008148193 s
-Python / Rust ratio: 658.8389308686692
+Rust calculation: 72.39111811323956 in 0.039016008377075195 s
+Python calculation: 89.28355821451629 in 25.08482003211975 s
+Python / Rust ratio: 642.9366066790919
 Benchmarking Maximin time against reference implementation
-Rust criterion 0.22187155920586812 in 0.026096105575561523 s
-Python criterion 0.22642738855220698 in 0.0776219367980957 s
-Python/Rust ratio: 2.9744643917591707
+Rust criterion 0.22187155920586812 in 0.02611827850341797 s
+Python criterion 0.23394896276844854 in 0.07612800598144531 s
+Python/Rust ratio: 2.914740570343594
+Benchmark ordering designs
+Mean time to order design: 0.01796654224395752 s
 ```
 
 The MaxPro metric calculation can be differentially tested against the R package as the source of truth. 
@@ -97,7 +88,6 @@ Benchmarks below can be reproduced [here](https://colab.research.google.com/driv
 ```
 R calculation: 95.98506 
 Rust calculation: 95.98505099515626
-Design with metric 94.60228692529198 found in 1.3302018642425537 seconds
-Rust/R runtime ratio: 0.24169013961983982
+Design with metric 94.60228692529198 found in 1.342952013015747 seconds
+Rust/R runtime ratio: 0.24400676938860166
 ```
-
