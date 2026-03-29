@@ -88,7 +88,7 @@ where
             }
         }
         let next_best_row = unordered_points.swap_remove(best_metric_index);
-        ordered_design.push(next_best_row.clone());
+        ordered_design.push(next_best_row);
     }
     ordered_design
 }
