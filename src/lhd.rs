@@ -93,14 +93,12 @@ pub fn plot_x_vs_y(
 ///     Vec<Vec<f64>>: A latin hypercube design
 ///
 /// Panics:
-///     n_samples == 0: n_samples must be positive and nonzero
 ///     n_dim == 0: n_dim must be positive and nonzero
 pub fn generate_lhd(n_samples: u64, n_dim: u64, rng: &mut StdRng) -> Vec<Vec<f64>> {
-    assert!(
-        n_samples > 0,
-        "n_samples must be a positive, nonzero integer"
-    );
-
+    if n_samples == 0 {
+        // No samples requested returns an empty array
+        return Vec::new();
+    }
     assert!(
         n_samples <= usize::MAX as u64,
         "n_samples too large to index"
@@ -157,14 +155,14 @@ fn test_generate_lhd() {
 }
 
 #[test]
-#[should_panic]
-/// Ensure for 0 samples, generate_lhd panics.
+/// Ensure for 0 samples, generate_lhd returns an empty vec.
 fn test_generate_lhd_0_samples() {
     let n_samples: u64 = 0;
     let n_dim: u64 = 4;
     let seed: u64 = 12345;
     let mut rng: StdRng = SeedableRng::seed_from_u64(seed);
-    generate_lhd(n_samples, n_dim, &mut rng);
+    let empty_vec = generate_lhd(n_samples, n_dim, &mut rng);
+    assert!(empty_vec.is_empty());
 }
 
 #[test]

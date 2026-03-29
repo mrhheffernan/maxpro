@@ -78,7 +78,6 @@ pub fn generate_lhd(
 
 **Panics:**
 
-- If `n_samples == 0`
 - If `n_dim == 0`
 - If `n_samples` or `n_dim` is too large to index
 
