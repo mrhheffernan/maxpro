@@ -34,7 +34,6 @@ where
     F: Fn(&Vec<Vec<f64>>) -> f64,
 {
     if lhd.is_empty() {
-        println!("Cannot order an empty design!");
         return lhd;
     }
     // First: Choose middle point
