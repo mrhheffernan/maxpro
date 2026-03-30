@@ -37,24 +37,26 @@ where
         return lhd;
     }
     // First: Choose middle point
-    let ndim = lhd[0].len();
-    let center = vec![0.5; ndim];
-    let mut center_point = lhd[0].clone();
-    let mut distance_to_center = calculate_l2_distance(&center, &center_point);
-    let mut center_point_index = 0;
+    let ndim: usize = lhd[0].len();
+    // Note: This assumes the design space is always a unit hypercube.
+    // This is currently true, but must be updated if the condition is relaxed.
+    let center: Vec<f64> = vec![0.5; ndim];
+    let mut distance_to_center: f64 = f64::INFINITY;
+    let mut center_point_index: usize = 0;
 
     for (i, row) in lhd.iter().enumerate() {
-        let proposal_distance = calculate_l2_distance(&center, row);
+        let proposal_distance: f64 = calculate_l2_distance(&center, row);
         if proposal_distance < distance_to_center {
-            center_point = row.clone();
             distance_to_center = proposal_distance;
             center_point_index = i;
         }
     }
 
-    let mut ordered_design = vec![center_point];
-    let mut unordered_points = lhd.clone();
-    let _ = unordered_points.swap_remove(center_point_index);
+    let mut unordered_points: Vec<Vec<f64>> = lhd.clone();
+
+    let center_point: Vec<f64> = unordered_points.swap_remove(center_point_index);
+    let mut ordered_design: Vec<Vec<f64>> = Vec::new();
+    ordered_design.push(center_point);
 
     // Then for the remaining points, proceed in a loop
     // Attempt each point that has not been chosen
@@ -62,7 +64,7 @@ where
     // Select that point and update the design
     // Repeat
     while !unordered_points.is_empty() {
-        let mut best_metric = match minimize {
+        let mut best_metric: f64 = match minimize {
             true => f64::INFINITY,
             false => f64::NEG_INFINITY,
         };
@@ -86,7 +88,7 @@ where
                 }
             }
         }
-        let next_best_row = unordered_points.swap_remove(best_metric_index);
+        let next_best_row: Vec<f64> = unordered_points.swap_remove(best_metric_index);
         ordered_design.push(next_best_row);
     }
     ordered_design
