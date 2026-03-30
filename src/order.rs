@@ -69,13 +69,17 @@ where
             false => f64::NEG_INFINITY,
         };
         let mut best_metric_index = 0;
-        for (i, row) in unordered_points.iter().enumerate() {
-            // Add the row under consideration
-            ordered_design.push(row.clone());
+        for (i, row_ref) in unordered_points.iter_mut().enumerate() {
+            // Add the row under consideration, taking it from the original Vec
+            let row = std::mem::take(row_ref);
+            ordered_design.push(row);
             // Calculate the metric
             let metric_value = metric(&ordered_design);
             // Remove the candidate row
-            ordered_design.pop();
+            let row = ordered_design.pop().unwrap();
+            // Assign old value back to the original location in memory
+            *row_ref = row;
+
             if minimize {
                 if metric_value < best_metric {
                     best_metric = metric_value;
