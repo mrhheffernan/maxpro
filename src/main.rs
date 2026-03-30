@@ -102,14 +102,14 @@ fn main() {
     println!("Swapped metric: {swap_annealed_metric}");
     println!("Annealed metric: {annealed_metric}");
 
-    let _ordered_design = order_design(annealed_design, metric_fn, minimize);
+    let ordered_design = order_design(annealed_design, metric_fn, minimize);
 
     // Plot, if requested
     if plot {
         if cfg!(feature = "debug") {
             if let Some(_output_path) = args.output_path {
                 #[cfg(feature = "debug")]
-                let _ = plot_x_vs_y(&annealed_design, std::path::Path::new(&_output_path));
+                let _ = plot_x_vs_y(&ordered_design, std::path::Path::new(&_output_path));
             } else {
                 eprintln!("--output-path not specified, not writing to file.")
             }

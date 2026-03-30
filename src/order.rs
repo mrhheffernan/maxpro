@@ -52,7 +52,7 @@ where
         }
     }
 
-    let mut unordered_points: Vec<Vec<f64>> = lhd.clone();
+    let mut unordered_points: Vec<Vec<f64>> = lhd;
 
     let center_point: Vec<f64> = unordered_points.swap_remove(center_point_index);
     let mut ordered_design: Vec<Vec<f64>> = Vec::new();
@@ -127,15 +127,15 @@ fn test_ordered_criteria_parity() {
     }
 }
 
-#[cfg(feature = "pyo3-bindings")] // WORK IN PROGRESS
+#[cfg(feature = "pyo3-bindings")]
 /// Order the design to optimize the run order for optimal subset ordering
 ///
 /// Args:
 ///     design (list[list[float]]): Design of interest
-///     metric_name (str):
+///     metric_name (str): Name of the metric of interest, one of ("maximin", "maxpro")
 ///
 /// Returns:
-///     float: Maximum projection criterion value
+///     list[list[float]]: Optimally-reordered design
 #[pyfunction(name = "order_design")]
 pub fn py_order_design(design: Vec<Vec<f64>>, metric_name: String) -> PyResult<Vec<Vec<f64>>> {
     if design.is_empty() {
