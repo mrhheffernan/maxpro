@@ -75,7 +75,7 @@ Rust criterion 0.22187155920586812 in 0.02611827850341797 s
 Python criterion 0.23394896276844854 in 0.07612800598144531 s
 Python/Rust ratio: 2.914740570343594
 Benchmark ordering designs
-Mean time to order design: 0.017710449695587157 s
+Mean time to order design: 5.19455441236496 s
 ```
 
 The MaxPro metric calculation can be differentially tested against the R package as the source of truth. 

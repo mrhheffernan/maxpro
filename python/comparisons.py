@@ -91,7 +91,7 @@ def benchmark_time_maximin():
 
 
 def benchmark_order_designs():
-    n_samples = 50
+    n_samples = 500
     n_iterations = 1000
     n_dim = 5
     n_rounds = 100
