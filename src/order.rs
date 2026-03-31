@@ -38,6 +38,10 @@ where
     }
     // First: Choose middle point
     let ndim: usize = lhd[0].len();
+    if ndim == 0 {
+        // Happens when vec![vec![]] is passed
+        return lhd;
+    }
     // Note: This assumes the design space is always a unit hypercube.
     // This is currently true, but must be updated if the condition is relaxed.
     let center: Vec<f64> = vec![0.5; ndim];
@@ -129,6 +133,17 @@ fn test_ordered_criteria_parity() {
         assert!((maximin_metric_before - maximin_metric_after).abs() < atol);
         assert!((maxpro_metric_before - maxpro_metric_after).abs() < atol);
     }
+}
+
+#[test]
+/// Test that empty inner points are handled
+fn test_empty_vecs() {
+    let lhd = vec![vec![]];
+    let ordered_lhd_minimize = order_design(lhd.clone(), maxpro_criterion, true);
+    let ordered_lhd_maximize = order_design(lhd.clone(), maxpro_criterion, false);
+
+    assert_eq!(lhd, ordered_lhd_minimize);
+    assert_eq!(lhd, ordered_lhd_maximize);
 }
 
 #[cfg(feature = "pyo3-bindings")]
