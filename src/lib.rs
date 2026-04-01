@@ -12,7 +12,7 @@ pub mod enums;
 pub mod lhd;
 pub mod maximin_utils;
 pub mod maxpro_utils;
-use rand::Rng;
+pub mod order;
 use rand::SeedableRng;
 use rand::rngs::StdRng;
 
@@ -171,5 +171,6 @@ fn maxpro(_py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(maximin_utils::py_maximin_criterion, m)?)?;
     m.add_function(wrap_pyfunction!(crate::py_build_lhd, m)?)?;
     m.add_function(wrap_pyfunction!(anneal::py_anneal_lhd, m)?)?;
+    m.add_function(wrap_pyfunction!(order::py_order_design, m)?)?;
     Ok(())
 }

@@ -78,7 +78,6 @@ pub fn generate_lhd(
 
 **Panics:**
 
-- If `n_samples == 0`
 - If `n_dim == 0`
 - If `n_samples` or `n_dim` is too large to index
 
@@ -272,6 +271,55 @@ let final_annealed = anneal_lhd(&swap_annealed, 80000, 1.0, 0.99, metric_fn, tru
 ```
 
 **Important**: It is only possible to achieve state-of-the-art performance using at least some coordinate swap annealing steps. Using jitter annealing alone (without coordinate swap) will not achieve competitive results.
+
+---
+
+### order_design
+
+Reorders a design to optimize the run order for sequential experimentation. The algorithm selects a center point (closest to the design center), then greedily adds remaining points that optimize the chosen criterion at each step. This produces designs where early subsets are already well-distributed.
+
+**Note**: This function is designed for unit hypercubes (designs with coordinates in the [0, 1] range). The center point is assumed to be at (0.5, 0.5, ...).
+
+```rust
+pub fn order_design<F>(lhd: Vec<Vec<f64>>, metric: F, minimize: bool) -> Vec<Vec<f64>>
+where
+    F: Fn(&Vec<Vec<f64>>) -> f64,
+```
+
+**Arguments:**
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `lhd` | `Vec<Vec<f64>>` | Design to reorder |
+| `metric` | `F` | A callable function mapping `&Vec<Vec<f64>>` to `f64` |
+| `minimize` | `bool` | Whether to minimize the metric (true for MaxPro, false for Maximin) |
+
+**Returns:**
+
+`Vec<Vec<f64>>` - The design with elements reordered for optimal run order
+
+**Algorithm:**
+
+1. Find the point closest to the design center (0.5, 0.5, ...) and place it first
+2. For remaining points, greedily select the point that produces the best criterion value when appended
+3. Repeat until all points are ordered
+
+**When to Use:**
+
+- Running sequential experiments where early subsets should be well-distributed
+- Building surrogate models incrementally and need good coverage from initial runs
+- Comparing designs at multiple stopping points (e.g., 10, 25, 50, 100 samples)
+
+**Example:**
+
+```rust
+use maxpro::enums::Metrics;
+use maxpro::order::order_design;
+use maxpro::maxpro_utils::maxpro_criterion;
+
+let lhd = maxpro::build_lhd(100, 5, 500, Some(Metrics::MaxPro), 42);
+let ordered = order_design(lhd, maxpro_criterion, true);
+```
 
 ---
 
