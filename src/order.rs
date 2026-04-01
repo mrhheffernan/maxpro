@@ -22,6 +22,8 @@ use rand::rngs::StdRng;
 /// stopping point. This can be used to produce preliminary results
 /// with the best available subset's design characteristics.
 ///
+/// This is presently only designed for unit hypercube designs.
+///
 /// Args:
 ///     lhd (Vec<Vec<f64>>): A design to order
 ///     metric (F): A metric function that maps &Vec<Vec<f64>> to f64
@@ -147,7 +149,8 @@ fn test_empty_vecs() {
 }
 
 #[cfg(feature = "pyo3-bindings")]
-/// Order the design to optimize the run order for optimal subset ordering
+/// Order the design to optimize the run order for optimal subset ordering.
+/// This is currently only for unit hypercube designs.
 ///
 /// Args:
 ///     design (list[list[float]]): Design of interest
@@ -158,7 +161,7 @@ fn test_empty_vecs() {
 #[pyfunction(name = "order_design")]
 pub fn py_order_design(design: Vec<Vec<f64>>, metric_name: String) -> PyResult<Vec<Vec<f64>>> {
     if design.is_empty() {
-        return Err(PyValueError::new_err("Design cannot be empty"));
+        return Ok(design);
     }
     // Note: The `as` here is required for this to compile as the match arms having different
     // functions causes compilation errors despite matching signatures

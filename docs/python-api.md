@@ -320,6 +320,8 @@ optimized = maxpro.anneal_lhd(
 
 Reorders a design to optimize the run order for sequential experimentation. The algorithm selects a center point (closest to the design center), then greedily adds remaining points that optimize the chosen criterion at each step. This produces designs where early subsets are already well-distributed, making it ideal for surrogate modeling workflows where you want preliminary results from initial runs.
 
+**Note**: This function is designed for unit hypercubes (designs with coordinates in the [0, 1] range). The center point is assumed to be at (0.5, 0.5, ...).
+
 ```python
 maxpro.order_design(design: list[list[float]], metric_name: str) -> list[list[float]]
 ```

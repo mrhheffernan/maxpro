@@ -278,6 +278,8 @@ let final_annealed = anneal_lhd(&swap_annealed, 80000, 1.0, 0.99, metric_fn, tru
 
 Reorders a design to optimize the run order for sequential experimentation. The algorithm selects a center point (closest to the design center), then greedily adds remaining points that optimize the chosen criterion at each step. This produces designs where early subsets are already well-distributed.
 
+**Note**: This function is designed for unit hypercubes (designs with coordinates in the [0, 1] range). The center point is assumed to be at (0.5, 0.5, ...).
+
 ```rust
 pub fn order_design<F>(lhd: Vec<Vec<f64>>, metric: F, minimize: bool) -> Vec<Vec<f64>>
 where
