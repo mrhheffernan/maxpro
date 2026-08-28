@@ -105,6 +105,33 @@ fn test_maximin_criterion_square_uniform(tc: TestCase) {
     assert!(maximin_metric < f64::INFINITY);
 }
 
+#[cfg(test)]
+#[hegel::test(test_cases = 100)]
+/// Test that the L2 distance is symmetric and zero for identical points
+fn test_calculate_l2_distance_symmetry(tc: TestCase) {
+    let n_dim: u64 = tc.draw(gs::integers::<u64>().min_value(1).max_value(10));
+    let n_index: usize = n_dim as usize;
+    let tolerance: f64 = 10.0_f64.powf(-9.0);
+
+    let point: Vec<f64> = tc.draw(
+        gs::vecs(gs::floats::<f64>().min_value(0.0).max_value(1.0))
+            .min_size(n_index)
+            .max_size(n_index),
+    );
+    let other: Vec<f64> = tc.draw(
+        gs::vecs(gs::floats::<f64>().min_value(0.0).max_value(1.0))
+            .min_size(n_index)
+            .max_size(n_index),
+    );
+
+    let distance_ab: f64 = calculate_l2_distance(&point, &other);
+    let distance_ba: f64 = calculate_l2_distance(&other, &point);
+    assert!((distance_ab - distance_ba).abs() < tolerance);
+
+    let distance_aa: f64 = calculate_l2_distance(&point, &point);
+    assert_eq!(distance_aa, 0.0);
+}
+
 #[test]
 /// Test that the value matches expectations to high tolerance
 fn test_maximin_criterion_value_1() {
