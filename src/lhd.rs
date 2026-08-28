@@ -1,3 +1,7 @@
+#[cfg(test)]
+use hegel::TestCase;
+#[cfg(test)]
+use hegel::generators as gs;
 #[cfg(feature = "debug")]
 use plotters::prelude::*;
 #[cfg(feature = "pyo3-bindings")]
@@ -131,12 +135,13 @@ pub fn generate_lhd(n_samples: u64, n_dim: u64, rng: &mut StdRng) -> Vec<Vec<f64
     lhd
 }
 
-#[test]
+#[cfg(test)]
+#[hegel::test(test_cases = 1000)]
 /// Makes a simple test of a latin hypercube checking that,
 /// for any interval in any dimension, there should be only one sample.
-fn test_generate_lhd() {
-    let n_samples: u64 = 100;
-    let n_dim: u64 = 4;
+fn test_generate_lhd(tc: TestCase) {
+    let n_samples: u64 = tc.draw(gs::integers::<u64>().min_value(2).max_value(100));
+    let n_dim: u64 = tc.draw(gs::integers::<u64>().min_value(1).max_value(10));
     let seed: u64 = 12345;
     let mut rng: StdRng = SeedableRng::seed_from_u64(seed);
     let design = generate_lhd(n_samples, n_dim, &mut rng);

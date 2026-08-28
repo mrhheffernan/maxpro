@@ -1,5 +1,9 @@
 #[cfg(test)]
 use crate::lhd::generate_lhd;
+#[cfg(test)]
+use hegel::TestCase;
+#[cfg(test)]
+use hegel::generators as gs;
 #[cfg(feature = "pyo3-bindings")]
 use pyo3::PyResult;
 #[cfg(feature = "pyo3-bindings")]
@@ -10,6 +14,7 @@ use pyo3::prelude::*;
 use rand::SeedableRng;
 #[cfg(test)]
 use rand::rngs::StdRng;
+
 /// Calculate the L2 distance between two points, also known as the
 /// Euclidean distance.
 ///
@@ -66,20 +71,65 @@ pub fn maximin_criterion(design: &Vec<Vec<f64>>) -> f64 {
     min_distance
 }
 
-#[test]
+#[cfg(test)]
+#[hegel::test(test_cases = 1000)]
 /// Test that the maximin criterion obeys simple properties across many iterations
-fn test_maximin_criterion() {
-    let n_iterations: u64 = 1000;
-    let n_samples: u64 = 100;
-    let n_dim: u64 = 5;
+fn test_maximin_criterion(tc: TestCase) {
+    let n_samples: u64 = tc.draw(gs::integers::<u64>().min_value(2).max_value(100));
+    let n_dim: u64 = tc.draw(gs::integers::<u64>().min_value(1).max_value(10));
     let seed: u64 = 12345;
+
     let mut rng: StdRng = SeedableRng::seed_from_u64(seed);
-    for _i in 0..n_iterations {
-        let lhd = generate_lhd(n_samples, n_dim, &mut rng);
-        let maximin_metric: f64 = maximin_criterion(&lhd);
-        assert!(maximin_metric >= 0.0);
-        assert!(maximin_metric < f64::INFINITY)
-    }
+
+    let lhd = generate_lhd(n_samples, n_dim, &mut rng);
+    let maximin_metric: f64 = maximin_criterion(&lhd);
+    assert!(maximin_metric >= 0.0);
+    assert!(maximin_metric < f64::INFINITY)
+}
+
+#[cfg(test)]
+#[hegel::test(test_cases = 100)]
+/// Test that the maximin criterion is well-defined for a generated n×n design
+/// whose entries are all bounded in [0, 1]
+fn test_maximin_criterion_square_uniform(tc: TestCase) {
+    let n: u64 = tc.draw(gs::integers::<u64>().min_value(2).max_value(50));
+    let n_index: usize = n as usize;
+
+    let row = gs::vecs(gs::floats::<f64>().min_value(0.0).max_value(1.0))
+        .min_size(n_index)
+        .max_size(n_index);
+    let design: Vec<Vec<f64>> = tc.draw(gs::vecs(row).min_size(n_index).max_size(n_index));
+
+    let maximin_metric: f64 = maximin_criterion(&design);
+    assert!(maximin_metric >= 0.0);
+    assert!(maximin_metric < f64::INFINITY);
+}
+
+#[cfg(test)]
+#[hegel::test(test_cases = 100)]
+/// Test that the L2 distance is symmetric and zero for identical points
+fn test_calculate_l2_distance_symmetry(tc: TestCase) {
+    let n_dim: u64 = tc.draw(gs::integers::<u64>().min_value(1).max_value(10));
+    let n_index: usize = n_dim as usize;
+    let tolerance: f64 = 10.0_f64.powf(-9.0);
+
+    let point: Vec<f64> = tc.draw(
+        gs::vecs(gs::floats::<f64>().min_value(0.0).max_value(1.0))
+            .min_size(n_index)
+            .max_size(n_index),
+    );
+    let other: Vec<f64> = tc.draw(
+        gs::vecs(gs::floats::<f64>().min_value(0.0).max_value(1.0))
+            .min_size(n_index)
+            .max_size(n_index),
+    );
+
+    let distance_ab: f64 = calculate_l2_distance(&point, &other);
+    let distance_ba: f64 = calculate_l2_distance(&other, &point);
+    assert!((distance_ab - distance_ba).abs() < tolerance);
+
+    let distance_aa: f64 = calculate_l2_distance(&point, &point);
+    assert_eq!(distance_aa, 0.0);
 }
 
 #[test]

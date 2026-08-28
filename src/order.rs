@@ -6,13 +6,16 @@ use crate::maximin_utils::maximin_criterion;
 #[cfg(any(test, feature = "pyo3-bindings"))]
 use crate::maxpro_utils::maxpro_criterion;
 use core::f64;
+#[cfg(test)]
+use hegel::TestCase;
+#[cfg(test)]
+use hegel::generators as gs;
 #[cfg(feature = "pyo3-bindings")]
 use pyo3::PyResult;
 #[cfg(feature = "pyo3-bindings")]
 use pyo3::exceptions::PyValueError;
 #[cfg(feature = "pyo3-bindings")]
 use pyo3::prelude::*;
-
 #[cfg(test)]
 use rand::SeedableRng;
 #[cfg(test)]
@@ -104,37 +107,35 @@ where
     ordered_design
 }
 
-#[test]
+#[cfg(test)]
+#[hegel::test(test_cases = 1000)]
 /// Test that the LHD has the same metric values before and after ordering
-fn test_ordered_criteria_parity() {
-    let n_iterations: u64 = 1000;
-    let n_samples: u64 = 50;
-    let n_dim: u64 = 5;
+fn test_ordered_criteria_parity(tc: TestCase) {
+    let n_samples: u64 = tc.draw(gs::integers::<u64>().min_value(2).max_value(100));
+    let n_dim: u64 = tc.draw(gs::integers::<u64>().min_value(1).max_value(10));
     let seed: u64 = 12345;
     let atol: f64 = 1e-10;
 
     let mut rng: StdRng = SeedableRng::seed_from_u64(seed);
-    for _i in 0..n_iterations {
-        // Generate LHD
-        let lhd = generate_lhd(n_samples, n_dim, &mut rng);
-        let maxpro_metric_before: f64 = maxpro_criterion(&lhd);
-        let maximin_metric_before: f64 = maximin_criterion(&lhd);
+    // Generate LHD
+    let lhd = generate_lhd(n_samples, n_dim, &mut rng);
+    let maxpro_metric_before: f64 = maxpro_criterion(&lhd);
+    let maximin_metric_before: f64 = maximin_criterion(&lhd);
 
-        // Order Design
-        let ordered_design = order_design(lhd, maximin_criterion, false);
+    // Order Design
+    let ordered_design = order_design(lhd, maximin_criterion, false);
 
-        // Ensure parity
-        let maxpro_metric_after: f64 = maxpro_criterion(&ordered_design);
-        let maximin_metric_after: f64 = maximin_criterion(&ordered_design);
+    // Ensure parity
+    let maxpro_metric_after: f64 = maxpro_criterion(&ordered_design);
+    let maximin_metric_after: f64 = maximin_criterion(&ordered_design);
 
-        assert!(maxpro_metric_after >= 0.0);
-        assert!(maxpro_metric_after < f64::INFINITY);
-        assert!(maximin_metric_after >= 0.0);
-        assert!(maximin_metric_after < f64::INFINITY);
+    assert!(maxpro_metric_after >= 0.0);
+    assert!(maxpro_metric_after < f64::INFINITY);
+    assert!(maximin_metric_after >= 0.0);
+    assert!(maximin_metric_after < f64::INFINITY);
 
-        assert!((maximin_metric_before - maximin_metric_after).abs() < atol);
-        assert!((maxpro_metric_before - maxpro_metric_after).abs() < atol);
-    }
+    assert!((maximin_metric_before - maximin_metric_after).abs() < atol);
+    assert!((maxpro_metric_before - maxpro_metric_after).abs() < atol);
 }
 
 #[test]
