@@ -1,5 +1,9 @@
 #[cfg(test)]
 use crate::lhd::generate_lhd;
+#[cfg(test)]
+use hegel::TestCase;
+#[cfg(test)]
+use hegel::generators as gs;
 #[cfg(feature = "pyo3-bindings")]
 use pyo3::PyResult;
 #[cfg(feature = "pyo3-bindings")]
@@ -10,6 +14,7 @@ use pyo3::prelude::*;
 use rand::SeedableRng;
 #[cfg(test)]
 use rand::rngs::StdRng;
+
 /// Calculate the L2 distance between two points, also known as the
 /// Euclidean distance.
 ///
@@ -66,12 +71,13 @@ pub fn maximin_criterion(design: &Vec<Vec<f64>>) -> f64 {
     min_distance
 }
 
-#[test]
+#[cfg(test)]
+#[hegel::test(test_cases = 1000)]
 /// Test that the maximin criterion obeys simple properties across many iterations
-fn test_maximin_criterion() {
+fn test_maximin_criterion(tc: TestCase) {
     let n_iterations: u64 = 1000;
-    let n_samples: u64 = 100;
-    let n_dim: u64 = 5;
+    let n_samples: u64 = tc.draw(gs::integers::<u64>().min_value(2).max_value(1000));
+    let n_dim: u64 = tc.draw(gs::integers::<u64>().min_value(1).max_value(100));
     let seed: u64 = 12345;
     let mut rng: StdRng = SeedableRng::seed_from_u64(seed);
     for _i in 0..n_iterations {
