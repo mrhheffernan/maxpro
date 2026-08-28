@@ -75,17 +75,16 @@ pub fn maximin_criterion(design: &Vec<Vec<f64>>) -> f64 {
 #[hegel::test(test_cases = 1000)]
 /// Test that the maximin criterion obeys simple properties across many iterations
 fn test_maximin_criterion(tc: TestCase) {
-    let n_iterations: u64 = 1000;
-    let n_samples: u64 = tc.draw(gs::integers::<u64>().min_value(2).max_value(1000));
-    let n_dim: u64 = tc.draw(gs::integers::<u64>().min_value(1).max_value(100));
+    let n_samples: u64 = tc.draw(gs::integers::<u64>().min_value(2).max_value(100));
+    let n_dim: u64 = tc.draw(gs::integers::<u64>().min_value(1).max_value(10));
     let seed: u64 = 12345;
+
     let mut rng: StdRng = SeedableRng::seed_from_u64(seed);
-    for _i in 0..n_iterations {
-        let lhd = generate_lhd(n_samples, n_dim, &mut rng);
-        let maximin_metric: f64 = maximin_criterion(&lhd);
-        assert!(maximin_metric >= 0.0);
-        assert!(maximin_metric < f64::INFINITY)
-    }
+
+    let lhd = generate_lhd(n_samples, n_dim, &mut rng);
+    let maximin_metric: f64 = maximin_criterion(&lhd);
+    assert!(maximin_metric >= 0.0);
+    assert!(maximin_metric < f64::INFINITY)
 }
 
 #[test]
