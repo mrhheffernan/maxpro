@@ -117,6 +117,24 @@ fn test_maxpro_criterion(tc: TestCase) {
     assert!(maxpro_metric < f64::INFINITY)
 }
 
+#[cfg(test)]
+#[hegel::test(test_cases = 100)]
+/// Test that the maxpro criterion is well-defined for a generated n×n design
+/// whose entries are all bounded in [0, 1]
+fn test_maxpro_criterion_square_uniform(tc: TestCase) {
+    let n: u64 = tc.draw(gs::integers::<u64>().min_value(2).max_value(50));
+    let n_index: usize = n as usize;
+
+    let row = gs::vecs(gs::floats::<f64>().min_value(0.0).max_value(1.0))
+        .min_size(n_index)
+        .max_size(n_index);
+    let design: Vec<Vec<f64>> = tc.draw(gs::vecs(row).min_size(n_index).max_size(n_index));
+
+    let maxpro_metric: f64 = maxpro_criterion(&design);
+    assert!(maxpro_metric >= 0.0);
+    assert!(maxpro_metric < f64::INFINITY);
+}
+
 #[test]
 /// Test that the value matches expectations to high tolerance
 fn test_maxpro_criterion_value_1() {
