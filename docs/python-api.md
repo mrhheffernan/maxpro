@@ -92,20 +92,12 @@ import maxpro
 
 # Generate a MaxPro design
 lhd = maxpro.build_lhd(
-    n_samples=100,
-    n_dim=10,
-    n_iterations=500,
-    metric="maxpro",
-    seed=42
+    n_samples=100, n_dim=10, n_iterations=500, metric="maxpro", seed=42
 )
 
 # Generate a Maximin design
 lhd = maxpro.build_lhd(
-    n_samples=100,
-    n_dim=3,
-    n_iterations=500,
-    metric="maximin",
-    seed=42
+    n_samples=100, n_dim=3, n_iterations=500, metric="maximin", seed=42
 )
 ```
 
@@ -240,11 +232,7 @@ import maxpro
 
 # First generate a design
 lhd = maxpro.build_lhd(
-    n_samples=100,
-    n_dim=5,
-    n_iterations=500,
-    metric="maxpro",
-    seed=42
+    n_samples=100, n_dim=5, n_iterations=500, metric="maxpro", seed=42
 )
 
 # Coordinate swap annealing (faster convergence)
@@ -256,7 +244,7 @@ optimized = maxpro.anneal_lhd(
     metric_name="maxpro",
     minimize=True,
     swap=True,
-    seed=42
+    seed=42,
 )
 
 # Jitter annealing (fine-grained exploration)
@@ -268,7 +256,7 @@ optimized = maxpro.anneal_lhd(
     metric_name="maxpro",
     minimize=True,
     swap=False,
-    seed=42
+    seed=42,
 )
 ```
 
@@ -296,7 +284,7 @@ swap_annealed = maxpro.anneal_lhd(
     metric_name="maxpro",
     minimize=True,
     swap=True,
-    seed=42
+    seed=42,
 )
 
 # 80% jitter (40k iterations) - perform this SECOND
@@ -308,7 +296,7 @@ optimized = maxpro.anneal_lhd(
     metric_name="maxpro",
     minimize=True,
     swap=False,
-    seed=43
+    seed=43,
 )
 ```
 
@@ -362,11 +350,7 @@ import maxpro
 
 # Generate a design
 lhd = maxpro.build_lhd(
-    n_samples=100,
-    n_dim=5,
-    n_iterations=500,
-    metric="maxpro",
-    seed=42
+    n_samples=100, n_dim=5, n_iterations=500, metric="maxpro", seed=42
 )
 
 # Order for optimal run order
