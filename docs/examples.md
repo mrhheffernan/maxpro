@@ -34,7 +34,7 @@ def main():
         n_dim=n_dim,
         n_iterations=n_iterations,
         metric=metric,
-        seed=SEED
+        seed=SEED,
     )
     metric_value = maxpro.maxpro_criterion(lhd)
     print(f"Initial maximum projection metric value: {metric_value}")
@@ -96,7 +96,7 @@ def main():
         n_dim=n_dim,
         n_iterations=n_iterations,
         metric=metric,
-        seed=SEED
+        seed=SEED,
     )
     metric_value = maxpro.maximin_criterion(lhd)
     print(f"Initial maximin metric value: {metric_value}")
@@ -134,9 +134,9 @@ import maxpro
 
 # Generate a random LHD (no metric optimization)
 lhd = maxpro.generate_lhd(
-    n_samples=50,   # Number of sample points
-    n_dim=5,        # Number of dimensions
-    seed=42         # Optional seed for reproducibility
+    n_samples=50,  # Number of sample points
+    n_dim=5,  # Number of dimensions
+    seed=42,  # Optional seed for reproducibility
 )
 
 print(f"Generated LHD with shape: {len(lhd)} x {len(lhd[0])}")

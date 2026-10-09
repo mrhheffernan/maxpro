@@ -56,11 +56,7 @@ import maxpro
 
 # Generate a semi-optimal MaxPro latin hypercube design
 lhd = maxpro.build_lhd(
-    n_samples=100,
-    n_dim=10,
-    n_iterations=500,
-    metric="maxpro",
-    seed=42
+    n_samples=100, n_dim=10, n_iterations=500, metric="maxpro", seed=42
 )
 
 # Calculate the MaxPro criterion
